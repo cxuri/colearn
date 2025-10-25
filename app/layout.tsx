@@ -20,7 +20,7 @@ const archivoBlack = Archivo_Black({
 });
 
 export const metadata: Metadata = {
-  title: "Klaz",
+  title: "Colearn",
   description: "Community Driven Learning For Free",
 };
 
