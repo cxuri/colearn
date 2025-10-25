@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const currentPhase = 1; // <-- CHANGE THIS NUMBER TO UPDATE PROGRESS (1, 2, 3, or 4)
+  let currentPhase = 1; // <-- CHANGE THIS NUMBER TO UPDATE PROGRESS (1, 2, 3, or 4)
 
   const roadmapPhases = [
     {
