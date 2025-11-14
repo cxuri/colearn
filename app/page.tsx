@@ -17,7 +17,8 @@ import {
   Sparkles,
   LayoutGrid,
   Blocks, // Logo
-  Search,
+  X,
+  Menu,
   Award, // Ambassador Program
   Mail, // Waitlist
   MessageSquare, // Testimonials
@@ -26,7 +27,7 @@ import {
 // --- Settings: Control Panel ---
 
 // Set to true to show "Join Now", false to show "Applications Closed"
-const IS_AMBASSADOR_PROGRAM_OPEN = false; 
+const IS_AMBASSADOR_PROGRAM_OPEN = true; 
 
 // Set the current phase of the project (1-4)
 const CURRENT_PHASE = 2; // Phase 2: "Building"
@@ -82,13 +83,15 @@ function useActiveSection() {
 export default function LandingPage() {
   
   const { activeSection, registerSection, setActiveSection } = useActiveSection();
+  // State for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // --- Page Content & Data ---
 
-  // --- IMPROVED: "What We're Hearing" Content (Manglish Complaints) ---
+  // "What We're Hearing" Content (Manglish Complaints)
   const testimonials = [
     {
-      quote: "Pattila, searching 5 group chats just for one PDF. Full scene. Everything needs to be in one place.",
+      quote: "Ente ponno... searching 5 group chats just for one PDF. Full scene. Everything needs to be in one place.",
       name: "Arjun Nair, 2nd Year CSE",
     },
     {
@@ -96,8 +99,8 @@ export default function LandingPage() {
       name: "Meera Menon, 3rd Year ECE",
     },
     {
-      quote: "Placement-inte karyam pinne parayanda, college il padipikana onum alla avde chodikunnath ",
-      name: "Basil Thomas, 2nd Year CSE",
+      quote: "Ayyoo, placement-inte karyam... full confusion. All these online roadmaps are veruppikkal. Just tell me what to *actually* study.",
+      name: "Basil Thomas, 2nd Year IT",
     },
   ];
 
@@ -259,7 +262,7 @@ export default function LandingPage() {
             <span className="text-[var(--foreground)]">Klaz</span>
           </a>
           
-          {/* Toggles (font-mono) - "join" is now "waitlist" */}
+          {/* Toggles (Desktop) */}
           <div className="hidden items-center gap-2 rounded-lg bg-[var(--card)] p-1 md:flex">
             {['features', 'roadmap', 'ambassador', 'waitlist'].map((id) => (
               <a
@@ -287,17 +290,50 @@ export default function LandingPage() {
             Join Discord
           </a>
 
-          {/* CTA (Mobile) - Simple button */}
+          {/* Mobile Menu Toggle Button */}
           <div className="md:hidden">
-            <a
-              href="#waitlist" // Mobile CTA also points to waitlist
-              onClick={() => setActiveSection('waitlist')}
-              className="inline-flex items-center justify-center rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-semibold text-[var(--accent-foreground)]"
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="rounded-lg p-2 text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
+              aria-label="Toggle navigation menu"
             >
-              Join
-            </a>
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur-lg">
+            <nav className="flex flex-col gap-4 p-4">
+              {['features', 'roadmap', 'ambassador', 'waitlist'].map((id) => (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  onClick={() => {
+                    setActiveSection(id);
+                    setIsMobileMenuOpen(false); // Close menu on click
+                  }}
+                  className={`rounded-md px-3 py-2 text-base font-mono font-medium transition-colors ${
+                    activeSection === id
+                      ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                  }`}
+                >
+                  {id.charAt(0).toUpperCase() + id.slice(1)}
+                </a>
+              ))}
+              <a
+                href={DISCORD_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-lg border-2 border-[var(--accent)] bg-transparent px-4 py-2 text-base font-semibold text-[var(--accent)] shadow-sm"
+              >
+                Join Discord
+              </a>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content Wrapper */}
@@ -340,13 +376,13 @@ export default function LandingPage() {
               </span>
             </p>
 
-            {/* Hero CTAs */}
+            {/* Hero CTAs (Mobile friendly) */}
             <div className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row animate-fadeIn animation-delay-700">
               {/* Primary CTA (Waitlist) */}
               <a
                 href="#waitlist"
                 onClick={() => setActiveSection('waitlist')}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
               >
                 Join the Waitlist
                 <ArrowRight className="h-5 w-5" />
@@ -357,7 +393,7 @@ export default function LandingPage() {
                 href={DISCORD_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-white bg-transparent px-8 py-4 text-lg font-bold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-transparent px-8 py-4 text-lg font-bold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
               >
                 Join the Discord
               </a>
@@ -377,8 +413,9 @@ export default function LandingPage() {
               <h2 className="font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl animate-fadeIn">
                 What We're Hearing
               </h2>
+              {/* --- MODIFIED: This text is now more inclusive --- */}
               <p className="mt-4 max-w-2xl text-xl text-[var(--muted-foreground)] animate-fadeIn animation-delay-100">
-                We're building the app we wish we had. Here's what students are asking for.
+                We're students building the app we all need. Here's what we're hearing from campus.
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -521,7 +558,7 @@ export default function LandingPage() {
                   href={GOOGLE_FORM_AMBASSADOR_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
                 >
                   Join the Program
                   <ArrowRight className="h-5 w-5" />
@@ -529,7 +566,7 @@ export default function LandingPage() {
               ) : (
                 <button
                   disabled
-                  className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[var(--muted-foreground)]/20 px-8 py-4 text-lg font-bold text-[var(--muted-foreground)] opacity-70 sm:w-auto"
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[var(--muted-foreground)]/20 px-8 py-4 text-lg font-bold text-[var(--muted-foreground)] opacity-70 sm:w-auto"
                 >
                   Applications Closed
                 </button>
@@ -560,7 +597,7 @@ export default function LandingPage() {
                 href={GOOGLE_FORM_WAITLIST_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
               >
                 Join the Waitlist
               </a>
@@ -568,12 +605,11 @@ export default function LandingPage() {
                 href={DISCORD_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[var(--accent)] bg-transparent px-8 py-4 text-lg font-bold text-[var(--accent)] shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-[var(--accent)]/10 sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[var(--accent)] bg-transparent px-8 py-4 text-lg font-bold text-[var(--accent)] shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-[var(--accent)]/10 sm:w-auto"
               >
                 Join the Discord
               </a>
             </div>
-            {/* FIX: Corrected typo from <s_p> to <p> */}
             <p className="text-sm text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-300">
               No spam, just one email when we launch.
             </p>
@@ -581,7 +617,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* --- 8. NEW: Professional Footer --- */}
+      {/* 8. Professional Footer */}
       <footer className="w-full border-t border-[var(--border)] bg-[var(--background)] py-16">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 md:grid-cols-2">
           {/* Column 1: Logo & Tagline */}
@@ -593,7 +629,6 @@ export default function LandingPage() {
             <p className="max-w-xs text-base text-[var(--muted-foreground)]">
               A project by B.Tech students, for B.Tech students.
             </p>
-            {/* FIX: Corrected typo from Dategit() to Date() */}
             <p className="text-sm text-[var(--muted-foreground)]">
               &copy; {new Date().getFullYear()} Klaz. All rights reserved.
             </p>
@@ -605,10 +640,10 @@ export default function LandingPage() {
               Navigate
             </h3>
             <div className="mt-4 flex flex-col gap-3">
-              <a href="#features" onClick={() => setActiveSection('features')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Features</a>
-              <a href="#roadmap" onClick={() => setActiveSection('roadmap')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Roadmap</a>
-              <a href="#ambassador" onClick={() => setActiveSection('ambassador')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Ambassadors</a>
-              <a href="#waitlist" onClick={() => setActiveSection('waitlist')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Waitlist</a>
+              <a href="#features" onClick={() => setActiveSection('features')} className="text-base text-[var(--muted-Goreground)] transition-colors hover:text-[var(--accent)]">Features</a>
+              <a href="#roadmap" onClick={() => setActiveSection('roadmap')} className="text-base text-[var(--muted-Goreground)] transition-colors hover:text-[var(--accent)]">Roadmap</a>
+              <a href="#ambassador" onClick={() => setActiveSection('ambassador')} className="text-base text-[var(--muted-Goreground)] transition-colors hover:text-[var(--accent)]">Ambassadors</a>
+              <a href="#waitlist" onClick={() => setActiveSection('waitlist')} className="text-base text-[var(--muted-Goreground)] transition-colors hover:text-[var(--accent)]">Waitlist</a>
             </div>
           </div>
         </div>
