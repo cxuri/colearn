@@ -27,13 +27,13 @@ import {
 // --- Settings: Control Panel ---
 
 // Set to true to show "Join Now", false to show "Applications Closed"
-const IS_AMBASSADOR_PROGRAM_OPEN = true; 
+const IS_AMBASSADOR_PROGRAM_OPEN = false; 
 
 // Set the current phase of the project (1-4)
 const CURRENT_PHASE = 2; // Phase 2: "Building"
 
 // --- Links: Update These ---
-const GOOGLE_FORM_WAITLIST_LINK = "https://forms.gle/YOUR_WAITLIST_FORM_LINK";
+const GOOGLE_FORM_WAITLIST_LINK = "https://forms.gle/KXKyqdsL8R8zFtws8";
 const GOOGLE_FORM_AMBASSADOR_LINK = "https://forms.gle/YOUR_AMBASSADOR_FORM_LINK";
 const DISCORD_LINK = "https://discord.gg/pPy4VSRy";
 
