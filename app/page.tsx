@@ -99,8 +99,8 @@ export default function LandingPage() {
       name: "Meera Menon, 3rd Year ECE",
     },
     {
-      quote: "Ayyoo, placement-inte karyam... full confusion. All these online roadmaps are veruppikkal. Just tell me what to *actually* study.",
-      name: "Basil Thomas, 2nd Year IT",
+      quote: "Placement inte karyam parayanda, like college il padipikatha kore topics codikunnund, A solution for that would be perfect",
+      name: "Basil Thomas, 4th Year CSE",
     },
   ];
 
@@ -348,13 +348,13 @@ export default function LandingPage() {
             loop
             muted
             playsInline
-            className="absolute inset-0 z-[-1] h-full w-full object-cover"
+            className="absolute inset-0 z-0 h-full w-full object-cover"
           >
             <source src="/promo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           {/* Video Overlay */}
-          <div className="absolute inset-0 z-0 bg-black/50"></div>
+          <div className="absolute inset-0 z-1 bg-black/70"></div>
 
           <div className="mx-auto flex max-w-4xl flex-col items-center relative z-10">
             
