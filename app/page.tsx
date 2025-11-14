@@ -529,10 +529,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
-        {/* "Meet the Team" Section has been REMOVED */}
-
-        {/* 6. "Ambassador Program" Section */}
         <section
           ref={registerSection('ambassador')} id="ambassador"
           className="w-full bg-[var(--background)] px-4 py-16 sm:py-20 lg:py-24"
