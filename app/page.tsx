@@ -1,715 +1,618 @@
+"use client";
+
+// --- React Core & Hooks ---
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+// --- Lucide React Icons ---
 import {
   Target,
   BookCheck,
-  Code2,
-  CheckCircle2, // For the hero list
-  ArrowRight, // For the hero button
-  Users, // For the 'About' section & Combined CTA
-  MessageSquareWarning, // Represents WhatsApp chaos
-  LayoutGrid, // Represents organized app
-  LogIn, // For 'How it Works'
-  Brain, // For 'How it Works'
-  Briefcase, // For 'How it Works'
-  Lightbulb, // Phase 1: Idea
-  Construction, // Phase 2: Building
-  TestTube2, // Phase 3: Beta
-  Rocket, // Phase 4: Launch
-  Eye, // For Visual Modules
-  Cpu, // For AI Prediction / Pattern Recognition
-  Sparkles, // For Curated Content / Fast Pace
-  UsersRound, // For Community Driven (alternative)
+  ArrowRight,
+  Users,
+  Lightbulb,
+  Construction,
+  TestTube2,
+  Rocket,
+  Cpu,
+  Sparkles,
+  LayoutGrid,
+  Blocks, // Logo
   Search,
+  Award, // Ambassador Program
+  Mail, // Waitlist
+  MessageSquare, // Testimonials
 } from 'lucide-react';
 
-export default function LandingPage() {
-  let currentPhase = 1; // <-- CHANGE THIS NUMBER TO UPDATE PROGRESS (1, 2, 3, or 4)
+// --- Settings: Control Panel ---
 
-  const roadmapPhases = [
+// Set to true to show "Join Now", false to show "Applications Closed"
+const IS_AMBASSADOR_PROGRAM_OPEN = false; 
+
+// Set the current phase of the project (1-4)
+const CURRENT_PHASE = 2; // Phase 2: "Building"
+
+// --- Links: Update These ---
+const GOOGLE_FORM_WAITLIST_LINK = "https://forms.gle/YOUR_WAITLIST_FORM_LINK";
+const GOOGLE_FORM_AMBASSADOR_LINK = "https://forms.gle/YOUR_AMBASSADOR_FORM_LINK";
+const DISCORD_LINK = "https://discord.gg/pPy4VSRy";
+
+
+// --- Custom Hook: useActiveSection ---
+// This hook observes which section is on screen and updates the header.
+function useActiveSection() {
+  const [activeSection, setActiveSection] = useState('hero');
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  const observerCallback = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setActiveSection(entry.target.id);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(observerCallback, {
+      root: null,
+      rootMargin: '-30% 0px -30% 0px', // Triggers when section is 30% from top/bottom
+      threshold: 0.3,
+    });
+
+    const currentRefs = sectionRefs.current;
+    Object.values(currentRefs).forEach(ref => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      Object.values(currentRefs).forEach(ref => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [observerCallback]);
+
+  // Creates a ref-setter function for each section
+  const registerSection = useCallback((id: string) => (node: HTMLElement | null) => {
+    if (node) sectionRefs.current[id] = node;
+  }, []);
+
+  return { activeSection, registerSection, setActiveSection };
+}
+
+// --- Main Landing Page Component ---
+export default function LandingPage() {
+  
+  const { activeSection, registerSection, setActiveSection } = useActiveSection();
+
+  // --- Page Content & Data ---
+
+  // --- IMPROVED: "What We're Hearing" Content (Manglish Complaints) ---
+  const testimonials = [
     {
-      phase: 1,
-      title: 'Phase 1: Idea & Feedback',
-      description:
-        "We're here now! We need your ideas. Tell us what you need through surveys and Discord so we build the right features.",
-      icon: Lightbulb,
-      status: currentPhase === 1 ? 'Current' : currentPhase > 1 ? 'Completed' : 'Upcoming',
+      quote: "Pattila, searching 5 group chats just for one PDF. Full scene. Everything needs to be in one place.",
+      name: "Arjun Nair, 2nd Year CSE",
     },
     {
-      phase: 2,
-      title: 'Phase 2: Building Core Features',
-      description:
-        'Making the first key parts: notes for your syllabus, basic placement help, and the main community area, using your feedback.',
-      icon: Construction,
-      status: currentPhase === 2 ? 'Current' : currentPhase > 2 ? 'Completed' : 'Upcoming',
+      quote: "End sem full scene aanu. That prof is saying something, I'm not understanding. Can it just give the important topics?",
+      name: "Meera Menon, 3rd Year ECE",
     },
     {
-      phase: 3,
-      title: 'Phase 3: Beta Testing with You',
-      description:
-        'Inviting students from our Discord to try the first version, find bugs, and tell us what works (and what doesn’t!).',
-      icon: TestTube2,
-      status: currentPhase === 3 ? 'Current' : currentPhase > 3 ? 'Completed' : 'Upcoming',
-    },
-    {
-      phase: 4,
-      title: 'Phase 4: Public Launch & Growth',
-      description:
-        'Opening the app to all B.Tech students! We’ll keep adding features and making improvements based on what you tell us.',
-      icon: Rocket,
-      status: currentPhase === 4 ? 'Current' : currentPhase > 4 ? 'Completed' : 'Upcoming',
+      quote: "Placement-inte karyam pinne parayanda, college il padipikana onum alla avde chodikunnath ",
+      name: "Basil Thomas, 2nd Year CSE",
     },
   ];
 
-  const getStatusClasses = (status: string) => {
-    switch (status) {
-      case 'Current':
-        return 'border-accent text-accent animate-pulse';
-      case 'Completed':
-        return 'border-green-500 text-green-500';
-      case 'Upcoming':
-      default:
-        return 'border-[var(--border)] text-[var(--muted-foreground)] opacity-60';
-    }
-  };
+  // "How It Works" (Features) Content
+  const features = [
+    {
+      icon: LayoutGrid,
+      title: 'All-in-One Hub',
+      description: 'Ditch messy group chats. All your notes, PYQs, and resources in one organized place.',
+      span: 'md:col-span-3',
+    },
+    {
+      icon: Cpu,
+      title: 'AI-Powered Prep',
+      description: 'Leverage AI to predict exam topics based on past trends and save time.',
+      span: 'md:col-span-1',
+    },
+    {
+      icon: Target,
+      title: 'Career Focused',
+      description: 'Placement prep & skill-gap analysis for your dream job, minus the noise.',
+      span: 'md:col-span-2',
+    },
+  ];
 
-  const getDotClasses = (status: string) => {
-    switch (status) {
-      case 'Current':
-        return 'bg-accent ring-accent/30';
-      case 'Completed':
-        return 'bg-green-500 ring-green-500/30';
-      case 'Upcoming':
-      default:
-        return 'bg-[var(--muted-foreground)] ring-[var(--border)] opacity-60';
-    }
+  // "Development Plan" (Roadmap) Content
+  const roadmapPhases = [
+    {
+      phase: 1,
+      title: 'Idea & Feedback',
+      description: "Gathering your needs through surveys & Discord to build the right features.",
+      icon: Lightbulb,
+    },
+    {
+      phase: 2,
+      title: 'Building Core Features',
+      description: 'Developing key components: syllabus notes, placement help, and community features.',
+      icon: Construction,
+    },
+    {
+      phase: 3,
+      title: 'Beta Testing',
+      description: 'Inviting students to test the app, identify bugs, and refine user experience.',
+      icon: TestTube2,
+    },
+    {
+      phase: 4,
+      title: 'Public Launch',
+      description: 'Opening the app to all B.Tech students and continuous iterative improvements.',
+      icon: Rocket,
+    },
+  ];
+
+  // --- Helper Functions ---
+  const getPhaseStatus = (phaseNum: number) => {
+    if (phaseNum < CURRENT_PHASE) return 'completed';
+    if (phaseNum === CURRENT_PHASE) return 'current';
+    return 'upcoming';
   };
 
   return (
-    // Use CSS variables for background
-    <div className="bg-[var(--background)]">
-      {/* --- NEW: Subtle Gradient Background --- */}
+    <div className="bg-[var(--background)] text-[var(--foreground)] relative">
+      {/* Subtle global radial gradient (moves on scroll) */}
       <div
-        className="fixed inset-0 z-[-1] h-full w-full"
+        className="fixed inset-0 z-[-2] h-full w-full opacity-10"
         style={{
-          backgroundImage:
-            'radial-gradient(ellipse 80% 80% at 50% -20%, rgba(14, 165, 233, 0.1), transparent 100%)',
+          background: 'radial-gradient(120% 120% at 50% 50%, var(--accent), transparent)',
+          backgroundAttachment: 'fixed',
+          backgroundRepeat: 'no-repeat',
+          animation: 'bg-gradient-radial-scrolling 60s ease-in-out infinite alternate',
         }}
         aria-hidden="true"
       />
 
-      {/* --- Style tag to define animations --- */}
+      {/* Subtle Global Grid Background */}
+      <div className="fixed inset-0 z-[-1] opacity-5"
+           style={{
+             backgroundImage: 'linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(to right, var(--border) 1px, transparent 1px)',
+             backgroundSize: '24px 24px',
+           }}
+           aria-hidden="true"
+      />
+
+      {/* Styles for animations */}
       <style>
         {`
-          @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-100%); }
-          }
-          .animate-marquee {
-            animation: marquee 40s linear infinite;
-          }
-          
-          @keyframes gradient-text {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .animate-gradient-text {
-            background-size: 200% auto;
-            animation: gradient-text 5s ease-in-out infinite;
-          }
-
-          @keyframes bobble {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-          }
-          .animate-bobble {
-            animation: bobble 2s ease-in-out infinite;
-          }
-
-          @keyframes glow {
-            0%, 100% {
-              box-shadow: 0 0 10px -5px var(--accent-glow, #06b6d4);
-            }
-            50% {
-              box-shadow: 0 0 20px 0px var(--accent-glow, #06b6d4);
-            }
-          }
-          .hover-glow:hover {
-            --accent-glow: var(--accent);
-            animation: glow 2s ease-in-out infinite;
-            border-color: var(--accent);
-          }
-          @keyframes subtle-pulse {
-             0%, 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); } /* Use accent color */
-             70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
-          }
-          .animate-subtle-pulse {
-              animation: subtle-pulse 2s infinite;
-          }
-
-          /* Simple chat bubble styles */
-          .chat-bubble-left {
-            background-color: #27272a; /* Zinc 800 approx */
-            color: #e4e4e7; /* Zinc 200 approx */
-            border-radius: 12px 12px 12px 0;
-          }
-          .chat-bubble-right {
-             background-color: #059669; /* Emerald 600 approx */
-             color: white;
-             border-radius: 12px 12px 0 12px;
-          }
-          
-          /* --- NEW: Simple Fade-in Animation --- */
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
           }
           .animate-fadeIn {
             animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0; /* Start hidden */
+            opacity: 0;
           }
-          /* --- Staggered delays for animation --- */
+          @keyframes text-reveal-clip {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+          }
+          .animate-text-reveal {
+            clip-path: inset(0 100% 0 0);
+            animation: text-reveal-clip 0.8s ease-out forwards;
+          }
+          @keyframes bg-gradient-radial-scrolling {
+            0% { background-position: 50% 50%; }
+            25% { background-position: 70% 30%; }
+            50% { background-position: 50% 50%; }
+            75% { background-position: 30% 70%; }
+            100% { background-position: 50% 50%; }
+          }
+          @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+          }
+          @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--accent); }
+          }
+          .animate-typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: 
+              typing 2.5s steps(44, end) forwards,
+              blink-caret .75s step-end infinite;
+          }
+          @keyframes sonar-pulse {
+            0% {
+              box-shadow: 0 0 0 0px var(--accent);
+              opacity: 1;
+            }
+            100% {
+              box-shadow: 0 0 0 12px var(--accent);
+              opacity: 0;
+            }
+          }
+          .animate-sonar-pulse::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            background-color: var(--accent);
+            animation: sonar-pulse 1.5s ease-in-out infinite;
+          }
+          /* Staggered delays */
           .animation-delay-100 { animation-delay: 100ms; }
           .animation-delay-200 { animation-delay: 200ms; }
           .animation-delay-300 { animation-delay: 300ms; }
           .animation-delay-400 { animation-delay: 400ms; }
           .animation-delay-500 { animation-delay: 500ms; }
-          .animation-delay-600 { animation-delay: 600ms; }
           .animation-delay-700 { animation-delay: 700ms; }
         `}
       </style>
 
-      <div className="flex min-h-screen flex-col items-center">
-        {/* 1. Navbar */}
-        <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
-          <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 md:px-6">
-            <a href="#" className="text-2xl font-bold">
-              <span className="bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent animate-gradient-text">
-                Klaz
-              </span>
-            </a>
-            <div className="hidden items-center gap-6 text-sm font-medium text-[var(--muted-foreground)] md:flex">
+      {/* 1. Floating Glassmorphism Header */}
+      <header className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 rounded-lg border border-[var(--border)] bg-[var(--background)]/80 shadow-lg shadow-black/5 backdrop-blur-lg">
+        <nav className="flex items-center justify-between px-4 py-3">
+          {/* Logo (font-mono) */}
+          <a href="#" className="flex items-center gap-2 text-2xl font-mono font-bold" onClick={() => setActiveSection('hero')}>
+            <Blocks className="h-6 w-6 text-[var(--accent)]" />
+            <span className="text-[var(--foreground)]">Klaz</span>
+          </a>
+          
+          {/* Toggles (font-mono) - "join" is now "waitlist" */}
+          <div className="hidden items-center gap-2 rounded-lg bg-[var(--card)] p-1 md:flex">
+            {['features', 'roadmap', 'ambassador', 'waitlist'].map((id) => (
               <a
-                href="#features"
-                className="transition-colors hover:text-[var(--foreground)]"
+                key={id}
+                href={`#${id}`}
+                onClick={() => setActiveSection(id)}
+                className={`rounded-md px-3 py-1 text-sm font-mono font-medium transition-colors ${
+                  activeSection === id
+                    ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+                    : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                }`}
               >
-                Features
+                {id.charAt(0).toUpperCase() + id.slice(1)}
               </a>
-              <a
-                href="#how-it-works"
-                className="transition-colors hover:text-[var(--foreground)]"
-              >
-                How it Works
-              </a>
-              <a
-                href="#roadmap"
-                className="transition-colors hover:text-[var(--foreground)]"
-              >
-                Roadmap
-              </a>
-              <a
-                href="#about" // Link now points to the combined section
-                className="transition-colors hover:text-[var(--foreground)]"
-              >
-                About & Join
-              </a>
-            </div>
+            ))}
+          </div>
+          
+          {/* CTA (Desktop) - Ghost button */}
+          <a
+            href={DISCORD_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center justify-center rounded-lg border-2 border-[var(--accent)] bg-transparent px-4 py-1.5 text-sm font-semibold text-[var(--accent)] shadow-sm transition-all duration-200 ease-in-out hover:bg-[var(--accent)]/10 md:inline-flex"
+          >
+            Join Discord
+          </a>
+
+          {/* CTA (Mobile) - Simple button */}
+          <div className="md:hidden">
             <a
-              href="https://discord.gg/pPy4VSRy" // Add your Discord link here
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 px-4 py-2 text-sm font-semibold text-gray-950 shadow-sm transition-all duration-200 ease-in-out animate-gradient-text hover:-translate-y-0.5 hover:opacity-90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              href="#waitlist" // Mobile CTA also points to waitlist
+              onClick={() => setActiveSection('waitlist')}
+              className="inline-flex items-center justify-center rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-semibold text-[var(--accent-foreground)]"
             >
-              Join the Discord
+              Join
             </a>
-          </nav>
-        </header>
+          </div>
+        </nav>
+      </header>
 
-        <main className="w-full">
-          {/* 2. Hero Section */}
-          <section className="relative w-full overflow-hidden px-4 py-20 md:py-28 lg:py-36">
-            <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
-              {/* Left Column: Text Content */}
-              <div className="flex flex-col items-start text-left">
-                <h1 className="text-4xl font-extrabold tracking-tighter text-[var(--foreground)] md:text-5xl lg:text-6xl animate-fadeIn">
-                  Stop the Scroll. Start Learning.
-                </h1>
-                <p className="mt-4 text-xl font-medium text-[var(--accent)] md:text-2xl animate-fadeIn animation-delay-100">
-                  Your B.Tech life, finally organized.
-                </p>
-                <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--muted-foreground)] md:text-xl animate-fadeIn animation-delay-200">
-                  Klaz is the{' '}
-                  <span className="font-semibold text-[var(--foreground)]">
-                    free all-in-one app
-                  </span>{' '}
-                  for B.Tech students, made by students like you. Ditch the messy group chats and find notes, placement prep, and career guidance in one smart place.
-                </p>
+      {/* Main Content Wrapper */}
+      <main className="w-full">
+        
+        {/* 2. Hero Section (100vh) */}
+        <section ref={registerSection('hero')} id="hero" className="relative flex min-h-screen w-full items-center overflow-hidden px-4 py-24 text-center">
+          
+          {/* Background Video */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 z-[-1] h-full w-full object-cover"
+            poster="/videos/hero-poster.jpg" // Optional poster image
+          >
+            {/* --- TODO: REPLACE THIS WITH YOUR VIDEO FILE --- */}
+            <source src="/videos/hero-background.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          {/* Video Overlay */}
+          <div className="absolute inset-0 z-0 bg-black/50"></div>
 
-                <div className="mt-10 flex w-full flex-col items-start animate-fadeIn animation-delay-300">
-                  <a
-                    href="https://forms.gle/4CB5QkpwRam8FfCB8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-lg font-bold text-accent-foreground shadow-lg shadow-teal-500/30 transition-all duration-200 ease-in-out animate-subtle-pulse hover:-translate-y-0.5 hover:opacity-90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          <div className="mx-auto flex max-w-4xl flex-col items-center relative z-10">
+            
+            {/* Hero Typography */}
+            <p className="font-mono text-xl font-medium text-[var(--accent)] animate-fadeIn animation-delay-100">
+              Stop the Scroll.
+            </p>
+            <h1 className="text-8xl font-extrabold uppercase leading-none tracking-tighter text-white md:text-9xl">
+              <span className="block animate-text-reveal animation-delay-200">Start</span>
+              <span className="block animate-text-reveal animation-delay-300">Learning.</span>
+            </h1>
+            
+            {/* Typing Animation Subtitle (font-mono) */}
+            <p className="font-mono mt-6 text-xl text-gray-200 md:text-2xl animate-fadeIn animation-delay-500">
+              <span className="inline-block animate-typing border-r-2 border-accent">
+                Your B.Tech life, finally organized.
+              </span>
+            </p>
+
+            {/* Hero CTAs */}
+            <div className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row animate-fadeIn animation-delay-700">
+              {/* Primary CTA (Waitlist) */}
+              <a
+                href="#waitlist"
+                onClick={() => setActiveSection('waitlist')}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+              >
+                Join the Waitlist
+                <ArrowRight className="h-5 w-5" />
+              </a>
+              
+              {/* Secondary CTA (Ghost Button) - white border for video */}
+              <a
+                href={DISCORD_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-white bg-transparent px-8 py-4 text-lg font-bold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+              >
+                Join the Discord
+              </a>
+            </div>
+            
+          </div>
+        </section>
+
+        {/* 3. "What We're Hearing" Section (Testimonials) */}
+        <section
+          id="social-proof" // Not in nav, so no ref needed
+          className="w-full bg-[var(--card)] py-16 sm:py-20 lg:py-24"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <div className="flex flex-col items-center text-center">
+              {/* Heading changed to sound more "hobbyist" */}
+              <h2 className="font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl animate-fadeIn">
+                What We're Hearing
+              </h2>
+              <p className="mt-4 max-w-2xl text-xl text-[var(--muted-foreground)] animate-fadeIn animation-delay-100">
+                We're building the app we wish we had. Here's what students are asking for.
+              </p>
+            </div>
+            <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {testimonials.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--background)] p-6 motion-safe:animate-fadeIn"
+                  style={{ animationDelay: `${100 + index * 100}ms` }}
+                >
+                  <MessageSquare className="h-8 w-8 text-[var(--accent)] mb-4" />
+                  {/* Text is no longer bold, quotes are removed */}
+                  <p className="text-lg text-[var(--foreground)] leading-relaxed">
+                    {item.quote}
+                  </p>
+                  <p className="mt-4 text-sm font-mono text-[var(--muted-foreground)]">
+                    - {item.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+
+        {/* 4. "How It Works" / Features Section (Bento Grid) */}
+        <section
+          ref={registerSection('features')} id="features"
+          className="w-full bg-[var(--background)] py-16 sm:py-20 lg:py-24"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl animate-fadeIn">
+                One App. Everything You Need.
+              </h2>
+              <p className="mt-4 max-w-2xl text-xl text-[var(--muted-foreground)] animate-fadeIn animation-delay-100">
+                Core features designed to boost your B.Tech journey.
+              </p>
+            </div>
+
+            {/* Bento Grid Layout */}
+            <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {features.map((feature, index) => (
+                <div
+                  key={feature.title}
+                  className={`flex flex-col rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm transition-all duration-300 hover:border-[var(--accent)] hover:shadow-xl hover:shadow-[var(--accent)]/20 hover:-translate-y-1.5 motion-safe:animate-fadeIn ${feature.span}`}
+                  style={{ animationDelay: `${100 + index * 100}ms` }}
+                >
+                  <div className="mb-4 w-fit rounded-lg border border-[var(--border)] bg-[var(--background)] p-3">
+                    <feature.icon className="h-8 w-8 text-[var(--accent)]" />
+                  </div>
+                  {/* Feature title uses font-mono */}
+                  <h3 className="mb-2 font-mono text-2xl font-semibold text-[var(--foreground)]">
+                    {feature.title}
+                  </h3>
+                  <p className="text-lg text-[var(--muted-foreground)]">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Roadmap Section (Blueprint Grid Background) */}
+        <section ref={registerSection('roadmap')} id="roadmap" className="w-full bg-[var(--card)] py-16 sm:py-20 lg:py-24 overflow-hidden relative">
+          {/* Blueprint grid for this section only */}
+          <div className="absolute inset-0 z-0 opacity-20"
+               style={{
+                 backgroundImage: 'linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(to right, var(--border) 1px, transparent 1px)',
+                 backgroundSize: '20px 20px',
+               }}
+               aria-hidden="true"
+          />
+
+          <div className="mx-auto max-w-5xl px-4 relative z-10"> {/* Ensure content is above grid */}
+            <h2 className="mb-4 text-center font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl motion-safe:animate-fadeIn">
+              Development Plan
+            </h2>
+            <p className="mb-16 text-center text-xl text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-100">
+              We're building this openly. Here's the plan – your feedback can change it!
+            </p>
+
+            {/* Horizontal Timeline (No lines, just gap) */}
+            <div className="relative flex flex-col items-start gap-6 md:flex-row md:justify-center mt-10 p-4 md:p-0">
+              
+              {roadmapPhases.map((item, index) => {
+                const status = getPhaseStatus(item.phase);
+                return (
+                  <div
+                    key={item.phase}
+                    className={`relative z-10 flex flex-col items-center text-center p-4 md:p-0 md:w-1/4 motion-safe:animate-fadeIn`}
+                    style={{ animationDelay: `${200 + index * 100}ms` }}
                   >
-                    Help Us Build It (Quick Survey)
-                    <ArrowRight className="h-5 w-5" />
-                  </a>
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    Tell us what you need in just 2 minutes!
-                  </p>
-                </div>
-              </div>
-
-              {/* --- NEW: Right Column: Visual App Mockup --- */}
-              <div className="relative flex h-full min-h-[400px] w-full flex-col rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 shadow-xl shadow-black/10 animate-fadeIn animation-delay-300">
-                {/* Mock window header */}
-                <div className="mb-3 flex items-center gap-1.5 border-b border-[var(--border)] pb-3">
-                  <div className="h-3 w-3 rounded-full bg-red-500/80"></div>
-                  <div className="h-3 w-3 rounded-full bg-yellow-500/80"></div>
-                  <div className="h-3 w-3 rounded-full bg-green-500/80"></div>
-                </div>
-
-                {/* Mock Search Bar */}
-                <div className="flex w-full items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--background)] p-2.5 shadow-inner-sm animate-fadeIn animation-delay-400">
-                  <Search className="h-4 w-4 text-[var(--muted-foreground)]" />
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Search "DBMS Unit 3 Notes"...
-                  </p>
-                </div>
-
-                {/* Mock Results */}
-                <div className="mt-4 flex flex-1 flex-col space-y-3">
-                  <p className="text-xs font-medium uppercase text-[var(--muted-foreground)] animate-fadeIn animation-delay-500">
-                    Your Syllabus
-                  </p>
-                  <div className="flex items-center gap-3 rounded-md bg-accent/10 p-3 ring-1 ring-accent/30 animate-fadeIn animation-delay-500">
-                    <BookCheck className="h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
-                    <span className="text-sm">
-                      <span className="font-semibold text-[var(--foreground)]">Curated Content</span>
-                      <p className="text-xs text-[var(--muted-foreground)]">Verified notes for your exact syllabus.</p>
-                    </span>
-                  </div>
-
-                  <p className="pt-2 text-xs font-medium uppercase text-[var(--muted-foreground)] animate-fadeIn animation-delay-600">
-                    Smart Tools
-                  </p>
-                  <div className="flex items-center gap-3 rounded-md bg-zinc-500/5 p-3 ring-1 ring-[var(--border)] animate-fadeIn animation-delay-600">
-                    <Cpu className="h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
-                    <span className="text-sm">
-                      <span className="font-semibold text-[var(--foreground)]">AI Predictions</span>
-                       <p className="text-xs text-[var(--muted-foreground)]">Potential topics for upcoming exams.</p>
-                    </span>
-                  </div>
-                   <div className="flex items-center gap-3 rounded-md bg-zinc-500/5 p-3 ring-1 ring-[var(--border)] animate-fadeIn animation-delay-700">
-                    <UsersRound className="h-5 w-5 flex-shrink-0 text-[var(--accent)]" />
-                    <span className="text-sm">
-                      <span className="font-semibold text-[var(--foreground)]">Community Driven</span>
-                       <p className="text-xs text-[var(--muted-foreground)]">Shared by verified seniors & peers.</p>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 3. Marquee Section */}
-          <section className="w-full border-y border-[var(--border)] bg-[var(--card)]/50">
-            <div className="relative flex overflow-hidden py-5 [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
-              <div className="flex w-max flex-shrink-0 animate-marquee items-center">
-                {/* List items duplicated for seamless loop */}
-                <div className="flex w-max items-center">
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Visual Modules
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    AI Exam Prediction
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Curated Syllabus Content
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Learn at Your Pace
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Placement Prep Hub
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Skill-Gap Analysis
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Community Driven
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    For All B.Tech Branches
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                </div>
-                {/* Duplicate set */}
-                <div className="flex w-max items-center" aria-hidden="true">
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Visual Modules
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    AI Exam Prediction
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Curated Syllabus Content
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Learn at Your Pace
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Placement Prep Hub
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Skill-Gap Analysis
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    Community Driven
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                  <span className="mx-6 text-lg font-medium text-[var(--muted-foreground)]">
-                    For All B.Tech Branches
-                  </span>
-                  <span className="text-2xl text-[var(--accent)]">&bull;</span>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* 4. "Before & After" Section */}
-          <section className="w-full bg-[var(--background)] py-20 sm:py-28 lg:py-32">
-            <div className="mx-auto max-w-5xl px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold text-[var(--foreground)] md:text-4xl">
-                From Scattered Chats to Smart Hub
-              </h2>
-              <p className="mb-12 text-center text-lg text-[var(--muted-foreground)]">
-                Stop digging through endless messages. Get what you need, fast.
-              </p>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                {/* "Before" Card - Styled like a messy chat */}
-                <div className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 opacity-90 motion-safe:animate-fadeIn">
-                  <div className="mb-4 flex items-center gap-2">
-                    <MessageSquareWarning className="h-6 w-6 text-red-500" />
-                    <h3 className="text-xl font-semibold text-red-400">
-                      The Old Way: Group Chat Chaos
-                    </h3>
-                  </div>
-                  {/* Simple Chat Simulation */}
-                  <div className="flex h-64 flex-col space-y-3 overflow-hidden rounded-md bg-zinc-900 p-3 shadow-inner">
-                    <div className="w-fit max-w-[80%] p-2 chat-bubble-left">
-                      <p className="text-sm">Anyone have Unit 3 notes?</p>
-                    </div>
-                    <div className="ml-auto w-fit max-w-[80%] p-2 chat-bubble-right">
-                      <p className="text-sm">Which subject bro?</p>
-                    </div>
-                    <div className="w-fit max-w-[80%] p-2 chat-bubble-left">
-                      <p className="text-sm">DBMS... exam is tmrw!</p>
-                    </div>
-                    <div className="ml-auto w-fit max-w-[80%] p-2 chat-bubble-right">
-                      <p className="text-sm">Check drive link maybe? 🤔</p>
-                    </div>
-                    <div className="w-fit max-w-[80%] p-2 chat-bubble-left">
-                      <p className="text-sm">Link expired 😭</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-                    Sound familiar? Lost files, endless scrolling, wrong syllabus...
-                  </p>
-                </div>
-
-                {/* "After" Card - Styled like a clean app interface */}
-                <div
-                  className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 transition-all
-                           hover-glow motion-safe:animate-fadeIn animation-delay-200"
-                >
-                  <div className="mb-4 flex items-center gap-2">
-                    <LayoutGrid className="h-6 w-6 text-[var(--accent)]" />
-                    <h3 className="text-xl font-semibold text-[var(--accent)]">
-                      The Klaz Way: Organized Hub
-                    </h3>
-                  </div>
-                  {/* Simple App UI Simulation */}
-                  <div className="flex h-64 flex-col space-y-3 overflow-hidden rounded-md bg-zinc-900 p-3 shadow-inner">
-                    {/* Search Bar */}
-                    <div className="flex items-center gap-2 rounded bg-zinc-800 p-2">
-                      <Search className="h-4 w-4 text-zinc-500" />
-                      <p className="text-sm text-zinc-400">Search "DBMS Unit 3"...</p>
-                    </div>
-                    {/* Results Area */}
-                    <div className="flex-1 space-y-2 rounded bg-zinc-800 p-3">
-                      <div className="flex items-center gap-2 rounded bg-accent/10 p-2">
-                        <CheckCircle2 className="h-4 w-4 text-accent" />
-                        <p className="text-sm text-accent">Verified Notes - Your Syllabus</p>
-                      </div>
-                      <div className="flex items-center gap-2 rounded bg-zinc-700 p-2">
-                        <BookCheck className="h-4 w-4 text-zinc-400" />
-                        <p className="text-sm text-zinc-300">Previous Year Questions</p>
-                      </div>
-                      {/* Added one more example */}
-                      <div className="flex items-center gap-2 rounded bg-zinc-700 p-2">
-                        <Cpu className="h-4 w-4 text-zinc-400" />
-                        <p className="text-sm text-zinc-300">AI Predicted Topics</p>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-[var(--muted-foreground)]">
-                    Everything you need, organized by subject and syllabus, always up-to-date.
-                  </p>
-                </div>
-              </div>
-              {/* --- UPDATED: Text size changed to text-sm --- */}
-              <p className="mt-12 text-center text-sm text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-400">
-                Note: This is not an official Preview, just a concept.
-              </p>
-            </div>
-          </section>
-
-          {/* 5. Features Section */}
-          <section
-            id="features"
-            className="w-full bg-[var(--card)] py-20 sm:py-28 lg:py-32"
-          >
-            <div className="mx-auto max-w-5xl px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold text-[var(--foreground)] md:text-4xl motion-safe:animate-fadeIn">
-                Learn Smarter, Not Harder
-              </h2>
-              <p className="mb-12 text-center text-lg text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-100">
-                Core features designed to boost your B.Tech journey:
-              </p>
-
-              {/* --- NEW: Added group/features and refined hover states --- */}
-              <div className="group/features grid grid-cols-1 gap-8 md:grid-cols-3">
-                {/* Feature Card 1: Smart & Personalized Learning */}
-                <div
-                  className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--background)] p-6 shadow-lg shadow-black/5 
-                           transition-all duration-300 group-hover/features:opacity-60 group-hover/features:blur-[1px] 
-                           hover:!opacity-100 hover:!blur-none hover:-translate-y-1 hover:shadow-xl hover:scale-105 
-                           motion-safe:animate-fadeIn animation-delay-200"
-                >
-                  <Sparkles className="mb-4 h-10 w-10 text-[var(--accent)]" />
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    Smart & Personalized Learning
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    Get <span className="font-semibold text-[var(--foreground)]">curated content</span> for your exact syllabus. Learn faster with <span className="font-semibold text-[var(--foreground)]">visual modules</span>, study at <span className="font-semibold text-[var(--foreground)]">your pace</span>, and benefit from AI that understands your <span className="font-semibold text-[var(--foreground)]">learning patterns</span>.
-                  </p>
-                </div>
-
-                {/* Feature Card 2: AI & Community Power */}
-                <div
-                  className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--background)] p-6 shadow-lg shadow-black/5 
-                           transition-all duration-300 group-hover/features:opacity-60 group-hover/features:blur-[1px] 
-                           hover:!opacity-100 hover:!blur-none hover:-translate-y-1 hover:shadow-xl hover:scale-105 
-                           motion-safe:animate-fadeIn animation-delay-300"
-                >
-                  <Cpu className="mb-4 h-10 w-10 text-[var(--accent)]" />
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    AI Insights & Community Hub
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    Leverage <span className="font-semibold text-[var(--foreground)]">AI question paper predictions</span> based on past trends. Connect with peers in our <span className="font-semibold text-[var(--foreground)]">community-driven</span> space to share resources and get help.
-                  </p>
-                </div>
-
-                {/* Feature Card 3: Career Focused */}
-                <div
-                  className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--background)] p-6 shadow-lg shadow-black/5 
-                           transition-all duration-300 group-hover/features:opacity-60 group-hover/features:blur-[1px] 
-                           hover:!opacity-100 hover:!blur-none hover:-translate-y-1 hover:shadow-xl hover:scale-105 
-                           motion-safe:animate-fadeIn animation-delay-400"
-                >
-                  <Target className="mb-4 h-10 w-10 text-[var(--accent)]" />
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    Career Focused Prep
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    Access comprehensive <span className="font-semibold text-[var(--foreground)]">placement prep</span> materials. Use the <span className="font-semibold text-[var(--foreground)]">skill-gap analysis</span> to see exactly what you need for your target job and get a clear path forward.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 6. "How It Works" Section */}
-          <section
-            id="how-it-works"
-            className="w-full bg-[var(--background)] py-20 sm:py-28 lg:py-32"
-          >
-            <div className="mx-auto max-w-5xl px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold text-[var(--foreground)] md:text-4xl motion-safe:animate-fadeIn">
-                Help Us Build It: 3 Quick Steps
-              </h2>
-              <p className="mb-12 text-center text-lg text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-100">
-                Your ideas are key to making Klaz awesome. Here's how to get involved right now:
-              </p>
-              <div className="group grid grid-cols-1 gap-4 md:grid-cols-3">
-                {/* Step 1 */}
-                <div className="flex flex-col items-center rounded-lg border border-[var(--border)] bg-[var(--card)] p-8 text-center transition-all duration-300 group-hover:opacity-60 hover:!opacity-100 motion-safe:animate-fadeIn animation-delay-200">
-                  <div className="mb-4 rounded-full bg-accent/10 p-4 text-accent">
-                    <LogIn className="h-8 w-8" />
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    1. Join the Discord
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    Connect with other students, share ideas, and get early updates in our community server.
-                  </p>
-                </div>
-                {/* Step 2 */}
-                <div className="flex flex-col items-center rounded-lg border border-[var(--border)] bg-[var(--card)] p-8 text-center transition-all duration-300 group-hover:opacity-60 hover:!opacity-100 motion-safe:animate-fadeIn animation-delay-300">
-                  <div className="mb-4 rounded-full bg-accent/10 p-4 text-accent">
-                    <Brain className="h-8 w-8" />
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    2. Take the Survey
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    It takes 2 minutes! Tell us your branch, biggest study problems, and what features you want most.
-                  </p>
-                </div>
-                {/* Step 3 */}
-                <div className="flex flex-col items-center rounded-lg border border-[var(--border)] bg-[var(--card)] p-8 text-center transition-all duration-300 group-hover:opacity-60 hover:!opacity-100 motion-safe:animate-fadeIn animation-delay-400">
-                  <div className="mb-4 rounded-full bg-accent/10 p-4 text-accent">
-                    <Briefcase className="h-8 w-8" />
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold text-[var(--foreground)]">
-                    3. Follow the Journey
-                  </h3>
-                  <p className="text-[var(--muted-foreground)]">
-                    Check the roadmap below, join discussions, and be first in line to test new features.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 7. Roadmap Section */}
-          <section id="roadmap" className="w-full bg-[var(--card)] py-20 sm:py-28 lg:py-32">
-            <div className="mx-auto max-w-3xl px-4">
-              <h2 className="mb-4 text-center text-3xl font-bold text-[var(--foreground)] md:text-4xl motion-safe:animate-fadeIn">
-                Our Building Plan (Roadmap)
-              </h2>
-              <p className="mb-12 text-center text-lg text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-100">
-                We're building this openly. Here's the plan – your feedback can change it! 🚀
-              </p>
-
-              <div className="relative flex flex-col items-start px-4">
-                {/* Connecting Line */}
-                <div className="absolute left-9 top-10 h-[calc(100%-4rem)] w-0.5 bg-[var(--border)] motion-safe:animate-fadeIn" aria-hidden="true" />
-
-                {roadmapPhases.map((item, index) => (
-                  <div key={item.phase} className="relative mb-10 flex w-full items-start gap-6 pl-16 last:mb-0 motion-safe:animate-fadeIn" style={{ animationDelay: `${200 + index * 100}ms`}}>
                     {/* Status Dot */}
-                    <div
-                      className={`absolute left-0 top-1.5 flex h-8 w-8 items-center justify-center rounded-full ring-4 ${getDotClasses(item.status)}`}
-                    >
-                      <item.icon className={`h-4 w-4 ${item.status === 'Current' ? 'text-accent-foreground' : item.status === 'Completed' ? 'text-white' : 'text-muted-foreground'}`} />
+                    <div className={`relative flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-[var(--card)] ${status === 'current' ? 'bg-[var(--accent)] animate-sonar-pulse' : status === 'completed' ? 'bg-green-500' : 'bg-[var(--muted-foreground)]'}`}>
+                      <item.icon className={`h-4 w-4 ${status === 'current' ? 'text-[var(--accent-foreground)]' : status === 'completed' ? 'text-white' : 'text-[var(--muted-foreground)] opacity-60'}`} />
                     </div>
-                    {/* Content */}
-                    <div className={`flex-1 rounded-lg border p-6 ${getStatusClasses(item.status)} ${item.status === 'Upcoming' ? 'bg-transparent shadow-inner shadow-black/10' : 'bg-[var(--background)]/30'}`}>
-                      <span
-                        className={`mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                          item.status === 'Current'
-                            ? 'bg-accent/20 text-accent'
-                            : item.status === 'Completed'
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-muted/50 text-muted-foreground'
-                        }`}
-                      >
-                        {item.status}
+                    {/* Content Box */}
+                    <div className={`mt-4 w-full md:w-auto rounded-lg border p-4 transition-all duration-300 ${status === 'current' ? 'border-[var(--accent)] bg-[var(--card)] shadow-xl shadow-[var(--accent)]/10' : status === 'completed' ? 'border-green-500 bg-[var(--card)]/80 opacity-80' : 'border-[var(--border)] bg-[var(--card)]/80 opacity-60'}`}>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium mb-2 ${status === 'current' ? 'bg-accent/20 text-accent' : status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-muted/50 text-muted-foreground'}`}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
                       </span>
-                      <h3 className={`mb-2 text-xl font-semibold ${item.status === 'Current' ? 'text-[var(--foreground)]' : item.status === 'Completed' ? 'text-green-300' : 'text-[var(--muted-foreground)]'}`}>
+                      <h3 className={`font-mono text-lg font-semibold ${status === 'current' ? 'text-[var(--foreground)]' : status === 'completed' ? 'text-green-300' : 'text-[var(--muted-foreground)]'}`}>
                         {item.title}
                       </h3>
-                      <p className={`${item.status === 'Upcoming' ? 'text-[var(--muted-foreground)] opacity-60' : 'text-[var(--muted-foreground)]'}`}>
+                      <p className={`font-mono text-base mt-1 ${status === 'upcoming' ? 'text-[var(--muted-foreground)] opacity-60' : 'text-[var(--muted-foreground)]'}`}>
                         {item.description}
                       </p>
                     </div>
                   </div>
-                ))}
-              </div>
-              <p className="mt-12 text-center text-base text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-500">
-                Have ideas for future phases? Tell us in the Discord!
+                );
+              })}
+            </div>
+          </div>
+        </section>
+        
+        {/* "Meet the Team" Section has been REMOVED */}
+
+        {/* 6. "Ambassador Program" Section */}
+        <section
+          ref={registerSection('ambassador')} id="ambassador"
+          className="w-full bg-[var(--background)] px-4 py-16 sm:py-20 lg:py-24"
+        >
+          <div className="mx-auto grid max-w-3xl grid-cols-1 items-center gap-8 text-center">
+            <div className="flex flex-col items-center text-center motion-safe:animate-fadeIn">
+              <Award className="mb-4 h-12 w-12 text-[var(--accent)]" />
+              <h2 className="font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl">
+                Become an Ambassador
+              </h2>
+              <p className="mt-6 text-xl text-[var(--muted-foreground)]">
+                Be a leader in your college. Help us spread the word about Klaz,
+                gather feedback, and shape the future of student learning. Get
+                exclusive perks, certificates, and more.
               </p>
             </div>
-          </section>
-
-
-          {/* --- 8. COMBINED About & CTA Section --- */}
-          <section
-            id="about" // Kept the ID for the nav link
-            className="w-full bg-[var(--background)] px-4 py-20 sm:py-28 lg:py-32" // Combined padding
-          >
-            <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
-                {/* Left Side: About Content */}
-                <div className="flex flex-col items-start text-left motion-safe:animate-fadeIn">
-                  <Users className="mb-4 h-12 w-12 text-[var(--accent)]" />
-                  <h2 className="text-3xl font-bold text-[var(--foreground)] md:text-4xl">
-                    Just Students Helping Students
-                  </h2>
-                  <p className="mt-6 text-lg text-[var(--muted-foreground)]">
-                    Klaz isn't a big company. It's built by{' '}
-                    <span className="font-semibold text-[var(--foreground)]">
-                      us – B.Tech students like you
-                    </span>
-                    – because we're tired of the messy notes and confusing prep too! We're making the app <span className="font-semibold text-[var(--foreground)]">we wish we had</span>. This project is totally open, and we need your ideas to make it great.
-                  </p>
-                </div>
-
-                {/* Right Side: CTA Content */}
-                <div className="flex flex-col items-center text-center md:items-start md:text-left motion-safe:animate-fadeIn animation-delay-200">
-                    <h3 className="text-2xl font-bold text-[var(--foreground)] md:text-3xl">
-                        Let's Build This, Together.
-                    </h3>
-                    <p className="mt-4 max-w-md text-lg text-[var(--muted-foreground)]">
-                        Ready to help? Your feedback now makes a huge difference. Join the community, share what you need, and let's create something amazing.
-                    </p>
-                    <div className="mt-8 flex w-full flex-col justify-center gap-4 sm:flex-row md:justify-start">
-                      <a
-                        href="https://forms.gle/4CB5QkpwRam8FfCB8"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-3 text-base font-semibold text-gray-950 shadow-md shadow-blue-500/20 transition-all duration-200 ease-in-out animate-gradient-text hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      >
-                        Share Your Ideas (2 Min Survey)
-                      </a>
-                      <a
-                        href="https://discord.gg/pPy4VSRy" // Add your Discord link
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center rounded-lg bg-[var(--accent)]/10 px-6 py-3 text-base font-semibold text-[var(--accent)] shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-[var(--accent)]/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      >
-                        Join the Discord Community
-                      </a>
-                    </div>
-                </div>
+            {/* CTA Button (Conditional) */}
+            <div className="mt-4 flex w-full flex-col items-center justify-center gap-4 sm:flex-row motion-safe:animate-fadeIn animation-delay-200">
+              {IS_AMBASSADOR_PROGRAM_OPEN ? (
+                <a
+                  href={GOOGLE_FORM_AMBASSADOR_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+                >
+                  Join the Program
+                  <ArrowRight className="h-5 w-5" />
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[var(--muted-foreground)]/20 px-8 py-4 text-lg font-bold text-[var(--muted-foreground)] opacity-70 sm:w-auto"
+                >
+                  Applications Closed
+                </button>
+              )}
             </div>
-          </section>
+          </div>
+        </section>
 
-        </main>
-
-        {/* 9. Footer */}
-        <footer className="w-full border-t border-[var(--border)] bg-[var(--card)] py-8">
-          <div className="mx-auto max-w-5xl px-4 text-center text-[var(--muted-foreground)]">
-            <p>
-              &copy; {new Date().getFullYear()} Klaz. Built openly with ❤️ by B.Tech students.
+        {/* 7. Waitlist Section (Using Google Form) */}
+        <section
+          ref={registerSection('waitlist')} id="waitlist"
+          className="w-full bg-[var(--card)] px-4 py-16 sm:py-20 lg:py-24"
+        >
+          <div className="mx-auto grid max-w-3xl grid-cols-1 items-center gap-8 text-center">
+            <div className="flex flex-col items-center text-center motion-safe:animate-fadeIn">
+              <Mail className="mb-4 h-12 w-12 text-[var(--accent)]" />
+              <h2 className="font-mono text-4xl font-bold text-[var(--foreground)] md:text-5xl">
+                Get Early Access
+              </h2>
+              <p className="mt-6 text-xl text-[var(--muted-foreground)]">
+                Be the first to know when Klaz goes live. Join the waitlist for
+                an exclusive launch-day badge and early access.
+              </p>
+            </div>
+            {/* Google Form Waitlist Button */}
+            <div className="mt-4 flex w-full flex-col items-center justify-center gap-4 sm:flex-row motion-safe:animate-fadeIn animation-delay-200">
+              <a
+                href={GOOGLE_FORM_WAITLIST_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--accent-foreground)] shadow-lg shadow-[var(--accent)]/20 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
+              >
+                Join the Waitlist
+              </a>
+              <a
+                href={DISCORD_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[var(--accent)] bg-transparent px-8 py-4 text-lg font-bold text-[var(--accent)] shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-[var(--accent)]/10 sm:w-auto"
+              >
+                Join the Discord
+              </a>
+            </div>
+            {/* FIX: Corrected typo from <s_p> to <p> */}
+            <p className="text-sm text-[var(--muted-foreground)] motion-safe:animate-fadeIn animation-delay-300">
+              No spam, just one email when we launch.
             </p>
           </div>
-        </footer>
-      </div>
+        </section>
+      </main>
+
+      {/* --- 8. NEW: Professional Footer --- */}
+      <footer className="w-full border-t border-[var(--border)] bg-[var(--background)] py-16">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 md:grid-cols-2">
+          {/* Column 1: Logo & Tagline */}
+          <div className="flex flex-col gap-4">
+            <a href="#" className="flex items-center gap-2 text-2xl font-mono font-bold" onClick={() => setActiveSection('hero')}>
+              <Blocks className="h-6 w-6 text-[var(--accent)]" />
+              <span className="text-[var(--foreground)]">Klaz</span>
+            </a>
+            <p className="max-w-xs text-base text-[var(--muted-foreground)]">
+              A project by B.Tech students, for B.Tech students.
+            </p>
+            {/* FIX: Corrected typo from Dategit() to Date() */}
+            <p className="text-sm text-[var(--muted-foreground)]">
+              &copy; {new Date().getFullYear()} Klaz. All rights reserved.
+            </p>
+          </div>
+          
+          {/* Column 2: Links */}
+          <div className="md:ml-auto">
+            <h3 className="font-mono text-sm font-semibold uppercase text-[var(--foreground)]">
+              Navigate
+            </h3>
+            <div className="mt-4 flex flex-col gap-3">
+              <a href="#features" onClick={() => setActiveSection('features')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Features</a>
+              <a href="#roadmap" onClick={() => setActiveSection('roadmap')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Roadmap</a>
+              <a href="#ambassador" onClick={() => setActiveSection('ambassador')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Ambassadors</a>
+              <a href="#waitlist" onClick={() => setActiveSection('waitlist')} className="text-base text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">Waitlist</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

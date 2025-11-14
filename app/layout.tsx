@@ -12,7 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
 const archivoBlack = Archivo_Black({
   weight: '400', 
   subsets: ['latin'],
@@ -20,8 +19,8 @@ const archivoBlack = Archivo_Black({
 });
 
 export const metadata: Metadata = {
-  title: "Colearn",
-  description: "Community Driven Learning For Free",
+  title: "Klaz - Stop the Scroll. Start Learning.",
+  description: "The all-in-one app for B.Tech students, built by students.",
 };
 
 export default function RootLayout({
@@ -30,9 +29,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${archivoBlack.variable} antialiased`}
       >
         {children}
       </body>
