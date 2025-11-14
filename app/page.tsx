@@ -349,10 +349,8 @@ export default function LandingPage() {
             muted
             playsInline
             className="absolute inset-0 z-[-1] h-full w-full object-cover"
-            poster="/videos/hero-poster.jpg" // Optional poster image
           >
-            {/* --- TODO: REPLACE THIS WITH YOUR VIDEO FILE --- */}
-            <source src="/videos/hero-background.mp4" type="video/mp4" />
+            <source src="/promo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           {/* Video Overlay */}
