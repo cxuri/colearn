@@ -24,6 +24,9 @@ import {
   MessageSquare, // Testimonials
 } from 'lucide-react';
 
+// Analytics 
+import { Analytics } from "@vercel/analytics/next"
+
 // --- Settings: Control Panel ---
 
 // Set to true to show "Join Now", false to show "Applications Closed"
@@ -34,7 +37,7 @@ const CURRENT_PHASE = 2; // Phase 2: "Building"
 
 // --- Links: Update These ---
 const GOOGLE_FORM_WAITLIST_LINK = "https://forms.gle/KXKyqdsL8R8zFtws8";
-const GOOGLE_FORM_AMBASSADOR_LINK = "https://forms.gle/YOUR_AMBASSADOR_FORM_LINK";
+const GOOGLE_FORM_AMBASSADOR_LINK = "";
 const DISCORD_LINK = "https://discord.gg/pPy4VSRy";
 
 
@@ -642,6 +645,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <Analytics/>
+      
     </div>
   );
 }
