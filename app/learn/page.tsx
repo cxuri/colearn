@@ -17,13 +17,6 @@ const topics = [
     color: "bg-teal-100 text-teal-800",
   },
   {
-    slug: "klaz",
-    title: "Klaz Full Stack",
-    description: "The complete masterclass. Build scalable web applications from scratch.",
-    tag: "Full Stack",
-    color: "bg-pink-100 text-pink-800",
-  },
-  {
     slug: "docker",
     title: "Docker Essentials",
     description: "Stop saying 'it works on my machine'. Containerize your apps.",
