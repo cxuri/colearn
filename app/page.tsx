@@ -26,6 +26,7 @@ import {
 
 // Analytics 
 import { Analytics } from "@vercel/analytics/next"
+import NextCourseSection from './NextCourseSection';
 
 // --- Settings: Control Panel ---
 
@@ -479,6 +480,13 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Demo Courses CTA */}
+        <NextCourseSection 
+          title="Demo Courses"
+          description="Explore our interactive modules. From FastAPI to Kubernetes, start building your stack."
+          href="/learn"
+        />
 
         {/* 5. Roadmap Section (Blueprint Grid Background) */}
         <section ref={registerSection('roadmap')} id="roadmap" className="w-full bg-[var(--card)] py-16 sm:py-20 lg:py-24 overflow-hidden relative">
