@@ -31,7 +31,7 @@ const topics = [
     color: "bg-blue-100 text-blue-800",
   },
   {
-    slug: "kubernetes",
+    slug: "kuber",
     title: "Kubernetes Orchestration",
     description: "Manage your container fleet. Pods, Deployments, and Services explained.",
     tag: "DevOps",
