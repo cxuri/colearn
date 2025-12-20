@@ -55,7 +55,7 @@ export default function Home() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <main className={`min-h-screen bg-white text-black ${archivo.className} selection:bg-yellow-400 selection:text-black overflow-x-hidden`}>
+    <main className={`min-h-screen bg-white text-black ${archivo.className} selection:bg-[#FBBF24] selection:text-black overflow-x-hidden`}>
       
       {/* --- INDUSTRIAL FRAME --- */}
       <div className="fixed top-0 left-0 w-full h-10 bg-black text-white z-[60] flex items-center justify-between px-4 md:px-12 uppercase text-xs tracking-widest border-b border-white/20">
@@ -79,11 +79,11 @@ export default function Home() {
          </div>
       </div>
 
-      {/* Corners */}
-      <div className="hidden md:block fixed top-0 left-0 w-10 h-10 bg-yellow-400 z-[70] border-r-4 border-b-4 border-black"></div>
-      <div className="hidden md:block fixed top-0 right-0 w-10 h-10 bg-yellow-400 z-[70] border-l-4 border-b-4 border-black"></div>
-      <div className="hidden md:block fixed bottom-0 left-0 w-10 h-10 bg-yellow-400 z-[70] border-r-4 border-t-4 border-black"></div>
-      <div className="hidden md:block fixed bottom-0 right-0 w-10 h-10 bg-yellow-400 z-[70] border-l-4 border-t-4 border-black"></div>
+      {/* Corners - Updated to Warm Amber */}
+      <div className="hidden md:block fixed top-0 left-0 w-10 h-10 bg-[#FBBF24] z-[70] border-r-4 border-b-4 border-black"></div>
+      <div className="hidden md:block fixed top-0 right-0 w-10 h-10 bg-[#FBBF24] z-[70] border-l-4 border-b-4 border-black"></div>
+      <div className="hidden md:block fixed bottom-0 left-0 w-10 h-10 bg-[#FBBF24] z-[70] border-r-4 border-t-4 border-black"></div>
+      <div className="hidden md:block fixed bottom-0 right-0 w-10 h-10 bg-[#FBBF24] z-[70] border-l-4 border-t-4 border-black"></div>
 
 
       {/* --- TOP NAVIGATION --- */}
@@ -92,18 +92,19 @@ export default function Home() {
         {/* Logo */}
         <div className="text-3xl md:text-4xl tracking-tighter cursor-pointer select-none relative group z-[60]">
           KLAZ.
-          <span className="absolute -top-1 -right-3 w-3 h-3 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
+          {/* Updated Pulse to Emerald Green */}
+          <span className="absolute -top-1 -right-3 w-3 h-3 bg-[#10B981] rounded-full border-2 border-black animate-pulse"></span>
         </div>
 
         {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-6 text-lg font-bold">
           
-          {/* Nav Links: Black text, Yellow highlight on hover */}
+          {/* Nav Links: Black text, Warm Amber highlight on hover */}
           {['MANIFESTO', 'STATUS', 'FAQ'].map((item) => (
             <a 
               key={item}
               href={item === 'STATUS' ? '/status' : `#${item.toLowerCase()}`} 
-              className="text-black px-2 py-1 transition-all hover:bg-yellow-400 hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
+              className="text-black px-2 py-1 transition-all hover:bg-[#FBBF24] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
             >
               {item}
             </a>
@@ -112,24 +113,24 @@ export default function Home() {
           {/* LOGIN BUTTON: Wireframe Box -> Solid Black on Hover */}
           <Link 
             href="/progress"
-            className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]"
+            className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
           >
             LOGIN
           </Link>
         </div>
 
-        {/* MOBILE BURGER BUTTON */}
+        {/* MOBILE BURGER BUTTON - Updated to Warm Amber */}
         <button 
           onClick={toggleMenu}
-          className="md:hidden p-2 border-2 border-black bg-yellow-400 active:bg-black active:text-white transition-colors z-[60]"
+          className="md:hidden p-2 border-2 border-black bg-[#FBBF24] active:bg-black active:text-white transition-colors z-[60]"
         >
            {isMenuOpen ? <X size={28} strokeWidth={3} /> : <Menu size={28} strokeWidth={3} />}
         </button>
       </nav>
 
-      {/* --- MOBILE MENU OVERLAY --- */}
+      {/* --- MOBILE MENU OVERLAY - Updated to Warm Amber --- */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-[50] bg-yellow-400 text-black flex flex-col pt-32 px-6">
+        <div className="fixed inset-0 z-[50] bg-[#FBBF24] text-black flex flex-col pt-32 px-6">
            
            {/* Background Grid */}
            <div className="absolute inset-0 opacity-10 pointer-events-none" 
