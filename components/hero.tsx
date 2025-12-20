@@ -19,20 +19,22 @@ export default function Hero() {
   const containerRef = useRef(null);
   const [isGsapLoaded, setIsGsapLoaded] = useState(false);
 
-  // 1. Check if GSAP is already loaded on mount (Fix for navigation issue)
+  // 1. Check if GSAP is already on window (handles hot reloads/navigation)
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.gsap) {
+    if (typeof window !== 'undefined' && (window as any).gsap) {
       setIsGsapLoaded(true);
     }
   }, []);
 
-  // 2. Run Animations whenever isGsapLoaded becomes true
+  // 2. Run Animations
   useEffect(() => {
+    // Only run if state says loaded and ref exists
     if (!isGsapLoaded || !containerRef.current) return;
 
-    const gsap = window.gsap;
+    // Safely access GSAP from window
+    const gsap = (window as any).gsap;
+    if (!gsap) return;
     
-    // Clean up previous context if any (good practice)
     const ctx = gsap.context(() => {
       // --- Initial States ---
       gsap.set(".hero-line", { y: 100, opacity: 0 });
@@ -85,7 +87,6 @@ export default function Hero() {
 
     }, containerRef);
     
-    // Cleanup on unmount
     return () => ctx.revert();
   }, [isGsapLoaded]);
 
@@ -99,17 +100,19 @@ export default function Hero() {
       }}
     >
       
-      {/* Script to load GSAP from CDN */}
+      {/* Load GSAP Core from CDN */}
       <Script 
         src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
         strategy="afterInteractive"
-        onLoad={() => setIsGsapLoaded(true)}
+        onLoad={() => {
+          // Explicitly mark as loaded once script finishes
+          setIsGsapLoaded(true);
+        }}
       />
 
       {/* --- LOGIC GATE BACKGROUND LINES --- */}
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none overflow-hidden">
          <svg className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-            {/* CHANGED: stroke colors to deeper teal and red */}
             <path d="M0,100 H100 V200 H200" fill="none" stroke="black" strokeWidth="2" />
             <path className="logic-signal" d="M0,100 H100 V200 H200" fill="none" stroke="#0D9488" strokeWidth="2" strokeDasharray="20 200" />
             <path d="M1000,500 H900 V600 H800" fill="none" stroke="black" strokeWidth="2" />
@@ -131,7 +134,6 @@ export default function Hero() {
             </h1>
           </div>
           <div className="py-2 relative">
-            {/* CHANGED: bg-yellow-400 to bg-[#FBBF24] (warmer amber) */}
             <h1 
               className="hero-line text-[12vw] md:text-[9vw] uppercase leading-none tracking-[-0.06em] text-black bg-[#FBBF24] inline-block px-4 py-1 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transform -rotate-2 origin-left z-20"
             >
@@ -142,17 +144,14 @@ export default function Hero() {
 
         {/* 2. TAG STACK */}
         <div className="mt-12 md:mt-16 flex flex-wrap gap-4 md:gap-6 relative z-20">
-          {/* CHANGED: Pink to deeper rose #EC4899 */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#EC4899] px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Play size={16} fill="black" />
             <span className="text-xs md:text-sm font-bold uppercase">Cinematic</span>
           </div>
-          {/* CHANGED: Mint to emerald green #10B981 */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#10B981] px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Zap size={16} fill="black" />
             <span className="text-xs md:text-sm font-bold uppercase">Interactive</span>
           </div>
-          {/* CHANGED: Purple to indigo #6366F1 */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#6366F1] text-white px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Trophy size={16} fill="white" />
             <span className="text-xs md:text-sm font-bold uppercase">Gamified</span>
@@ -195,7 +194,6 @@ export default function Hero() {
                             <div className="w-16 h-4 bg-black rounded-b-lg"></div>
                         </div>
                         <div className="pt-8 px-2 space-y-2">
-                            {/* CHANGED: bg-yellow-400 to warmer #FBBF24 */}
                             <div className="h-20 bg-[#FBBF24] rounded-lg border-2 border-black flex items-center justify-center shadow-sm">
                               <Zap size={24} fill="black" />
                             </div>
@@ -231,7 +229,6 @@ export default function Hero() {
               
               <h2 className="text-3xl md:text-5xl uppercase font-black leading-[0.9] tracking-tight mb-6 text-black">
                   Strictly <br/>
-                  {/* CHANGED: bg-yellow-400 to warmer #FBBF24 */}
                   <span className="bg-[#FBBF24] px-2 border-4 border-black inline-block mt-2">Curated.</span>
               </h2>
               
@@ -248,7 +245,6 @@ export default function Hero() {
                       <Timer className="text-black" size={20} />
                       <span>Pace-Based Learning.</span>
                   </div>
-                  {/* CHANGED: hover:bg-green-600 to hover:bg-[#10B981] (Emerald) */}
                   <div className="flex items-center gap-3 p-3 border-2 border-black bg-black text-white hover:bg-[#10B981] transition-colors">
                       <Box className="text-white" size={20} />
                       <span>Everything in one place.</span>
@@ -267,7 +263,6 @@ export default function Hero() {
           </p>
           
           <div className="flex flex-col md:flex-row gap-8 w-full md:w-auto items-center md:items-start">
-            {/* CHANGED: hover:bg-yellow-400 to warmer #FBBF24 */}
             <button className="w-full md:w-auto bg-black text-white text-lg md:text-xl px-10 py-5 uppercase font-black border-4 border-transparent hover:bg-[#FBBF24] hover:text-black hover:border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1">
               Join Waitlist
               <ArrowDownRight />
@@ -284,14 +279,12 @@ export default function Hero() {
                        />
                     </div>
                   ))}
-                  {/* CHANGED: bg-yellow-400 to warmer #FBBF24 */}
                   <div className="w-12 h-12 rounded-full bg-[#FBBF24] border-2 border-black flex items-center justify-center text-xs font-black z-10">
                      +420
                   </div>
                </div>
                <div className="flex flex-col">
                   <span className="text-sm font-black uppercase tracking-tight">Early Users</span>
-                  {/* CHANGED: text-green-600 to #10B981 (Emerald) */}
                   <span className="text-[10px] font-bold text-[#10B981] uppercase tracking-widest flex items-center gap-1">
                      <Zap size={10} fill="currentColor" /> Locking Spots
                   </span>
