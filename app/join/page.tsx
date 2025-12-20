@@ -10,7 +10,8 @@ import {
   AlertTriangle, 
   Loader2, 
   Zap, 
-  X,
+  Share2, // Changed X to Share2
+  Check, // Added Check for copy confirmation
   Terminal,
   ChevronDown
 } from 'lucide-react';
@@ -171,17 +172,18 @@ export default function JoinPage() {
                   <div className="flex items-center gap-2 mb-2">
                       <Terminal size={20} />
                       <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                          Registration
+                          {status === 'success' ? 'Database Updated' : 'Registration'}
                       </span>
                   </div>
+                  {/* DYNAMIC HEADER CHANGE */}
                   <h2 className={`${archivo.className} text-black text-4xl uppercase`}>
-                        Lets get you on the list
+                        {status === 'success' ? "Welcome to the Cult." : "Lets get you on the list"}
                   </h2>
               </div>
 
               {/* SUCCESS STATE */}
               {status === 'success' ? (
-                  <SuccessTicket message={message} ticketId={ticketId} onReset={() => setStatus('idle')} loaded={gsapLoaded} />
+                  <SuccessTicket message={message} ticketId={ticketId} loaded={gsapLoaded} />
               ) : (
                   
                   /* FORM STATE */
@@ -358,8 +360,9 @@ export default function JoinPage() {
 }
 
 // --- SUCCESS TICKET COMPONENT ---
-function SuccessTicket({ message, ticketId, onReset, loaded }: { message: string, ticketId: string, onReset: () => void, loaded: boolean }) {
+function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketId: string, loaded: boolean }) {
   const container = useRef(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if(!loaded || !window.gsap) return;
@@ -375,6 +378,29 @@ function SuccessTicket({ message, ticketId, onReset, loaded }: { message: string
     return () => ctx.revert();
   }, [loaded]);
 
+  const handleShare = async () => {
+    const shareText = "I just joined the waitlist for Klaz - The anti-boring learning platform for KTU. Survival mode activated. 🚀";
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://klaz.app';
+
+    if (navigator.share) {
+        // Native Share (Mobile)
+        try {
+            await navigator.share({
+                title: 'Join Klaz',
+                text: shareText,
+                url: shareUrl
+            });
+        } catch (err) {
+            console.log("Share cancelled");
+        }
+    } else {
+        // Fallback to Clipboard Copy
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div ref={container} className="flex flex-col items-center justify-center text-center space-y-8 py-10">
         
@@ -382,7 +408,8 @@ function SuccessTicket({ message, ticketId, onReset, loaded }: { message: string
         <div className="ticket-item relative bg-[#F2F2F2] border-4 border-black w-full max-w-sm p-0 shadow-[8px_8px_0px_0px_#000]">
             {/* Ticket Header */}
             <div className="bg-black text-white p-4 flex justify-between items-center border-b-4 border-black">
-                <span className="font-bold text-xs uppercase tracking-widest">ADMIT ONE</span>
+                {/* CHANGED: FROM ADMIT ONE TO WAITLIST PASS */}
+                <span className="font-bold text-xs uppercase tracking-widest">WAITLIST PASS</span>
                 <span className="font-bold text-xs uppercase tracking-widest">KLAZ.APP</span>
             </div>
             
@@ -412,11 +439,20 @@ function SuccessTicket({ message, ticketId, onReset, loaded }: { message: string
             {message || "We have secured your spot in the database."}
         </p>
 
+        {/* CHANGED: SHARE BUTTON */}
         <button 
-            onClick={onReset}
-            className="ticket-item group flex items-center gap-2 text-sm font-bold uppercase hover:underline hover:text-[#FF0054] transition-colors"
+            onClick={handleShare}
+            className="ticket-item w-full max-w-sm bg-black text-white h-14 border-4 border-transparent hover:bg-[#FF0054] hover:text-white hover:border-black transition-all flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 active:translate-y-0 active:shadow-none"
         >
-            <X size={16} /> Register another user
+            {copied ? (
+                <>
+                    <Check size={20} /> <span className={`${archivo.className} uppercase tracking-wide`}>Link Copied</span>
+                </>
+            ) : (
+                <>
+                    <Share2 size={20} /> <span className={`${archivo.className} uppercase tracking-wide`}>Recruit a Friend</span>
+                </>
+            )}
         </button>
     </div>
   );
