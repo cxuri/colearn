@@ -11,12 +11,13 @@ export async function submitToWaitlist(formData: FormData) {
     const email = formData.get('email') as string;
     const college = formData.get('college') as string;
     const year = formData.get('year') as string;
+    const branch = formData.get('branch') as string;
     const reason = formData.get('why') as string;
     const whatsapp = formData.get('whatsapp') as string; 
 
     await sql`
-      INSERT INTO waitlist (name, email, college, year, reason, whatsapp_number)
-      VALUES (${name}, ${email}, ${college}, ${year}, ${reason}, ${whatsapp})
+      INSERT INTO waitlist (name, email, college, branch, year, reason, whatsapp_number)
+      VALUES (${name}, ${email}, ${college}, ${branch}, ${year}, ${reason}, ${whatsapp})
     `;
 
     revalidatePath('/join');
