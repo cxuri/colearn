@@ -19,8 +19,6 @@ interface RollingStripProps {
 }
 
 const DEFAULT_ITEMS = [
-  "COURSES",
-  "FREE LEARNING",
   "CORE BRANCHES",
   "BY B.TECH STUDENTS",
   "KTU",

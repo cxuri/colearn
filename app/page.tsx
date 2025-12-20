@@ -6,6 +6,7 @@ import { Archivo_Black, Space_Mono } from 'next/font/google';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 
 import Hero from '@/components/hero';
+import CTABanner from '@/components/ctabanner';
 import RollingTextStrip from '@/components/rollingtextstrip';
 import Manifesto from '@/components/manifesto';
 import StaticSeparator from '@/components/seperator';
@@ -75,7 +76,7 @@ export default function Home() {
       </div>
       <div className="hidden md:flex fixed top-0 right-0 w-10 h-full bg-black z-[50] flex-col justify-center items-center text-white overflow-hidden">
          <div className="rotate-90 whitespace-nowrap text-[10px] tracking-[0.2em] uppercase text-gray-400">
-            SCROLL FOR INDEX &rarr;
+            The Solution to all our problems &rarr;
          </div>
       </div>
 
@@ -92,25 +93,25 @@ export default function Home() {
         {/* Logo */}
         <div className="text-3xl md:text-4xl tracking-tighter cursor-pointer select-none relative group z-[60]">
           KLAZ.
-          {/* Updated Pulse to Emerald Green */}
+          {/* Pulse Dot: Emerald Green */}
           <span className="absolute -top-1 -right-3 w-3 h-3 bg-[#10B981] rounded-full border-2 border-black animate-pulse"></span>
         </div>
 
         {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-6 text-lg font-bold">
           
-          {/* Nav Links: Black text, Warm Amber highlight on hover */}
+          {/* UPDATED: Black text -> Blue Underline on Hover */}
           {['MANIFESTO', 'STATUS', 'FAQ'].map((item) => (
             <a 
               key={item}
               href={item === 'STATUS' ? '/status' : `#${item.toLowerCase()}`} 
-              className="text-black px-2 py-1 transition-all hover:bg-[#FBBF24] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
+              className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600"
             >
               {item}
             </a>
           ))}
           
-          {/* LOGIN BUTTON: Wireframe Box -> Solid Black on Hover */}
+          {/* LOGIN BUTTON: Kept as Box for hierarchy */}
           <Link 
             href="/progress"
             className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
@@ -119,7 +120,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* MOBILE BURGER BUTTON - Updated to Warm Amber */}
+        {/* MOBILE BURGER BUTTON */}
         <button 
           onClick={toggleMenu}
           className="md:hidden p-2 border-2 border-black bg-[#FBBF24] active:bg-black active:text-white transition-colors z-[60]"
@@ -128,7 +129,7 @@ export default function Home() {
         </button>
       </nav>
 
-      {/* --- MOBILE MENU OVERLAY - Updated to Warm Amber --- */}
+      {/* --- MOBILE MENU OVERLAY --- */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[50] bg-[#FBBF24] text-black flex flex-col pt-32 px-6">
            
@@ -195,6 +196,8 @@ export default function Home() {
         <div id="contact" className="scroll-mt-32">
             <Socials />
         </div>
+
+        <CTABanner />
 
         {/* --- THE END SQUIGGLE --- */}
         <div className="pt-20 pb-10 flex justify-center w-full select-none">
