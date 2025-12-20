@@ -2,13 +2,16 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { Archivo_Black, Space_Mono } from 'next/font/google';
+import { getCount } from '@/app/actions';
 import Script from 'next/script';
+import Link from 'next/link'; // <--- ADDED THIS
 import { 
   ArrowDownRight, Zap, Trophy, 
   Laptop as LaptopIcon, Smartphone,
   Layers, Timer, Box, ChevronRight, Play,
   BookOpen, Gamepad2, Users, MousePointerClick
 } from 'lucide-react';
+import { count } from 'console';
 
 const archivo = Archivo_Black({ 
   weight: '400', 
@@ -22,28 +25,45 @@ const mono = Space_Mono({
   display: 'swap', 
 });
 
+// Fix TypeScript error for window.gsap
+declare global {
+  interface Window {
+    gsap: any;
+  }
+}
+
 export default function Hero() {
   const containerRef = useRef(null);
   const [isGsapLoaded, setIsGsapLoaded] = useState(false);
+  const [userCount, setUserCount] = useState(71);
+
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).gsap) {
+    getCount().then((count) => {
+      setUserCount(count);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.gsap) {
       setIsGsapLoaded(true);
     }
   }, []);
 
   useEffect(() => {
     if (!isGsapLoaded || !containerRef.current) return;
-    const gsap = (window as any).gsap;
+    const gsap = window.gsap;
     if (!gsap) return;
     
     const ctx = gsap.context(() => {
+      // Set initial states
       gsap.set(".hero-line", { y: 100, opacity: 0 });
       gsap.set(".device-group", { y: 50, opacity: 0 });
       gsap.set(".tag-pill", { y: 20, opacity: 0 });
       gsap.set(".hero-cta", { y: 20, opacity: 0 });
       gsap.set(".logic-signal", { strokeDashoffset: 100 });
 
+      // Entrance Timeline
       const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.0 } });
 
       tl.to(".hero-line", { y: 0, opacity: 1, stagger: 0.1 })
@@ -51,6 +71,7 @@ export default function Hero() {
         .to(".device-group", { y: 0, opacity: 1, duration: 1.2, ease: "expo.out" }, "-=0.6")
         .to(".hero-cta", { y: 0, opacity: 1, stagger: 0.1 }, "-=0.8");
 
+      // Loop Animations
       gsap.to(".logic-signal", { strokeDashoffset: 0, duration: 2, repeat: -1, ease: "none" });
       gsap.to(".device-float", { y: -15, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
@@ -113,28 +134,28 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 2. TAG STACK (UPDATED COLORS & HIERARCHY) */}
+        {/* 2. TAG STACK */}
         <div className="mt-16 md:mt-20 flex flex-wrap justify-center md:justify-start gap-4 md:gap-5 relative z-20">
           
-          {/* 1. PRIMARY: KTU Identity (Black/White) */}
+          {/* 1. PRIMARY: KTU Identity */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform cursor-default">
             <BookOpen size={18} />
             <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Strictly KTU</span>
           </div>
 
-          {/* 2. SECONDARY: Gamification (Amber/Black - Matches Brand) */}
+          {/* 2. SECONDARY: Gamification */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#FBBF24] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Gamepad2 size={18} className="text-black" />
             <span className={`text-xs md:text-sm font-bold uppercase text-black ${mono.className}`}>Gamified</span>
           </div>
 
-          {/* 3. FEATURE: Interactive (Electric Blue/White) */}
+          {/* 3. FEATURE: Interactive */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#2563EB] text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <MousePointerClick size={18} />
             <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Interactive</span>
           </div>
 
-          {/* 4. SOCIAL: Community (Emerald Green/Black) */}
+          {/* 4. SOCIAL: Community */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#10B981] text-black px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Users size={18} />
             <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Community</span>
@@ -149,7 +170,7 @@ export default function Hero() {
           <div className="md:col-span-7 relative">
               <div className="device-float relative w-full h-[350px] sm:h-[450px] md:h-[500px]">
                 
-                {/* LAPTOP */}
+                {/* LAPTOP MOCKUP */}
                 <div className="absolute top-0 left-0 md:left-4 w-[95%] md:w-[90%] z-10">
                   <div className="bg-black border-4 border-black rounded-t-xl p-2 pb-0 shadow-2xl">
                       <div className="bg-[#111] aspect-[16/10] w-full rounded-t-lg relative overflow-hidden flex items-center justify-center border border-gray-800">
@@ -166,7 +187,7 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* PHONE */}
+                {/* PHONE MOCKUP */}
                 <div className="absolute bottom-4 right-4 md:right-0 w-[130px] md:w-[180px] z-20">
                   <div className="bg-black border-4 border-black rounded-[2rem] p-1.5 shadow-[12px_12px_0px_0px_rgba(0,0,0,0.5)]">
                       <div className="bg-white aspect-[9/19.5] w-full rounded-[1.5rem] relative overflow-hidden border border-gray-400">
@@ -261,7 +282,8 @@ export default function Hero() {
           
           <div className="flex flex-col md:flex-row gap-10 w-full items-center md:items-start md:justify-start">
             
-            <button className="
+            {/* FIXED: Changed from <link> to <Link> */}
+            <Link href="/join" className="
               group relative 
               bg-[#FBBF24] text-black 
               text-xl md:text-2xl font-black uppercase italic tracking-tighter
@@ -275,7 +297,7 @@ export default function Hero() {
             ">
               <span>Join The Waitlist</span>
               <ArrowDownRight strokeWidth={3} className="group-hover:-rotate-90 transition-transform duration-300" />
-            </button>
+            </Link>
             
             <div className="flex items-center gap-4">
                <div className="flex -space-x-4">
@@ -289,7 +311,7 @@ export default function Hero() {
                     </div>
                   ))}
                   <div className={`w-12 h-12 rounded-full bg-[#FBBF24] border-2 border-black flex items-center justify-center text-xs font-black z-10 shadow-sm ${mono.className}`}>
-                     +420
+                     +{userCount}
                   </div>
                </div>
                <div className="flex flex-col">

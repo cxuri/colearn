@@ -6,7 +6,8 @@ import {
   Instagram, 
   ArrowUpRight,
   Flame,
-  Bell
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 
 const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
@@ -17,52 +18,15 @@ interface SocialLink {
   label: string;
   handle: string;
   url: string;
-  icon: React.ElementType; 
+  
+  // Icon handling: Support both local Images and Lucide Components
+  iconSrc?: string;                 // Path to your image in public folder (e.g. '/discord.png')
+  iconComponent?: React.ElementType; // Fallback for things like Instagram
+  
   bgColor: string; 
   desc: string;
-  badge?: { text: string; icon?: React.ElementType }; // Optional Badge
+  badge?: { text: string; icon?: React.ElementType };
 }
-
-// --- CUSTOM ICONS ---
-
-const RedditIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2.5" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    {...props}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M17 13c0-1.5 1.1-2.5 2.5-2.5a2.5 2.5 0 0 1 0 5c-1.1 0-2-1-2-2Z" /> 
-    <path d="M7 11a2.5 2.5 0 0 0-2.5 2.5 2.5 2.5 0 0 0 5 0c0-1.5-1.1-2.5-2.5-2.5Z" />
-    <path d="M10 17a3 3 0 0 0 4 0" />
-    <path d="M12 2.5V5" />
-  </svg>
-);
-
-const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2.5" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    {...props}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M9 12h6" />
-    <path d="M15 9c0 0-1-1-3-1s-3 1-3 1" />
-    <path d="M8.5 14.5c.5-1 1.5-1.5 3.5-1.5s3 .5 3.5 1.5" />
-    <path d="M15.5 16.5l1.5-3.5" />
-    <path d="M8.5 16.5l-1.5-3.5" />
-  </svg>
-);
 
 // --- DATA ---
 const SOCIAL_LINKS: SocialLink[] = [
@@ -71,8 +35,9 @@ const SOCIAL_LINKS: SocialLink[] = [
     label: 'Instagram',
     handle: '@klaz.app',
     url: 'https://instagram.com/klaz.app',
-    icon: Instagram,
-    bgColor: 'bg-[#FF8ED4]', // Neo-Pink
+    // Uses the Lucide component
+    iconComponent: Instagram, 
+    bgColor: 'bg-[#FF0054]', // Neo-Pink
     desc: 'B.Tech trauma & updates'
   },
   {
@@ -80,18 +45,20 @@ const SOCIAL_LINKS: SocialLink[] = [
     label: 'Reddit',
     handle: 'r/klaz',
     url: 'https://reddit.com/r/klaz',
-    icon: RedditIcon,
-    bgColor: 'bg-[#FF6B6B]', // Neo-Red
+    // Uses your local file
+    iconSrc: '/reddit.png', 
+    bgColor: 'bg-[#FF4500]', // Reddit Orange
     desc: 'Discussions & theories',
-    badge: { text: 'HOT', icon: Flame }
+    badge: { text: 'HOT TOPIC', icon: Flame }
   },
   {
     id: 'discord',
     label: 'Discord',
     handle: 'discord.gg/klaz',
-    url: 'https://discord.gg/', // <--- FILL LINK HERE
-    icon: DiscordIcon,
-    bgColor: 'bg-[#54A0FF]', // Neo-Blue
+    url: 'https://discord.gg/yourlink', 
+    // Uses your local file
+    iconSrc: '/discord.png',
+    bgColor: 'bg-[#5865F2]', // Discord Blurple
     desc: 'Voice channels & chaos',
     badge: { text: '99+ PINGS', icon: Bell }
   },
@@ -99,95 +66,134 @@ const SOCIAL_LINKS: SocialLink[] = [
 
 export default function Socials() {
   return (
-    <section className="w-full bg-white border-x-4 border-black px-6 py-20 md:px-12 relative overflow-hidden text-black">
+    <section className="w-full bg-white border-x-4 border-black px-6 py-20 md:px-12 relative overflow-hidden font-sans">
       
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 p-4 opacity-10 pr-20 pointer-events-none select-none">
-          <h1 className="text-9xl font-black text-black">CONNECT</h1>
+      <div className="absolute top-10 -right-10 rotate-12 opacity-5 pointer-events-none select-none">
+          <h1 className="text-[12rem] font-black text-black leading-none">SOCIALS</h1>
+      </div>
+      <div className="absolute bottom-10 -left-10 -rotate-6 opacity-5 pointer-events-none select-none">
+          <MessageSquare size={300} strokeWidth={0.5} />
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* Header */}
-        <div className="mb-12 border-b-4 border-black pb-4 flex flex-col md:flex-row justify-between items-end">
-          <div>
-            <span className={`bg-black text-white px-2 py-1 text-sm font-bold uppercase ${mono.className}`}>
-                Net_Protocol.v2
-            </span>
-            <h2 className="text-5xl md:text-7xl font-black uppercase mt-2 text-black">
+        {/* Header Section */}
+        <div className="mb-16 flex flex-col md:flex-row justify-between items-end border-b-4 border-black pb-6">
+          <div className="space-y-4">
+            <div className={`inline-block bg-black text-white px-3 py-1 text-sm font-bold uppercase tracking-wider transform -rotate-1 ${mono.className}`}>
+                Net_Protocol.v2 // Connect
+            </div>
+            <h2 className="text-6xl md:text-8xl font-black uppercase text-black leading-[0.9]">
                 Join the <br/>
-                <span className="text-transparent" style={{ WebkitTextStroke: '2px black' }}>
-                    Chaos<span className="animate-pulse text-black">_</span>
+                <span className="relative inline-block">
+                    <span className="relative z-10">Chaos</span>
+                    {/* Hard Underline */}
+                    <span className="absolute bottom-2 left-0 w-full h-4 bg-[#FF0054] -z-0"></span>
                 </span>
             </h2>
           </div>
-          <div className={`hidden md:block text-right ${mono.className}`}>
-             <p className="text-xs font-bold text-gray-400">STATUS: ONLINE</p>
-             <p className="text-xs font-bold text-gray-400">PING: 24ms</p>
+          
+          <div className={`hidden md:flex flex-col items-end gap-1 ${mono.className} mt-6 md:mt-0`}>
+             <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 border-2 border-black animate-pulse"></div>
+                <p className="text-sm font-bold text-black">SYSTEM_ONLINE</p>
+             </div>
+             <p className="text-sm font-bold text-gray-500">PING: 24ms</p>
           </div>
         </div>
 
-        {/* Grid: 3 Columns on Large Screens */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Links Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {SOCIAL_LINKS.map((link) => {
-            const Icon = link.icon;
-            
             return (
               <a 
                 key={link.id}
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                // The Card Container
+                // THE CARD CONTAINER
                 className={`
-                  group relative border-4 border-black p-8 flex flex-col justify-between h-64 
-                  transition-all duration-200 
-                  ${link.bgColor} text-black
+                  group relative 
+                  border-4 border-black 
+                  p-6 h-72 
+                  flex flex-col justify-between 
+                  transition-all duration-200 ease-out
+                  bg-white hover:bg-black
                   
-                  /* Hover State: Turn Black, White Text, Lift Up */
-                  hover:bg-black hover:text-white hover:-translate-y-2 hover:shadow-[8px_8px_0px_0px_#000]
+                  /* Default Shadow */
+                  shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
                   
-                  /* Active/Click State: Press Down */
-                  active:translate-y-0 active:shadow-none
+                  /* Hover: Press Effect */
+                  hover:translate-x-[4px] hover:translate-y-[4px] 
+                  hover:shadow-none
                 `}
               >
-                
-                {/* Badge (Optional) - Absolute positioned top right */}
+                {/* Color Overlay */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none ${link.bgColor} mix-blend-difference`}></div>
+
+                {/* Badge */}
                 {link.badge && (
                   <div className={`
-                    absolute top-4 right-4 bg-black text-white px-2 py-1 text-[10px] font-bold uppercase 
-                    flex items-center gap-1 border-2 border-transparent group-hover:border-white group-hover:bg-white group-hover:text-black
+                    absolute -top-5 -right-2 
+                    bg-[#FFDE00] text-black border-4 border-black 
+                    px-3 py-1 text-xs font-black uppercase 
+                    flex items-center gap-2 
+                    transform rotate-3 group-hover:rotate-0 transition-transform
+                    z-20
                     ${mono.className}
                   `}>
-                     {link.badge.icon && <link.badge.icon size={10} className={link.id === 'reddit' ? 'fill-current' : ''} />}
+                     {link.badge.icon && <link.badge.icon size={12} />}
                      {link.badge.text}
                   </div>
                 )}
 
-                <div className="flex justify-between items-start mt-2">
-                  <Icon 
-                    className="w-12 h-12 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" 
-                    strokeWidth={2.5} 
-                  />
-                  {/* Arrow Icon */}
-                  {!link.badge && (
-                    <ArrowUpRight className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  )}
+                {/* Top Row: Icon Container */}
+                <div className="flex justify-between items-start z-10">
+                  <div className={`
+                    p-3 border-4 border-black ${link.bgColor} text-white
+                    group-hover:bg-white group-hover:text-black
+                    transition-colors duration-200
+                    w-16 h-16 flex items-center justify-center
+                  `}>
+                    
+                    {/* LOGIC: Render Local Image OR Component */}
+                    {link.iconSrc ? (
+                      <img 
+                        src={link.iconSrc} 
+                        alt={`${link.label} icon`}
+                        // MAGIC CLASS: 'invert' makes black icons white. 'group-hover:invert-0' makes them black again on hover.
+                        className="w-full h-full object-contain filter invert brightness-0 group-hover:invert-0 group-hover:brightness-0 transition-all" 
+                      />
+                    ) : (
+                      link.iconComponent && <link.iconComponent className="w-8 h-8" strokeWidth={2} />
+                    )}
+                    
+                  </div>
+                  
+                  <ArrowUpRight className="w-10 h-10 text-black group-hover:text-white transition-colors duration-200" />
                 </div>
                 
-                <div>
-                  <h3 className="text-3xl font-black uppercase leading-none mb-2">
+                {/* Bottom Row: Text */}
+                <div className="z-10 relative">
+                  <h3 className="text-4xl font-black uppercase italic leading-none mb-2 text-black group-hover:text-white transition-colors">
                       {link.label}
                   </h3>
-                  <p className={`text-sm font-bold uppercase tracking-widest opacity-70 mb-4 ${mono.className}`}>
+                  <p className={`text-xs font-bold uppercase tracking-widest text-gray-500 group-hover:text-gray-300 mb-4 ${mono.className}`}>
                     {link.desc}
                   </p>
                   
-                  {/* Link Text with animated underline on hover */}
-                  <div className={`text-base font-bold border-t-2 border-black group-hover:border-white pt-4 flex items-center gap-2 ${mono.className}`}>
-                     <span>{link.handle}</span>
-                     <ArrowUpRight className="w-4 h-4" />
+                  {/* Handle */}
+                  <div className={`
+                    inline-block
+                    bg-black text-white px-2 py-1 
+                    text-sm font-bold 
+                    group-hover:bg-white group-hover:text-black
+                    transition-colors
+                    ${mono.className}
+                  `}>
+                     {link.handle}
                   </div>
                 </div>
               </a>

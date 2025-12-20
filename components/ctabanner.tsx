@@ -1,12 +1,22 @@
 'use client';
 
+import Link from 'next/link'; // Import Link
 import { Archivo_Black, Space_Mono } from 'next/font/google';
 import { ArrowRight, Ticket, Users, AlertTriangle } from 'lucide-react';
+import { getCount } from '@/app/actions';
+import { useEffect, useState } from 'react';
 
 const archivo = Archivo_Black({ weight: '400', subsets: ['latin'] });
 const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
 export default function CTABanner() {
+  const [userCount, setUserCount] = useState(71);
+
+  useEffect(() => {
+    getCount().then((count) => {
+      setUserCount(count);
+    })
+  })
   return (
     // Applied margin to respect the 14px border constraint
     <section className="relative mx-4 md:mx-[14px] mb-[14px] mt-24">
@@ -44,7 +54,7 @@ export default function CTABanner() {
             {/* Subtext */}
             <p className={`text-base md:text-xl font-bold text-black/90 max-w-lg leading-relaxed ${mono.className}`}>
                The exams don't care if you're ready. <br/>
-               <span className="bg-black text-[#D2F843] px-1">Join 420+ students</span> armed with the ultimate survival kit.
+               <span className="bg-black text-[#D2F843] px-1">Join {userCount}+ students</span> armed with the ultimate survival kit.
             </p>
         </div>
 
@@ -65,7 +75,7 @@ export default function CTABanner() {
             {/* The Ticket Graphic */}
             <div className="bg-white text-black p-4 rotate-3 shadow-[4px_4px_0px_0px_#333] border-2 border-dashed border-gray-400 w-full max-w-[280px]">
                 <div className={`flex justify-between items-center text-xs font-bold uppercase ${mono.className} text-gray-500 mb-2`}>
-                   <span>TICKET_NO: #0421</span>
+                   <span>TICKET_NO: #{userCount+1}</span>
                    <span>ADMIT ONE</span>
                 </div>
                 <div className={`text-2xl font-black uppercase ${archivo.className}`}>
@@ -73,24 +83,27 @@ export default function CTABanner() {
                 </div>
             </div>
 
-            {/* THE BUTTON */}
-            <button className="
-                w-full max-w-[280px] group
-                bg-[#D2F843] text-black 
-                text-xl font-black uppercase tracking-tight
-                py-4 px-6
-                border-4 border-transparent
-                shadow-[4px_4px_0px_0px_#fff]
-                
-                hover:bg-white hover:scale-105 hover:shadow-[6px_6px_0px_0px_#D2F843] hover:rotate-1
-                active:scale-95 active:shadow-none active:rotate-0
-                
-                transition-all duration-150 ease-out
-                flex items-center justify-center gap-2 relative z-10
-            ">
+            {/* THE BUTTON (Changed from <button> to <Link>) */}
+            <Link 
+                href="/join" 
+                className="
+                    w-full max-w-[280px] group
+                    bg-[#D2F843] text-black 
+                    text-xl font-black uppercase tracking-tight
+                    py-4 px-6
+                    border-4 border-transparent
+                    shadow-[4px_4px_0px_0px_#fff]
+                    
+                    hover:bg-white hover:scale-105 hover:shadow-[6px_6px_0px_0px_#D2F843] hover:rotate-1
+                    active:scale-95 active:shadow-none active:rotate-0
+                    
+                    transition-all duration-150 ease-out
+                    flex items-center justify-center gap-2 relative z-10
+                "
+            >
                 <span>Secure My Spot</span>
                 <ArrowRight strokeWidth={4} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
 
             {/* Micro Social Proof */}
             <div className={`flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest ${mono.className}`}>

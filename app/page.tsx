@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Archivo_Black, Space_Mono } from 'next/font/google';
+import { Space_Mono } from 'next/font/google';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 
+// Import your new component
+import BorderFrame from '@/components/borderframe';
+// Import your other components
 import Hero from '@/components/hero';
 import CTABanner from '@/components/ctabanner';
 import RollingTextStrip from '@/components/rollingtextstrip';
@@ -12,12 +15,6 @@ import Manifesto from '@/components/manifesto';
 import StaticSeparator from '@/components/seperator';
 import Socials from '@/components/socials';
 import FAQ from '@/components/faq';
-
-const archivo = Archivo_Black({ 
-  weight: '400', 
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
@@ -44,7 +41,6 @@ const Squiggle = () => (
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -56,62 +52,40 @@ export default function Home() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <main className={`min-h-screen bg-white text-black ${archivo.className} selection:bg-[#FBBF24] selection:text-black overflow-x-hidden`}>
+    <BorderFrame>
       
-      {/* --- INDUSTRIAL FRAME --- */}
-      <div className="fixed top-0 left-0 w-full h-10 bg-black text-white z-[60] flex items-center justify-between px-4 md:px-12 uppercase text-xs tracking-widest border-b border-white/20">
-        <span>KLAZ.APP</span>
-        <span>KOCHI, KL</span>
-      </div>
-
-      <div className="fixed bottom-0 left-0 w-full h-10 bg-black text-white z-[60] flex items-center justify-between px-4 md:px-12 uppercase text-xs tracking-widest border-t border-white/20">
-        <span>© 2025</span>
-        <span className="hidden md:inline text-gray-500">ENGINEERING RESOURCE ARCHIVE</span>
-        <span>V.1.0</span>
-      </div>
-
-      {/* Side Bars */}
-      <div className="hidden md:flex fixed top-0 left-0 w-10 h-full bg-black z-[50] flex-col justify-center items-center">
-         <div className="w-[1px] h-20 bg-white/30"></div>
-      </div>
-      <div className="hidden md:flex fixed top-0 right-0 w-10 h-full bg-black z-[50] flex-col justify-center items-center text-white overflow-hidden">
-         <div className="rotate-90 whitespace-nowrap text-[10px] tracking-[0.2em] uppercase text-gray-400">
-            The Solution to all our problems &rarr;
-         </div>
-      </div>
-
-      {/* Corners - Updated to Warm Amber */}
-      <div className="hidden md:block fixed top-0 left-0 w-10 h-10 bg-[#FBBF24] z-[70] border-r-4 border-b-4 border-black"></div>
-      <div className="hidden md:block fixed top-0 right-0 w-10 h-10 bg-[#FBBF24] z-[70] border-l-4 border-b-4 border-black"></div>
-      <div className="hidden md:block fixed bottom-0 left-0 w-10 h-10 bg-[#FBBF24] z-[70] border-r-4 border-t-4 border-black"></div>
-      <div className="hidden md:block fixed bottom-0 right-0 w-10 h-10 bg-[#FBBF24] z-[70] border-l-4 border-t-4 border-black"></div>
-
-
       {/* --- TOP NAVIGATION --- */}
       <nav className="fixed top-10 left-0 md:left-10 right-0 md:right-10 h-16 md:h-20 flex justify-between items-center px-4 md:px-8 border-b-4 border-black bg-white z-[55]">
         
         {/* Logo */}
         <div className="text-3xl md:text-4xl tracking-tighter cursor-pointer select-none relative group z-[60]">
           KLAZ.
-          {/* Pulse Dot: Emerald Green */}
           <span className="absolute -top-1 -right-3 w-3 h-3 bg-[#10B981] rounded-full border-2 border-black animate-pulse"></span>
         </div>
 
         {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-6 text-lg font-bold">
-          
-          {/* UPDATED: Black text -> Blue Underline on Hover */}
-          {['MANIFESTO', 'STATUS', 'FAQ'].map((item) => (
+          {/* Anchor Links (Scroll) */}
+          {['MANIFESTO', 'FAQ'].map((item) => (
             <a 
               key={item}
-              href={item === 'STATUS' ? '/status' : `#${item.toLowerCase()}`} 
+              href={`#${item.toLowerCase()}`} 
               className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600"
             >
               {item}
             </a>
           ))}
+
+          {/* Page Links (Next.js Link for speed) */}
+          <Link href="/status" className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600">
+            STATUS
+          </Link>
           
-          {/* LOGIN BUTTON: Kept as Box for hierarchy */}
+          <Link href="/join" className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600">
+            JOIN
+          </Link>
+          
+          {/* LOGIN BUTTON */}
           <Link 
             href="/progress"
             className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
@@ -132,35 +106,40 @@ export default function Home() {
       {/* --- MOBILE MENU OVERLAY --- */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[50] bg-[#FBBF24] text-black flex flex-col pt-32 px-6">
-           
            {/* Background Grid */}
            <div className="absolute inset-0 opacity-10 pointer-events-none" 
               style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
            </div>
 
-           {/* Menu Header */}
            <div className={`text-xs font-bold uppercase border-b-4 border-black pb-2 mb-8 flex justify-between ${mono.className}`}>
               <span>System_Nav.exe</span>
               <span>Menu_Open</span>
            </div>
 
-           {/* Menu Links */}
            <div className="flex flex-col gap-6">
+              {/* Anchor Links */}
               <a href="#manifesto" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  MANIFESTO <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
+              
+              {/* Page Links */}
+              <Link href="/join" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
+                 JOIN <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
+              </Link>
+              
               <Link href="/status" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  STATUS <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </Link>
+              
               <a href="#faq" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  FAQ <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
+              
               <a href="#contact" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  CONTACT <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
            </div>
 
-           {/* Mobile Login Button */}
            <div className="mt-auto mb-24">
               <Link 
                 href="/progress" 
@@ -173,8 +152,7 @@ export default function Home() {
         </div>
       )}
 
-
-      {/* MAIN CONTENT */}
+      {/* --- MAIN CONTENT --- */}
       <div className="max-w-screen-2xl mx-auto pb-24">
         
         <Hero />
@@ -199,13 +177,12 @@ export default function Home() {
 
         <CTABanner />
 
-        {/* --- THE END SQUIGGLE --- */}
         <div className="pt-20 pb-10 flex justify-center w-full select-none">
            <Squiggle />
         </div>
 
       </div>
 
-    </main>
+    </BorderFrame>
   );
 }
