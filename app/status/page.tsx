@@ -25,8 +25,8 @@ const MODULES = [
     version: 'v0.5.0', 
     status: 'TRAINING', 
     tech: 'LLM / RAG',
-    bg: 'bg-[#FF6B6B]', // Hot Red
-    fg: 'text-black',
+    bg: 'bg-[#E11D48]', // Deep Rose (Industrial Red)
+    fg: 'text-white',
     icon: BrainCircuit
   },
   { 
@@ -35,8 +35,8 @@ const MODULES = [
     version: 'ALPHA_1', 
     status: 'BUILDING', 
     tech: 'FLUTTER / DART', 
-    bg: 'bg-[#60A5FA]', // Blue
-    fg: 'text-black',
+    bg: 'bg-[#3B82F6]', // Royal Blue
+    fg: 'text-white',
     icon: Smartphone
   },
   { 
@@ -45,7 +45,7 @@ const MODULES = [
     version: 'v1.0.2', 
     status: 'LIVE', 
     tech: 'NEXT.JS 14',
-    bg: 'bg-[#A3E635]', // Lime Green
+    bg: 'bg-[#10B981]', // Emerald (Matches Hero/Blueprint)
     fg: 'text-black',
     icon: Globe
   },
@@ -55,8 +55,8 @@ const MODULES = [
     version: 'v0.9.5', 
     status: 'STABLE', 
     tech: 'FASTAPI / PY',
-    bg: 'bg-[#F472B6]', // Pink
-    fg: 'text-black',
+    bg: 'bg-[#8B5CF6]', // Violet
+    fg: 'text-white',
     icon: Server
   },
 ];
@@ -94,15 +94,16 @@ const ROADMAP = [
 
 export default function StatusPage() {
   return (
-    <main className={`min-h-screen bg-[#E0E0E0] text-black ${archivo.className} selection:bg-black selection:text-white pb-24`}>
+    <main className={`min-h-screen bg-[#F0F2F5] text-black ${archivo.className} selection:bg-[#FBBF24] selection:text-black pb-24`}>
       
       {/* --- HEADER SECTION --- */}
       <div className="bg-black text-white pt-8 pb-12 px-6 border-b-8 border-black relative overflow-hidden">
          
-         {/* Navigation - Stacked on Mobile, Row on Desktop */}
+         {/* Navigation */}
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 relative z-10">
             <Link href="/" className="group flex items-center gap-3 hover:translate-x-2 transition-transform">
-               <div className="bg-white text-black p-3 border-4 border-transparent group-hover:bg-[#FACC15] group-hover:border-black group-hover:shadow-[4px_4px_0px_0px_#fff] transition-all">
+               {/* Updated Hover Color to Warm Amber */}
+               <div className="bg-white text-black p-3 border-4 border-transparent group-hover:bg-[#FBBF24] group-hover:border-black group-hover:shadow-[4px_4px_0px_0px_#fff] transition-all">
                   <ArrowLeft size={24} strokeWidth={4} />
                </div>
                <span className={`text-sm font-bold uppercase tracking-widest ${mono.className}`}>
@@ -111,17 +112,19 @@ export default function StatusPage() {
             </Link>
             
             <div className={`bg-white/10 px-4 py-2 border border-white/20 backdrop-blur-sm ${mono.className}`}>
-               <span className="animate-pulse text-[#A3E635] mr-2">●</span>
+               {/* Updated Pulse Color to Emerald */}
+               <span className="animate-pulse text-[#10B981] mr-2">●</span>
                STATUS: HEAVY DEVELOPMENT
             </div>
          </div>
 
-         {/* Title - Smaller Text on Mobile */}
+         {/* Title */}
          <div className="max-w-7xl mx-auto relative z-10">
             <h1 className="text-5xl md:text-9xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
                BUILD<br/>TRACKER
             </h1>
-            <p className={`text-gray-300 max-w-xl text-sm md:text-lg border-l-8 border-[#FACC15] pl-6 py-2 bg-white/5 ${mono.className}`}>
+            {/* Updated Accent Border to Warm Amber */}
+            <p className={`text-gray-300 max-w-xl text-sm md:text-lg border-l-8 border-[#FBBF24] pl-6 py-2 bg-white/5 ${mono.className}`}>
                Integrating AI Agents with a Cross-Platform Flutter Client. <br/>
                The stack is vast. The coffee is strong.
             </p>
@@ -133,17 +136,17 @@ export default function StatusPage() {
          </div>
       </div>
 
-      {/* --- SCROLLING MARQUEE --- */}
+      {/* --- SCROLLING MARQUEE (Warm Amber) --- */}
       <style jsx>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-marquee { animation: marquee 20s linear infinite; }
       `}</style>
-      <div className="bg-[#FACC15] border-b-4 border-black py-4 overflow-hidden whitespace-nowrap flex relative z-20">
+      <div className="bg-[#FBBF24] border-b-4 border-black py-4 overflow-hidden whitespace-nowrap flex relative z-20">
          <div className="animate-marquee flex gap-8 items-center text-black font-black uppercase tracking-widest text-lg md:text-xl">
             {[...Array(10)].map((_, i) => (
                <span key={i} className="flex items-center gap-4">
                   <BrainCircuit size={24} fill="black" /> 
-                  AI INTEGRATION ACTIVE // FLUTTER ENGINE RUNNING // KTU ARCHIVES SYNCING
+                  AI INTEGRATION ACTIVE // LOTS OF COFFIES // MATCHING KTU SYLLABUS // IMPROVING UX
                </span>
             ))}
          </div>
@@ -160,6 +163,7 @@ export default function StatusPage() {
                     <div className="text-black">
                         <mod.icon size={32} strokeWidth={2.5} />
                     </div>
+                    {/* Status Badge */}
                     <span className={`px-2 py-1 text-xs font-bold border-2 border-black ${mod.bg} ${mod.fg} ${mono.className}`}>
                        {mod.status}
                     </span>
@@ -181,16 +185,15 @@ export default function StatusPage() {
            </div>
 
            <div className="space-y-0 relative">
-              {/* Vertical Line - Positioned for Mobile & Desktop */}
+              {/* Vertical Line */}
               <div className="absolute left-[18px] md:left-[26px] top-4 bottom-10 w-[4px] md:w-[6px] bg-black/10"></div>
               
               {ROADMAP.map((phase, i) => (
-                 // Padding adjusted for Mobile (pl-14) vs Desktop (pl-20)
                  <div key={i} className={`relative pl-14 md:pl-20 pb-12 ${phase.done || phase.current ? 'opacity-100' : 'opacity-50 grayscale'}`}>
                     
-                    {/* Icon Bubble - Smaller on Mobile (w-10) vs Desktop (w-14) */}
+                    {/* Icon Bubble */}
                     <div className={`absolute left-0 top-0 w-10 h-10 md:w-14 md:h-14 border-4 border-black flex items-center justify-center z-10 shadow-[4px_4px_0px_0px_#000]
-                       ${phase.done ? 'bg-[#A3E635]' : phase.current ? 'bg-[#FACC15]' : 'bg-white'}
+                       ${phase.done ? 'bg-[#10B981]' : phase.current ? 'bg-[#FBBF24]' : 'bg-white'}
                     `}>
                        {phase.done ? <Check className="w-5 h-5 md:w-7 md:h-7 text-black" strokeWidth={4} /> : 
                         phase.current ? <Construction className="w-5 h-5 md:w-7 md:h-7 animate-pulse text-black" strokeWidth={3} /> :
@@ -201,7 +204,8 @@ export default function StatusPage() {
                        <div className={`flex flex-wrap gap-2 md:gap-3 items-center mb-2 ${mono.className}`}>
                           <span className="text-[10px] md:text-xs font-bold bg-black text-white px-2 py-1">{phase.phase}</span>
                           <span className="text-[10px] md:text-xs font-bold border-2 border-black px-2 py-1 bg-white text-black">{phase.date}</span>
-                          {phase.current && <span className="text-[10px] md:text-xs font-bold bg-[#FACC15] text-black px-2 py-1 border-2 border-black animate-pulse">CURRENT</span>}
+                          {/* Current Tag: Warm Amber */}
+                          {phase.current && <span className="text-[10px] md:text-xs font-bold bg-[#FBBF24] text-black px-2 py-1 border-2 border-black animate-pulse">CURRENT</span>}
                        </div>
                        <h3 className="text-2xl md:text-4xl font-black uppercase mb-2 text-black">{phase.title}</h3>
                        <p className={`text-xs md:text-sm font-bold mb-4 uppercase text-black ${mono.className}`}>{phase.desc}</p>

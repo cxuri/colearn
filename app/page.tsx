@@ -96,15 +96,23 @@ export default function Home() {
         </div>
 
         {/* DESKTOP LINKS */}
-        <div className="hidden md:flex items-center gap-8 text-lg font-bold">
-          <a href="#manifesto" className="hover:underline decoration-4 underline-offset-4 decoration-black">MANIFESTO</a>
-          <Link href="/status" className="hover:underline decoration-4 underline-offset-4 decoration-black">STATUS</Link>
-          <a href="#faq" className="hover:underline decoration-4 underline-offset-4 decoration-black">FAQ</a>
+        <div className="hidden md:flex items-center gap-6 text-lg font-bold">
           
-          {/* LOGIN BUTTON: Red text on Desktop */}
+          {/* Nav Links: Black text, Yellow highlight on hover */}
+          {['MANIFESTO', 'STATUS', 'FAQ'].map((item) => (
+            <a 
+              key={item}
+              href={item === 'STATUS' ? '/status' : `#${item.toLowerCase()}`} 
+              className="text-black px-2 py-1 transition-all hover:bg-yellow-400 hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
+            >
+              {item}
+            </a>
+          ))}
+          
+          {/* LOGIN BUTTON: Wireframe Box -> Solid Black on Hover */}
           <Link 
             href="/progress"
-            className="text-red-600 hover:text-black transition-colors uppercase hover:underline decoration-4 underline-offset-4 decoration-black ml-4"
+            className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]"
           >
             LOGIN
           </Link>
@@ -134,28 +142,23 @@ export default function Home() {
               <span>Menu_Open</span>
            </div>
 
-           {/* Menu Links - Explicit text-black with hover:text-white */}
+           {/* Menu Links */}
            <div className="flex flex-col gap-6">
-              
               <a href="#manifesto" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  MANIFESTO <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
-              
               <Link href="/status" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  STATUS <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </Link>
-              
               <a href="#faq" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  FAQ <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
-              
               <a href="#contact" onClick={toggleMenu} className="text-5xl font-black uppercase tracking-tighter text-black hover:text-white hover:pl-4 transition-all flex items-center gap-4 group">
                  CONTACT <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
               </a>
-
            </div>
 
-           {/* Mobile Login Button (Big Block) */}
+           {/* Mobile Login Button */}
            <div className="mt-auto mb-24">
               <Link 
                 href="/progress" 

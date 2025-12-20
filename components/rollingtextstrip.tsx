@@ -1,7 +1,7 @@
 'use client';
 
 import { Archivo_Black } from 'next/font/google';
-import { Zap } from 'lucide-react';
+import { Zap, Square } from 'lucide-react'; // Added Square for block option
 
 const archivo = Archivo_Black({ 
   weight: '400', 
@@ -14,7 +14,7 @@ interface RollingStripProps {
   bgColor?: string;
   textColor?: string;
   rotation?: number;
-  speed?: number; // Seconds for one full loop
+  speed?: number;
   separator?: 'zap' | 'block' | 'none';
 }
 
@@ -31,11 +31,11 @@ const DEFAULT_ITEMS = [
 
 export default function RollingTextStrip({
   items = DEFAULT_ITEMS,
-  bgColor = 'bg-yellow-400',
+  bgColor = 'bg-[#FBBF24]', // Updated to Warm Amber
   textColor = 'text-black',
   rotation = -2,
-  speed = 40, // Increased default speed (20s might be too fast for long text)
-  separator = 'zap'
+  speed = 40, 
+  separator = 'block' // Changed default to 'block' for industrial look
 }: RollingStripProps) {
 
   // Duplicate items 4 times to ensure seamless infinite scroll
@@ -43,19 +43,27 @@ export default function RollingTextStrip({
 
   const SeparatorIcon = () => {
       if (separator === 'none') return <span className="mx-4"></span>;
-      if (separator === 'block') return <div className={`w-3 h-3 ${textColor.replace('text-', 'bg-')} mx-6 rotate-45`}></div>;
+      
+      // Industrial Block Separator
+      if (separator === 'block') {
+        return (
+           <div className="mx-6 relative">
+              <div className="w-3 h-3 bg-black transform rotate-45"></div>
+           </div>
+        );
+      }
+      
       return <Zap size={20} className={`mx-6 ${textColor.replace('text-', 'fill-')}`} />;
   }
 
   return (
     <div 
-      className={`relative w-full overflow-hidden border-y-4 border-black ${bgColor} ${textColor} py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]`}
+      className={`relative w-full overflow-hidden border-y-4 border-black ${bgColor} ${textColor} py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
       style={{ 
         transform: `rotate(${rotation}deg) scale(1.05)`, 
         zIndex: 10
       }} 
     >
-      {/* 1. Inject Keyframes Globally within Component to avoid Next.js scoping issues */}
       <style>{`
         @keyframes rolling-marquee {
           0% { transform: translateX(0); }
@@ -65,10 +73,10 @@ export default function RollingTextStrip({
 
       {/* The scrolling track */}
       <div 
-        className="flex whitespace-nowrap w-max hover:[animation-play-state:paused]" // Added hover pause
+        className="flex whitespace-nowrap w-max hover:[animation-play-state:paused]"
         style={{
             animation: `rolling-marquee ${speed}s linear infinite`,
-            willChange: 'transform' // Performance optimization
+            willChange: 'transform'
         }}
       >
         {marqueeItems.map((item, i) => (
