@@ -368,11 +368,11 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
     if(!loaded || !window.gsap) return;
     const ctx = window.gsap.context(() => {
         window.gsap.from('.ticket-item', {
-            y: 50,
+            y: 30,
             opacity: 0,
             duration: 0.8,
             stagger: 0.1,
-            ease: 'elastic.out(1, 0.75)'
+            ease: 'power3.out'
         });
     }, container);
     return () => ctx.revert();
@@ -380,10 +380,9 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
 
   const handleShare = async () => {
     const shareText = "I just joined the waitlist for Klaz - The anti-boring learning platform for KTU. Survival mode activated. 🚀";
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://klaz.app';
+    const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://klaz.app';
 
     if (navigator.share) {
-        // Native Share (Mobile)
         try {
             await navigator.share({
                 title: 'Join Klaz',
@@ -394,7 +393,6 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
             console.log("Share cancelled");
         }
     } else {
-        // Fallback to Clipboard Copy
         navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -402,31 +400,34 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
   };
 
   return (
-    <div ref={container} className="flex flex-col items-center justify-center text-center space-y-8 py-10">
+    /* Added pb-20 and changed justify-center to justify-start on mobile for better scrolling */
+    <div ref={container} className="flex flex-col items-center justify-start md:justify-center text-center space-y-6 md:space-y-8 py-4 md:py-10 pb-20">
         
-        {/* The Ticket Graphic */}
-        <div className="ticket-item relative bg-[#F2F2F2] border-4 border-black w-full max-w-sm p-0 shadow-[8px_8px_0px_0px_#000]">
+        {/* The Ticket Graphic - Reduced size for mobile */}
+        <div className="ticket-item relative bg-[#F2F2F2] border-4 border-black w-full max-w-[320px] md:max-w-sm p-0 shadow-[8px_8px_0px_0px_#000] z-10">
             {/* Ticket Header */}
-            <div className="bg-black text-white p-4 flex justify-between items-center border-b-4 border-black">
-                {/* CHANGED: FROM ADMIT ONE TO WAITLIST PASS */}
-                <span className="font-bold text-xs uppercase tracking-widest">WAITLIST PASS</span>
-                <span className="font-bold text-xs uppercase tracking-widest">KLAZ.APP</span>
+            <div className="bg-black text-white p-3 md:p-4 flex justify-between items-center border-b-4 border-black">
+                <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest">WAITLIST PASS</span>
+                <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest">KLAZ.APP</span>
             </div>
             
             {/* Ticket Body */}
-            <div className="p-8 space-y-4">
-                <div className="w-20 h-20 bg-[#00FF94] border-4 border-black rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={40} className="text-black" />
+            <div className="p-6 md:p-8 space-y-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#00FF94] border-4 border-black rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
+                    <CheckCircle size={32} className="md:w-10 md:h-10 text-black" />
                 </div>
-                <h2 className={`${archivo.className} text-4xl uppercase`}>You are In.</h2>
+                <h2 className={`${archivo.className} text-3xl md:text-4xl uppercase`}>You are In.</h2>
                 <div className="border-t-2 border-dashed border-black my-4 w-full"></div>
-                <div className="flex justify-between text-xs font-bold uppercase">
-                    <span className="text-gray-500">TICKET ID</span>
-                    <span>#{ticketId}</span>
-                </div>
-                <div className="flex justify-between text-xs font-bold uppercase items-center">
-                    <span className="text-gray-500">STATUS</span>
-                    <span className="bg-[#00FF94] text-black px-2 py-1 border-2 border-black font-black">CONFIRMED</span>
+                
+                <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] md:text-xs font-bold uppercase">
+                        <span className="text-gray-500">TICKET ID</span>
+                        <span>#{ticketId}</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] md:text-xs font-bold uppercase items-center">
+                        <span className="text-gray-500">STATUS</span>
+                        <span className="bg-[#00FF94] text-black px-2 py-0.5 border-2 border-black font-black">CONFIRMED</span>
+                    </div>
                 </div>
             </div>
 
@@ -435,25 +436,29 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
             <div className="absolute top-1/2 -right-3 w-6 h-6 bg-white border-l-4 border-black rounded-full -mt-3"></div>
         </div>
 
-        <p className="ticket-item font-bold text-sm max-w-xs mx-auto">
-            {message || "We have secured your spot in the database."}
-        </p>
+        <div className="ticket-item px-4">
+            <p className="font-bold text-xs md:text-sm max-w-xs mx-auto">
+                {message || "We have secured your spot in the database."}
+            </p>
+        </div>
 
-        {/* CHANGED: SHARE BUTTON */}
-        <button 
-            onClick={handleShare}
-            className="ticket-item w-full max-w-sm bg-black text-white h-14 border-4 border-transparent hover:bg-[#FF0054] hover:text-white hover:border-black transition-all flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 active:translate-y-0 active:shadow-none"
-        >
-            {copied ? (
-                <>
-                    <Check size={20} /> <span className={`${archivo.className} uppercase tracking-wide`}>Link Copied</span>
-                </>
-            ) : (
-                <>
-                    <Share2 size={20} /> <span className={`${archivo.className} uppercase tracking-wide`}>Recruit a Friend</span>
-                </>
-            )}
-        </button>
+        {/* Updated Button: Ensure visibility and width */}
+        <div className="ticket-item w-full px-4 max-w-sm pb-10">
+            <button 
+                onClick={handleShare}
+                className="w-full bg-black text-white h-14 border-4 border-transparent hover:bg-[#FF0054] hover:text-white hover:border-black transition-all flex items-center justify-center gap-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none"
+            >
+                {copied ? (
+                    <>
+                        <Check size={20} /> <span className={`${archivo.className} text-lg md:text-xl uppercase tracking-wide`}>Link Copied</span>
+                    </>
+                ) : (
+                    <>
+                        <Share2 size={20} /> <span className={`${archivo.className} text-lg md:text-xl uppercase tracking-wide`}>Recruit a Friend</span>
+                    </>
+                )}
+            </button>
+        </div>
     </div>
   );
 }
