@@ -369,7 +369,7 @@ function SuccessTicket({ message, ticketId, loaded }: { message: string, ticketI
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-[#00FF94] border-4 border-black rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
                     <CheckCircle size={32} className="md:w-10 md:h-10 text-black" />
                 </div>
-                <h2 className={`${archivo.className} text-3xl md:text-4xl uppercase`}>You are In.</h2>
+                <h2 className={`${archivo.className} text-3xl text-black md:text-4xl uppercase`}>You are In.</h2>
                 <div className="border-t-2 border-dashed border-black my-4 w-full"></div>
                 
                 <div className="space-y-2">
