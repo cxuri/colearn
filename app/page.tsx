@@ -56,53 +56,85 @@ export default function Home() {
     <BorderFrame>
       
       {/* --- TOP NAVIGATION --- */}
-      <nav className="fixed top-10 left-0 md:left-10 right-0 md:right-10 h-16 md:h-20 flex justify-between items-center px-4 md:px-8 border-b-4 border-black bg-white z-[55]">
-        
-        {/* Logo */}
-        <div className="text-3xl md:text-4xl tracking-tighter cursor-pointer select-none relative group z-[60]">
-          KLAZ.
-          <span className="absolute -top-1 -right-3 w-3 h-3 bg-[#10B981] rounded-full border-2 border-black animate-pulse"></span>
-        </div>
+<nav className="fixed top-10 left-0 md:left-10 right-0 md:right-10 h-16 md:h-20 flex justify-between items-center px-4 md:px-8 border-b-4 border-black bg-white z-[55]">
+  
+  {/* Logo */}
+  <div className="text-3xl md:text-4xl font-black tracking-tighter cursor-pointer select-none relative group z-[60]">
+    KLAZ.
+    <span className="absolute -top-1 -right-3 w-3 h-3 bg-[#10B981] rounded-full border-2 border-black animate-pulse"></span>
+  </div>
 
-        {/* DESKTOP LINKS */}
-        <div className="hidden md:flex items-center gap-6 text-lg font-bold">
-          {/* Anchor Links (Scroll) */}
-          {['MANIFESTO', 'FAQ'].map((item) => (
-            <a 
-              key={item}
-              href={`#${item.toLowerCase()}`} 
-              className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600"
-            >
-              {item}
-            </a>
-          ))}
+  {/* DESKTOP LINKS */}
+  <div className="hidden md:flex items-center gap-8 text-lg font-bold">
+    {/* Thick Underline Hover Effect */}
+    {['MANIFESTO', 'FAQ', 'STATUS', 'JOIN'].map((item) => (
+      <Link 
+        key={item}
+        href={item === 'MANIFESTO' || item === 'FAQ' ? `#${item.toLowerCase()}` : `/${item.toLowerCase()}`} 
+        className="text-black transition-all hover:decoration-[#FBBF24] decoration-transparent underline decoration-[6px] underline-offset-[12px] hover:underline-offset-[8px]"
+      >
+        {item}
+      </Link>
+    ))}
+    
+    {/* LOGIN BUTTON: No background change, just bold border and translate */}
+    <Link 
+      href="/progress"
+      className="ml-4 px-6 py-2 border-4 border-black text-black font-black uppercase transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none"
+    >
+      LOGIN
+    </Link>
+  </div>
 
-          {/* Page Links (Next.js Link for speed) */}
-          <Link href="/status" className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600">
-            STATUS
-          </Link>
-          
-          <Link href="/join" className="text-black px-2 py-1 transition-all hover:text-blue-600 hover:underline decoration-4 underline-offset-4 decoration-blue-600">
-            JOIN
-          </Link>
-          
-          {/* LOGIN BUTTON */}
-          <Link 
-            href="/progress"
-            className="ml-4 px-6 py-2 border-4 border-black text-black uppercase transition-all hover:bg-black hover:text-white hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#000]"
+  {/* MOBILE BURGER BUTTON: High contrast black on white/yellow */}
+  <button 
+    onClick={toggleMenu}
+    className="md:hidden p-2 border-4 border-black bg-black text-white transition-transform active:scale-95 z-[60]"
+  >
+     {isMenuOpen ? <X size={28} strokeWidth={4} /> : <Menu size={28} strokeWidth={4} />}
+  </button>
+</nav>
+
+{/* --- MOBILE MENU OVERLAY --- */}
+{isMenuOpen && (
+  <div className="fixed inset-0 z-[50] bg-[#FBBF24] text-black flex flex-col pt-32 px-6">
+     {/* Improved Grid Contrast */}
+     <div className="absolute inset-0 opacity-20 pointer-events-none" 
+        style={{ backgroundImage: 'linear-gradient(#000 2px, transparent 2px), linear-gradient(90deg, #000 2px, transparent 2px)', backgroundSize: '40px 40px' }}>
+     </div>
+
+     {/* System Header with better contrast */}
+     <div className={`text-sm font-black uppercase border-b-4 border-black pb-2 mb-8 flex justify-between ${mono.className}`}>
+        <span>System_Nav.exe</span>
+        <span className="bg-black text-[#FBBF24] px-2">ONLINE</span>
+     </div>
+
+     <div className="flex flex-col gap-6">
+        {/* Mobile Links: Replaced white hover with high-contrast underline */}
+        {['MANIFESTO', 'JOIN', 'STATUS', 'FAQ', 'CONTACT'].map((item) => (
+          <a 
+            key={item}
+            href={item.startsWith('/') ? item : `#${item.toLowerCase()}`}
+            onClick={toggleMenu} 
+            className="text-5xl font-black uppercase tracking-tighter text-black hover:italic transition-all flex items-center gap-4 group"
           >
-            LOGIN
-          </Link>
-        </div>
+             {item} 
+             <span className="h-2 w-0 group-hover:w-12 bg-black transition-all duration-300"></span>
+          </a>
+        ))}
+     </div>
 
-        {/* MOBILE BURGER BUTTON */}
-        <button 
+     <div className="mt-auto mb-24">
+        <Link 
+          href="/progress" 
           onClick={toggleMenu}
-          className="md:hidden p-2 border-2 border-black bg-[#FBBF24] active:bg-black active:text-white transition-colors z-[60]"
+          className="w-full block bg-black text-[#FBBF24] text-center py-6 text-3xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
         >
-           {isMenuOpen ? <X size={28} strokeWidth={3} /> : <Menu size={28} strokeWidth={3} />}
-        </button>
-      </nav>
+          LOGIN
+        </Link>
+     </div>
+  </div>
+)}
 
       {/* --- MOBILE MENU OVERLAY --- */}
       {isMenuOpen && (

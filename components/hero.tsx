@@ -76,7 +76,7 @@ export default function Hero() {
   return (
     <div 
       ref={containerRef} 
-      className={`relative w-full min-h-screen flex flex-col justify-center items-center px-4 md:px-8 py-24 ${archivo.className} bg-[#F0F2F5] overflow-hidden`}
+      className={`relative w-full min-h-screen flex flex-col justify-center items-center px-4 md:px-8 py-25 ${archivo.className} bg-[#F0F2F5] overflow-hidden`}
       style={{
         backgroundImage: 'radial-gradient(#94A3B8 2px, transparent 2px)',
         backgroundSize: '40px 40px'
@@ -88,20 +88,10 @@ export default function Hero() {
         onLoad={() => setIsGsapLoaded(true)}
       />
 
-      {/* --- BACKGROUND LINES --- */}
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none overflow-hidden">
-         <svg className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-            <path d="M0,100 H100 V200 H200" fill="none" stroke="black" strokeWidth="2" />
-            <path className="logic-signal" d="M0,100 H100 V200 H200" fill="none" stroke="#0D9488" strokeWidth="2" strokeDasharray="20 200" />
-            <path d="M1000,500 H900 V600 H800" fill="none" stroke="black" strokeWidth="2" />
-            <path className="logic-signal" d="M1000,500 H900 V600 H800" fill="none" stroke="#DC2626" strokeWidth="2" strokeDasharray="20 200" />
-         </svg>
-      </div>
-
       <div className={`relative z-20 w-full max-w-6xl transition-opacity duration-300 ${isGsapLoaded ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* 1. HEADLINE SECTION */}
-        <div className="flex flex-col pl-5 pr-5 py-10 items-center md:items-start relative z-30 w-full">
+        <div className="flex flex-col pl-6 pr-5 py-10 items-center md:items-start relative z-30 w-full">
 
           <div className="relative overflow-visible pb-5">
             <h1 
