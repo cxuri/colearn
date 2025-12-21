@@ -79,7 +79,7 @@ export default function Manifesto() {
         <ManifestoItem 
           num="02"
           title="Built by Victims."
-          desc="We are students, We know how it fels when you get ignored by all your friends and faculty, the night before exams" 
+          desc="We are students, We know how it feel's when you get ignored by all your friends and faculty, the night before exams" 
           icon={ShieldAlert}
         />
         <ManifestoItem 
