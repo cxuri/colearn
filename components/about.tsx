@@ -63,12 +63,12 @@ export default function About() {
                <div>
                   <div className="mb-6 flex justify-between items-start">
                      <Zap size={48} className="text-black" strokeWidth={1.5} />
-                     <span className={`text-4xl font-black text-black/10 ${archivo.className}`}>01</span>
+                     <span className={`text-4xl font-black text-black ${archivo.className}`}>01</span>
                   </div>
-                  <h3 className={`text-2xl font-black uppercase mb-4 leading-none ${archivo.className}`}>
+                  <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
                     The Catch-Up
                   </h3>
-                  <p className={`text-sm font-bold text-gray-600 leading-relaxed ${mono.className}`}>
+                  <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
                     Missed class? Lazed around all semester? We break down complex topics into digestable chunks so you can speed-run the syllabus.
                   </p>
                </div>
@@ -85,12 +85,12 @@ export default function About() {
                <div>
                   <div className="mb-6 flex justify-between items-start">
                      <Files size={48} className="text-black" strokeWidth={1.5} />
-                     <span className={`text-4xl font-black text-black/10 ${archivo.className}`}>02</span>
+                     <span className={`text-4xl text-black ${archivo.className}`}>02</span>
                   </div>
-                  <h3 className={`text-2xl font-black uppercase mb-4 leading-none ${archivo.className}`}>
+                  <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
                     The Arsenal
                   </h3>
-                  <p className={`text-sm font-bold text-gray-600 leading-relaxed ${mono.className}`}>
+                  <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
                     Stop begging seniors. Access curated Notes, Solved PYQs, and Answer Keys instantly. Everything you need to pass, in one place.
                   </p>
                </div>
@@ -107,12 +107,12 @@ export default function About() {
                <div>
                   <div className="mb-6 flex justify-between items-start">
                      <Users size={48} className="text-black" strokeWidth={1.5} />
-                     <span className={`text-4xl font-black text-black/10 ${archivo.className}`}>03</span>
+                     <span className={`text-4xl text-black ${archivo.className}`}>03</span>
                   </div>
-                  <h3 className={`text-2xl font-black uppercase mb-4 leading-none ${archivo.className}`}>
+                  <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
                     The Meta
                   </h3>
-                  <p className={`text-sm font-bold text-gray-600 leading-relaxed ${mono.className}`}>
+                  <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
                     Static PDFs are boring. We use interactive lessons and community support to make sure the concepts actually stick.
                   </p>
                </div>

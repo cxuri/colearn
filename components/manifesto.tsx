@@ -63,7 +63,6 @@ export default function Manifesto() {
         <div className="text-right hidden md:block">
            <p className={`text-gray-500 text-xs uppercase tracking-widest max-w-xs text-left md:text-right ${mono.className}`}>
               We reject the bloat. <br/>
-              We reject the ads. <br/>
               We reject the chaos.
            </p>
         </div>
