@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Archivo_Black, Space_Mono } from 'next/font/google';
 import { Plus, Minus, BadgeCheck, CornerRightDown, LifeBuoy, ArrowRight } from 'lucide-react';
 
@@ -159,21 +160,28 @@ export default function FAQ() {
                         </div>
                     </div>
 
-                    {/* Wireframe Button (Clean & Sharp) */}
-                    <link href="https://linkedin.com/in/dhaneshupai" className={`
-                        group-hover:bg-black group-hover:text-white
-                        bg-white text-black px-6 py-3 
-                        text-sm font-bold uppercase tracking-wider
-                        border-2 border-black 
-                        shadow-[4px_4px_0px_0px_#000] 
-                        hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
-                        transition-all duration-200
-                        flex items-center gap-2
-                        ${mono.className}
-                    `}>
+
+                    <Link 
+                        href="https://linkedin.com/in/dhaneshupai" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`
+                            group
+                            bg-white text-black px-6 py-3 
+                            text-sm font-bold uppercase tracking-wider
+                            border-[4px] border-black 
+                            shadow-[4px_4px_0px_0px_#000] 
+                            hover:translate-x-[2px] hover:translate-y-[2px] 
+                            hover:shadow-none
+                            hover:bg-black hover:text-white
+                            transition-all duration-200
+                            flex items-center justify-center gap-2
+                            ${mono.className}
+                        `}
+                    >
                         Contact Support
-                        <ArrowRight size={16} />
-                    </link>
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
                 </div>
             </div>
 
