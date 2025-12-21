@@ -160,7 +160,7 @@ export default function FAQ() {
                     </div>
 
                     {/* Wireframe Button (Clean & Sharp) */}
-                    <button className={`
+                    <link href="https://linkedin.com/in/dhaneshupai" className={`
                         group-hover:bg-black group-hover:text-white
                         bg-white text-black px-6 py-3 
                         text-sm font-bold uppercase tracking-wider
@@ -173,7 +173,7 @@ export default function FAQ() {
                     `}>
                         Contact Support
                         <ArrowRight size={16} />
-                    </button>
+                    </link>
                 </div>
             </div>
 
