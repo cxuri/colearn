@@ -4,14 +4,12 @@ import { useRef, useState, useEffect } from 'react';
 import { Archivo_Black, Space_Mono } from 'next/font/google';
 import { getCount } from '@/app/actions';
 import Script from 'next/script';
-import Link from 'next/link'; // <--- ADDED THIS
+import Link from 'next/link';
 import { 
-  ArrowDownRight, Zap, Trophy, 
+  ArrowDownRight, Zap, 
   Laptop as LaptopIcon, Smartphone,
-  Layers, Timer, Box, ChevronRight, Play,
-  BookOpen, Gamepad2, Users, MousePointerClick
+  BookOpen, Hammer, Users, Code2, BrainCircuit
 } from 'lucide-react';
-import { count } from 'console';
 
 const archivo = Archivo_Black({ 
   weight: '400', 
@@ -25,7 +23,6 @@ const mono = Space_Mono({
   display: 'swap', 
 });
 
-// Fix TypeScript error for window.gsap
 declare global {
   interface Window {
     gsap: any;
@@ -36,7 +33,6 @@ export default function Hero() {
   const containerRef = useRef(null);
   const [isGsapLoaded, setIsGsapLoaded] = useState(false);
   const [userCount, setUserCount] = useState(71);
-
 
   useEffect(() => {
     getCount().then((count) => {
@@ -56,14 +52,12 @@ export default function Hero() {
     if (!gsap) return;
     
     const ctx = gsap.context(() => {
-      // Set initial states
       gsap.set(".hero-line", { y: 100, opacity: 0 });
       gsap.set(".device-group", { y: 50, opacity: 0 });
       gsap.set(".tag-pill", { y: 20, opacity: 0 });
       gsap.set(".hero-cta", { y: 20, opacity: 0 });
       gsap.set(".logic-signal", { strokeDashoffset: 100 });
 
-      // Entrance Timeline
       const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1.0 } });
 
       tl.to(".hero-line", { y: 0, opacity: 1, stagger: 0.1 })
@@ -71,7 +65,6 @@ export default function Hero() {
         .to(".device-group", { y: 0, opacity: 1, duration: 1.2, ease: "expo.out" }, "-=0.6")
         .to(".hero-cta", { y: 0, opacity: 1, stagger: 0.1 }, "-=0.8");
 
-      // Loop Animations
       gsap.to(".logic-signal", { strokeDashoffset: 0, duration: 2, repeat: -1, ease: "none" });
       gsap.to(".device-float", { y: -15, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
@@ -83,7 +76,7 @@ export default function Hero() {
   return (
     <div 
       ref={containerRef} 
-      className={`relative w-full min-h-screen pt-32 md:pt-40 pb-24 px-4 md:px-0 ${archivo.className} bg-[#F0F2F5] overflow-x-hidden`}
+      className={`relative w-full min-h-screen flex flex-col justify-center items-center px-4 md:px-8 py-24 ${archivo.className} bg-[#F0F2F5] overflow-hidden`}
       style={{
         backgroundImage: 'radial-gradient(#94A3B8 2px, transparent 2px)',
         backgroundSize: '40px 40px'
@@ -105,66 +98,63 @@ export default function Hero() {
          </svg>
       </div>
 
-      <div className={`relative z-20 max-w-6xl mx-auto transition-opacity duration-300 ${isGsapLoaded ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-20 w-full max-w-6xl transition-opacity duration-300 ${isGsapLoaded ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* 1. HEADLINE SECTION */}
-        <div className="flex flex-col items-center md:items-start relative z-30 w-full">
-          
-          <div className={`hero-line mb-4 flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 ${mono.className}`}>
-            <span className="w-2 h-2 bg-black"></span>
-            <span>Archive_V1.0</span>
-            <span className="w-12 h-[1px] bg-black/20"></span>
-          </div>
+        <div className="flex flex-col pl-5 pr-5 py-10 items-center md:items-start relative z-30 w-full">
 
-          <div className="overflow-hidden">
+          <div className="relative overflow-visible pb-5">
             <h1 
-              className="hero-line text-[12vw] md:text-[10vw] uppercase leading-[0.85] tracking-tighter text-transparent drop-shadow-sm select-none text-center md:text-left"
+              className="hero-line relative text-[12vw] md:text-[8vw] uppercase leading-[0.85] tracking-tighter text-transparent drop-shadow-sm select-none text-center md:text-left z-10"
               style={{ WebkitTextStroke: '1.5px black' }}
             >
-              ENGINEERING
+              THE B.TECH
             </h1>
           </div>
           
-          <div className="py-2 relative -mt-2 md:-mt-4 ml-0 md:ml-4">
-            <h1 
-              className="hero-line text-[10vw] md:text-[10vw] uppercase leading-[0.85] tracking-tighter text-black bg-[#FBBF24] inline-block px-4 pt-4 pb-2 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] transform -rotate-2 z-20 whitespace-nowrap"
-            >
-              SURVIVAL APP.
-            </h1>
+          <div className="relative -mt-2 md:-mt-6 ml-0 md:ml-2">
+             <div className="hero-line relative z-20 inline-block transform -rotate-2 hover:rotate-0 transition-transform duration-300 origin-bottom-left">
+                <h1 
+                  className="text-[6vw] md:text-[6vw] uppercase leading-[0.85] tracking-tighter text-black bg-[#FBBF24] px-4 pt-4 pb-2 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] whitespace-nowrap"
+                >
+                  APP WE ALL NEED
+                </h1>
+             </div>
           </div>
         </div>
 
         {/* 2. TAG STACK */}
-        <div className="mt-16 md:mt-20 flex flex-wrap justify-center md:justify-start gap-4 md:gap-5 relative z-20">
+        <div className="mt-12 md:mt-20 flex flex-wrap justify-center md:justify-start gap-4 md:gap-5 relative z-20">
           
-          {/* 1. PRIMARY: KTU Identity */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform cursor-default">
-            <BookOpen size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Strictly KTU</span>
+            <Hammer size={18} />
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Building In Public</span>
           </div>
 
-          {/* 2. SECONDARY: Gamification */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#FBBF24] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
-            <Gamepad2 size={18} className="text-black" />
-            <span className={`text-xs md:text-sm font-bold uppercase text-black ${mono.className}`}>Gamified</span>
+            <Code2 size={18} className="text-black" />
+            <span className={`text-xs md:text-sm font-bold uppercase text-black ${mono.className}`}>Open Dev</span>
           </div>
 
-          {/* 3. FEATURE: Interactive */}
+          <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#A855F7] text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
+            <BrainCircuit size={18} className="text-white" />
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Knowledge_Engine</span>
+          </div>
+
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#2563EB] text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
-            <MousePointerClick size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Interactive</span>
+            <BookOpen size={18} />
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>KTU Syllabus</span>
           </div>
 
-          {/* 4. SOCIAL: Community */}
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#10B981] text-black px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Users size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Community</span>
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Community Driven</span>
           </div>
 
         </div>
 
         {/* 3. DUAL DEVICE MOCKUP + AIM TEXT */}
-        <div className="device-group mt-24 md:mt-32 w-full relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-center">
+        <div className="device-group mt-16 md:mt-32 w-full relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-center">
           
           {/* LEFT COLUMN: DEVICES */}
           <div className="md:col-span-7 relative">
@@ -174,12 +164,44 @@ export default function Hero() {
                 <div className="absolute top-0 left-0 md:left-4 w-[95%] md:w-[90%] z-10">
                   <div className="bg-black border-4 border-black rounded-t-xl p-2 pb-0 shadow-2xl">
                       <div className="bg-[#111] aspect-[16/10] w-full rounded-t-lg relative overflow-hidden flex items-center justify-center border border-gray-800">
+                        {/* Background Gradients */}
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-black opacity-90"></div>
                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                        <div className="relative z-10 flex flex-col items-center">
-                            <Play size={48} className="text-white fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
-                            <span className={`mt-4 bg-white text-black text-xs font-bold px-3 py-1 uppercase ${mono.className}`}>Desktop_View</span>
+                        
+                        {/* --- NEW STATIC DASHBOARD SKELETON (Replaces Video) --- */}
+                        <div className="relative z-10 w-full h-full p-4 md:p-6 flex flex-col opacity-90">
+                           {/* Fake Header/Nav */}
+                           <div className="w-full h-4 bg-gray-800/60 rounded mb-3 flex items-center px-2 gap-2 border border-white/5">
+                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                               <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                               <div className="ml-2 w-16 h-1 bg-gray-600/50 rounded-full"></div>
+                           </div>
+                           
+                           {/* Fake Layout Grid */}
+                           <div className="flex gap-3 h-full">
+                               {/* Sidebar */}
+                               <div className="w-1/4 h-full bg-gray-800/40 rounded border border-white/5 flex flex-col gap-2 p-2">
+                                  <div className="w-full h-2 bg-white/10 rounded"></div>
+                                  <div className="w-2/3 h-2 bg-white/10 rounded"></div>
+                                  <div className="w-3/4 h-2 bg-white/10 rounded"></div>
+                               </div>
+                               {/* Main Content */}
+                               <div className="flex-1 flex flex-col gap-3">
+                                   <div className="h-16 bg-[#FBBF24]/10 border border-[#FBBF24]/30 rounded relative overflow-hidden p-3">
+                                      <div className="w-24 h-3 bg-[#FBBF24]/40 rounded mb-2"></div>
+                                      <div className="w-12 h-2 bg-[#FBBF24]/20 rounded"></div>
+                                   </div>
+                                   <div className="flex-1 bg-gray-800/40 rounded border border-white/5 p-2 grid grid-cols-2 gap-2">
+                                      <div className="bg-white/5 rounded"></div>
+                                      <div className="bg-white/5 rounded"></div>
+                                      <div className="col-span-2 bg-white/5 rounded h-8 mt-auto"></div>
+                                   </div>
+                               </div>
+                           </div>
                         </div>
+                        {/* --- END STATIC DASHBOARD --- */}
+
                       </div>
                   </div>
                   <div className="bg-gray-800 h-4 w-full rounded-b-lg border-x-4 border-b-4 border-black relative">
@@ -202,7 +224,7 @@ export default function Hero() {
                             <div className="h-10 bg-gray-100 rounded-lg border-2 border-black"></div>
                         </div>
                         <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 bg-black text-white text-[8px] font-bold px-2 py-1 uppercase whitespace-nowrap ${mono.className}`}>
-                            Mobile_App
+                            Beta_Build
                         </div>
                       </div>
                   </div>
@@ -222,43 +244,70 @@ export default function Hero() {
 
           {/* RIGHT COLUMN: AIM TEXT */}
           <div className="md:col-span-5 relative z-20">
+            {/* Main Card Container */}
             <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000] rotate-1 md:rotate-2 hover:rotate-0 transition-transform duration-300">
               
-              <div className={`bg-black text-white px-3 py-1 text-xs font-bold uppercase mb-6 inline-block border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] ${mono.className}`}>
-                  // MISSION_DIRECTIVE: OPTIMIZE
+              {/* HEADER: Identity Tag */}
+              <div className="flex justify-between items-start mb-6">
+                  <div className={`bg-black text-white px-3 py-1 text-xs font-bold uppercase inline-flex items-center gap-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] ${mono.className}`}>
+                      <span className="w-2 h-2 bg-[#FBBF24] rounded-full animate-pulse"/>
+                      // IDENTITY: B.TECH_STUDENTS
+                  </div>
               </div>
               
-              <h2 className="text-4xl md:text-5xl uppercase font-black leading-[0.9] tracking-tighter mb-6 text-black">
-                  Strictly <br/>
-                  <span className="bg-[#FBBF24] px-2 border-4 border-black inline-block mt-2 shadow-[4px_4px_0px_0px_#000]">Curated.</span>
+              {/* HEADLINE: Emphasizing "Students" */}
+              <h2 className={`text-5xl md:text-6xl uppercase leading-[0.85] tracking-tighter mb-6 text-black ${archivo.className}`}>
+                  Built By <br/>
+                  <span className="relative inline-block mt-2">
+                      {/* Yellow Underlay */}
+                      <span className="absolute inset-0 bg-[#FBBF24] translate-x-1 translate-y-1 border-2 border-black"></span>
+                      {/* Text */}
+                      <span className="relative bg-white border-2 border-black px-3 z-10 block">Students.</span>
+                  </span>
               </h2>
               
-              <p className="text-base md:text-lg font-bold leading-relaxed text-gray-800 mb-8 border-l-4 border-gray-200 pl-4">
-                  Stop digging through random drives. We provide syllabus-focused content, pace-based learning, and every tool you need all in one place.
+              {/* BODY: Emphasizing "For Ourselves" */}
+              <p className="text-base md:text-lg font-medium leading-relaxed text-black mb-8">
+                  We aren't a corporation. We are <b>B.Tech students</b> sitting in the same exam halls as you. 
+                  <br className="hidden md:block" />
+                  We are building this app because <span className="bg-[#10B981]/20 px-1 font-bold border-b-4 border-[#10B981]">we need it just as much as you do.</span>
               </p>
               
-              <div className={`space-y-3 font-bold text-xs md:text-sm uppercase ${mono.className}`}>
-                  <div className="flex items-center justify-between p-3 border-2 border-black bg-gray-50 hover:bg-blue-50 transition-colors group cursor-default">
-                      <div className="flex items-center gap-3">
-                          <Layers className="text-black group-hover:scale-110 transition-transform" size={18} />
-                          <span>Curated Content</span>
+              {/* ACTION LIST: Proof of Student Identity */}
+              <div className={`space-y-4 ${mono.className}`}>
+                  
+                  {/* Item 1: Relatability */}
+                  <div className="group relative cursor-default">
+                      <div className="absolute inset-0 bg-black translate-x-1 translate-y-1"></div>
+                      <div className="relative flex items-center justify-between p-3 border-2 border-black bg-white">
+                          <div className="flex items-center gap-4">
+                              <div className="bg-[#FBBF24] p-2 border-2 border-black flex items-center justify-center">
+                                  <Users className="text-black" size={20} />
+                              </div>
+                              <div className="flex flex-col">
+                                  <span className="font-bold text-black text-sm uppercase">One of Us</span>
+                                  <span className="text-[10px] md:text-xs text-gray-600 font-bold leading-none mt-0.5">We write the same exams you do.</span>
+                              </div>
+                          </div>
                       </div>
-                      <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"/>
                   </div>
-                  <div className="flex items-center justify-between p-3 border-2 border-black bg-gray-50 hover:bg-red-50 transition-colors group cursor-default">
-                      <div className="flex items-center gap-3">
-                          <Timer className="text-black group-hover:scale-110 transition-transform" size={18} />
-                          <span>Pace-Based Learning</span>
+
+                  {/* Item 2: Dogfooding (Using your own product) */}
+                  <div className="group relative cursor-default">
+                      <div className="absolute inset-0 bg-black translate-x-1 translate-y-1"></div>
+                      <div className="relative flex items-center justify-between p-3 border-2 border-black bg-white">
+                          <div className="flex items-center gap-4">
+                              <div className="bg-[#10B981] p-2 border-2 border-black flex items-center justify-center">
+                                   <Hammer className="text-black" size={20} />
+                              </div>
+                              <div className="flex flex-col">
+                                  <span className="font-bold text-black text-sm uppercase">Dogfooding Daily</span>
+                                  <span className="text-[10px] md:text-xs text-gray-600 font-bold leading-none mt-0.5">We use this app to survive our own semesters.</span>
+                              </div>
+                          </div>
                       </div>
-                      <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"/>
                   </div>
-                  <div className="flex items-center justify-between p-3 border-2 border-black bg-black text-white hover:bg-[#10B981] transition-colors group cursor-default">
-                      <div className="flex items-center gap-3">
-                          <Box className="text-white group-hover:scale-110 transition-transform" size={18} />
-                          <span>All-in-One Platform</span>
-                      </div>
-                      <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"/>
-                  </div>
+
               </div>
 
             </div>
@@ -267,7 +316,7 @@ export default function Hero() {
         </div>
 
         {/* 4. BOTTOM CTA */}
-        <div className="hero-cta mt-24 md:mt-32 flex flex-col items-start pb-20 relative z-30 w-full">
+        <div className="hero-cta mt-20 md:mt-32 flex flex-col items-start pb-4 relative z-30 w-full">
           
           <div className={`
             mb-8 bg-white border-2 border-black px-4 py-2 
@@ -277,12 +326,11 @@ export default function Hero() {
             ${mono.className}
           `}>
              <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse"></span>
-             <span>Built by B.Techs <span className="text-gray-300 mx-1">//</span> For B.Techs</span>
+             <span>Created by B.Techs <span className="text-gray-300 mx-1">//</span> For B.Techs</span>
           </div>
           
           <div className="flex flex-col md:flex-row gap-10 w-full items-center md:items-start md:justify-start">
             
-            {/* FIXED: Changed from <link> to <Link> */}
             <Link href="/join" className="
               group relative 
               bg-[#FBBF24] text-black 
@@ -315,7 +363,7 @@ export default function Hero() {
                   </div>
                </div>
                <div className="flex flex-col">
-                  <span className={`text-sm font-bold uppercase tracking-tight ${archivo.className}`}>Early Users</span>
+                  <span className={`text-sm font-bold uppercase tracking-tight ${archivo.className}`}>Early Supporters</span>
                   <span className={`text-[10px] font-bold text-[#10B981] uppercase tracking-widest flex items-center gap-1 ${mono.className}`}>
                      <Zap size={10} fill="currentColor" /> Locking Spots
                   </span>
