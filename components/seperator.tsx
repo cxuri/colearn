@@ -2,7 +2,7 @@
 
 export default function SimpleSeparator() {
   return (
-    <div className="w-full my-8 px-4 md:px-8">
+    <div className="w-full px-4 md:px-8">
       {/* The Main Bar */}
       <div className="w-full h-6 bg-[#FBBF24] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative flex items-center overflow-hidden">
         
