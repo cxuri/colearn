@@ -9,24 +9,24 @@ const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
 const FAQs = [
   {
+    question: "What is this app?",
+    answer: "Klaz is a community driven free learning app, we are a team of btech students who got tired of learning stuff the normal way, so thats why we are building klaz"
+  },
+  {
     question: "Is this app affiliated with KTU?",
     answer: "Absolutely not. If we were, the site would crash every time you opened it. We are an independent archive built by students, for students."
   },
   {
     question: "Is it actually free?",
-    answer: "Yes. Education shouldn't be paywalled. We might add a 'Pro' tier later for advanced analytics, but the core archive (Notes/QP) will remains open source and free."
-  },
-  {
-    question: "How do I get off the waitlist?",
-    answer: "We let people in batches of 50 every Friday to prevent server fires. Sharing your referral link bumps you up the queue. Spamming us on Instagram might also work."
+    answer: "Yes. Education shouldn't be paywalled. We might add a Pro tier later on for Power users, but the core archive (Notes/QP) will remains open source and free."
   },
   {
     question: "Will you sell my data?",
-    answer: "We are too lazy to figure out how to do that. Your email is only used for login and 'Exam Tomorrow' panic alerts. No third-party tracking."
+    answer: "The data we are collecting is strictly for informing all the students on the launch of the app, and optional Updates"
   },
   {
     question: "Can I upload my own notes?",
-    answer: "Yes. That's the whole point. Contributors get a special 'Verified' badge and priority access to new features."
+    answer: "Yes. That's the whole point. our idea is a community managed app, where we students share notes for others to use"
   }
 ];
 
