@@ -5,7 +5,6 @@ import {
   Zap, 
   Files, 
   Users, 
-  Skull, 
 } from 'lucide-react';
 
 const archivo = Archivo_Black({ 
@@ -23,11 +22,6 @@ const mono = Space_Mono({
 export default function About() {
   return (
     <section className="relative w-full py-24 px-4 md:px-8 bg-white border-t-4 border-black overflow-hidden">
-      
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <Skull size={400} strokeWidth={0.5} />
-      </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
         
