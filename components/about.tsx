@@ -40,9 +40,9 @@ export default function About() {
           
           <div className="max-w-md">
             <p className="text-lg font-bold leading-relaxed border-l-4 border-[#FBBF24] pl-6">
-              We hate the "normal" way of studying. Digging through 50 WhatsApp groups just to find one syllabus PDF is not it.
+              Scrolling through 50 whatsapp groups just for a PDF?, Not it
               <br/><br/>
-              We are building this to learn topics <b>efficiently</b>, clear backlogs, and survive the semester without the corporate BS.
+              We are building Klaz to <b>learn fast</b>, clear backlogs, and survive semesters, no corporate BS.
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function About() {
                     The Catch-Up
                   </h3>
                   <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
-                    Missed class? Lazed around all semester? We break down complex topics into digestable chunks so you can speed-run the syllabus.
+                    Missed classes all semester? <b>Speed-run</b> the syllabus with bitesized breakdowns.
                   </p>
                </div>
                <div className="mt-8 pt-4 border-t-2 border-black border-dashed">
@@ -76,21 +76,21 @@ export default function About() {
           <div className="group relative">
             <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3"></div>
             <div className="relative h-full bg-white border-4 border-black p-6 md:p-8 flex flex-col justify-between hover:-translate-y-1 hover:-translate-x-1 transition-transform border-l-[12px] border-l-[#EF4444]">
-               <div>
-                  <div className="mb-6 flex justify-between items-start">
-                     <Files size={48} className="text-black" strokeWidth={1.5} />
-                     <span className={`text-4xl text-black ${archivo.className}`}>02</span>
-                  </div>
-                  <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
-                    The Arsenal
-                  </h3>
-                  <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
-                    Stop begging seniors. Access curated Notes, Solved PYQs, and Answer Keys instantly. Everything you need to pass, in one place.
-                  </p>
-               </div>
-               <div className="mt-8 pt-4 border-t-2 border-black border-dashed">
-                  <span className="text-xs font-black uppercase bg-[#EF4444] text-white px-2 py-1">Resources: Unlocked</span>
-               </div>
+              <div>
+                <div className="mb-6 flex justify-between items-start">
+                  <Files size={48} className="text-black" strokeWidth={1.5} />
+                  <span className={`text-4xl text-black ${archivo.className}`}>02</span>
+                </div>
+                <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
+                  The Arsenal
+                </h3>
+                <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
+                  Access curated notes, solved PYQs, and answer keys in one place—everything you need to pass.
+                </p>
+              </div>
+              <div className="mt-8 pt-4 border-t-2 border-black border-dashed">
+                <span className="text-xs font-black uppercase bg-[#EF4444] text-white px-2 py-1">Resources: Unlocked</span>
+              </div>
             </div>
           </div>
 
@@ -98,24 +98,23 @@ export default function About() {
           <div className="group relative">
             <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3"></div>
             <div className="relative h-full bg-white border-4 border-black p-6 md:p-8 flex flex-col justify-between hover:-translate-y-1 hover:-translate-x-1 transition-transform border-l-[12px] border-l-[#10B981]">
-               <div>
-                  <div className="mb-6 flex justify-between items-start">
-                     <Users size={48} className="text-black" strokeWidth={1.5} />
-                     <span className={`text-4xl text-black ${archivo.className}`}>03</span>
-                  </div>
-                  <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
-                    The Meta
-                  </h3>
-                  <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
-                    Static PDFs are boring. We use interactive lessons and community support to make sure the concepts actually stick.
-                  </p>
-               </div>
-               <div className="mt-8 pt-4 border-t-2 border-black border-dashed">
-                  <span className="text-xs font-black uppercase bg-[#10B981] text-black px-2 py-1">Mode: Interactive</span>
-               </div>
+              <div>
+                <div className="mb-6 flex justify-between items-start">
+                  <Users size={48} className="text-black" strokeWidth={1.5} />
+                  <span className={`text-4xl text-black ${archivo.className}`}>03</span>
+                </div>
+                <h3 className={`text-2xl text-black uppercase mb-4 leading-none ${archivo.className}`}>
+                  The Meta
+                </h3>
+                <p className={`text-sm font-bold text-gray-800 leading-relaxed ${mono.className}`}>
+                  Engage with interactive lessons and community support—making concepts stick.
+                </p>
+              </div>
+              <div className="mt-8 pt-4 border-t-2 border-black border-dashed">
+                <span className="text-xs font-black uppercase bg-[#10B981] text-black px-2 py-1">Mode: Interactive</span>
+              </div>
             </div>
           </div>
-
         </div>
 
       </div>

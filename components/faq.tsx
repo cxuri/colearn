@@ -10,24 +10,24 @@ const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
 const FAQs = [
   {
-    question: "What is this app?",
-    answer: "Klaz is a community driven free learning app, we are a team of btech students who got tired of learning stuff the normal way, so thats why we are building klaz"
+    "question": "What is this app?",
+    "answer": "Klaz is a free, community driven learning app created by B.Tech students tired of traditional methods."
   },
   {
-    question: "Is this app affiliated with KTU?",
-    answer: "Absolutely not. If we were, the site would crash every time you opened it. We are an independent archive built by students, for students."
+    "question": "Is this app affiliated with KTU?",
+    "answer": "No, we are an independent archive built by students for students."
   },
   {
-    question: "Is it actually free?",
-    answer: "Yes. Education shouldn't be paywalled. We might add a Pro tier later on for Power users, but the core archive (Notes/QP) will remains open source and free."
+    "question": "Is it actually free?",
+    "answer": "Yes, education should be accessible. The core archive will always remain free, though we may introduce a Pro tier later."
   },
   {
-    question: "Will you sell my data?",
-    answer: "The data we are collecting is strictly for informing all the students on the launch of the app, and optional Updates"
+    "question": "Will you sell my data?",
+    "answer": "We collect data solely to inform students about app updates and launches."
   },
   {
-    question: "Can I upload my own notes?",
-    answer: "Yes. That's the whole point. our idea is a community managed app, where we students share notes for others to use"
+    "question": "Can I upload my own notes?",
+    "answer": "Absolutely! Klaz is designed for students to share their notes with the community."
   }
 ];
 
@@ -97,7 +97,7 @@ export default function FAQ() {
                         <span className={`text-xs font-bold text-gray-400 ${mono.className}`}>#NO_BS</span>
                     </div>
                     <div className={`text-sm font-bold leading-relaxed text-gray-800 ${mono.className}`}>
-                        "We are building the tool we wished we had during our S3 exams. This isn't a startup; it's a survival mechanism."
+                        "We're building this because we need it as much as you do"
                     </div>
                     {/* Barcode */}
                     <div className="mt-6 flex items-end justify-between opacity-80">
