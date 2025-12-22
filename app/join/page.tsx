@@ -263,7 +263,7 @@ export default function JoinPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="group relative">
                 <label className="text-[10px] font-black uppercase mb-1 flex justify-between group-focus-within:text-[#FF0054]">
-                  <span className="flex items-center gap-2"><span className="bg-black text-white px-1 py-0.5 text-[8px]">06</span> WhatsApp</span>
+                  <span className="flex items-center gap-2"><span className="bg-black text-white px-1 py-0.5 text-[8px]">06</span> WhatsApp <i>optional</i></span>
                 </label>
                 <input name="whatsapp" type="tel" placeholder="+91" className="w-full bg-[#F8F8F8] border-b-2 border-black p-3 text-sm font-bold focus:outline-none focus:bg-[#E6FFF5] focus:border-[#FF0054]" />
               </div>
