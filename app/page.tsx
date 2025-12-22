@@ -204,9 +204,7 @@ export default function Home() {
            <FAQ />
         </div>
 
-        <StaticSeparator />
-
-        <div id="contact" className="scroll-mt-32">
+        <div id="contact" className="scroll-mt-32 py-10">
             <Socials />
         </div>
 
