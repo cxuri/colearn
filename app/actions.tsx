@@ -49,17 +49,17 @@ export async function getCount() {
 
 export async function submitScore(gameId: string, playerName: string, score: number, college?: string, branch?: string) {
   try {
+    // We update ON CONFLICT to match your DB constraint exactly:
+    // (game_id, player_name, branch, college)
     await sql`
       INSERT INTO leaderboard (player_name, score, game_id, college, branch)
       VALUES (${playerName}, ${score}, ${gameId}, ${college}, ${branch})
-      ON CONFLICT (game_id, player_name) 
+      ON CONFLICT (game_id, player_name, branch, college) 
       DO UPDATE SET 
-        score = GREATEST(leaderboard.score, EXCLUDED.score),
-        college = COALESCE(EXCLUDED.college, leaderboard.college),
-        branch = COALESCE(EXCLUDED.branch, leaderboard.branch)
+        score = GREATEST(leaderboard.score, EXCLUDED.score)
     `;
 
-    // Revalidate so the leaderboard sidebar updates immediately
+    // Revalidate to refresh the UI
     revalidatePath(`/play`); 
     
     return { success: true, message: 'Score submitted successfully.' };
