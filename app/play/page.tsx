@@ -3,7 +3,6 @@ import { getGame } from '@/app/actions'; // Adjust path to your actions file
 
 // Dynamic import for Phaser (Client Side Only)
 const PhaserGame = dynamic(() => import('@/components/game/PhaserGame'), { 
-  ssr: false,
   loading: () => (
     <div className="flex h-screen w-full items-center justify-center bg-[#e0f2fe] font-mono">
       <div className="text-2xl font-black animate-bounce">LOADING ASSETS...</div>
