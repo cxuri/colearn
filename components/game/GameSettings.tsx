@@ -44,9 +44,9 @@ const GameSettings = () => {
   const chunksRef = useRef<Blob[]>([]);
   const [recordingType, setRecordingType] = useState<string | null>(null);
 
-  // --- 1. CORE UPLOAD LOGIC (WITH 3MB LIMIT) ---
-  const handleBlobUpload = async (file: File | Blob, type: string, fileName: string) => {
-    // 3MB Limit Check (3 * 1024 * 1024 bytes)
+  // --- 1. CORE UPLOAD LOGIC (RANDOMIZED & LIMITED) ---
+  const handleBlobUpload = async (file: File | Blob, type: string, originalFileName: string) => {
+    // 3MB Limit Check
     if (file.size > 3 * 1024 * 1024) {
         alert("File too large! Please keep it under 3MB to save bandwidth.");
         return;
@@ -54,7 +54,15 @@ const GameSettings = () => {
 
     setUploadingState(type);
     try {
-      const newBlob = await upload(fileName, file, {
+      // 1. Get Extension
+      const ext = originalFileName.includes('.') ? originalFileName.split('.').pop() : 'bin';
+      
+      // 2. Generate Random Name: [type]-[timestamp]-[random].[ext]
+      const randomSuffix = Math.random().toString(36).substring(2, 10);
+      const uniqueFileName = `${type}-${Date.now()}-${randomSuffix}.${ext}`;
+
+      // 3. Upload with Unique Name
+      const newBlob = await upload(uniqueFileName, file, {
         access: 'public',
         handleUploadUrl: '/api/upload',
       });
@@ -93,7 +101,8 @@ const GameSettings = () => {
         context.drawImage(videoRef.current, 0, 0, 100, 100);
         canvasRef.current.toBlob(async (blob) => {
           if (blob) {
-            await handleBlobUpload(blob, 'player', `player-${Date.now()}.png`);
+            // Filename here is just a placeholder to extract extension 'png'
+            await handleBlobUpload(blob, 'player', 'camera-capture.png');
             stopCamera();
           }
         }, 'image/png');
@@ -107,12 +116,12 @@ const GameSettings = () => {
     setIsCameraOpen(false);
   };
 
-  // --- 3. AUDIO RECORDING LOGIC (FIXED MIME TYPE) ---
+  // --- 3. AUDIO RECORDING LOGIC ---
   const startRecording = async (type: string) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Determine supported Audio MIME type (Chrome/Firefox vs Safari)
+      // Force Audio MIME Type (Fixes video/webm issue)
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
           mimeType = 'audio/webm;codecs=opus';
@@ -128,13 +137,11 @@ const GameSettings = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        // Create Blob with specific audio type
         const blob = new Blob(chunksRef.current, { type: mimeType.split(';')[0] });
-        
-        // Determine extension
         const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
         
-        await handleBlobUpload(blob, type, `${type}-${Date.now()}.${ext}`);
+        // Pass dummy name with correct extension, randomizer handles the rest
+        await handleBlobUpload(blob, type, `recording.${ext}`);
         
         stream.getTracks().forEach(track => track.stop());
         setRecordingType(null);
@@ -144,7 +151,7 @@ const GameSettings = () => {
       setRecordingType(type);
     } catch (err) { 
         console.error(err);
-        alert("Microphone permission denied or not supported."); 
+        alert("Microphone permission denied."); 
     }
   };
 
