@@ -86,25 +86,39 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     setFinalScore({ distance: dist, coins: coins, total: totalScore });
     setGameState('gameover');
 
-    // FIX 1 Usage: Use the Ref to get the LATEST name, not the stale one
-    const currentData = formDataRef.current;
+    const currentData = formDataRef.current; // Use the Ref
 
-    // --- SUBMIT SCORE LOGIC ---
-    if (gameId && currentData.name) {
-      console.log("Submitting score for:", currentData.name);
-      
-      submitScore(
+    // --- DEBUG LOGS ---
+    console.log("💀 GAME OVER DETECTED");
+    console.log("Game ID:", gameId);
+    console.log("Player Name:", currentData.name);
+    console.log("Score:", totalScore);
+
+    if (!gameId) {
+        console.error("❌ ABORTING: No Game ID found in URL. URL must be /play?id=...");
+        return;
+    }
+    if (!currentData.name) {
+        console.error("❌ ABORTING: No Player Name found.");
+        return;
+    }
+
+    // --- SUBMIT SCORE ---
+    console.log("🚀 Sending score to server...");
+    submitScore(
         gameId, 
         currentData.name, 
         totalScore, 
         currentData.college, 
         currentData.branch
-      ).then(() => {
-        console.log("Score saved!");
-        // FIX 2 Usage: Trigger leaderboard refresh
-        setLeaderboardKey(prev => prev + 1);
-      }).catch(err => console.error("Score save failed", err));
-    }
+    ).then((result) => {
+        if (result.success) {
+            console.log("✅ SUCCESS: Score saved!", result);
+            setLeaderboardKey(prev => prev + 1); // Refresh leaderboard
+        } else {
+            console.error("⚠️ SERVER ERROR:", result.message);
+        }
+    }).catch(err => console.error("❌ NETWORK ERROR:", err));
   };
 
   const startGame = () => {
