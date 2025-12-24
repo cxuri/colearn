@@ -609,11 +609,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               </a>
             </div>
 
-            {/* CONTROLS HINT */}
-            <div className="bg-black text-white px-4 py-1 font-bold text-[10px] inline-block shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] tracking-widest uppercase mt-4">
-              [SPACE] or [TAP] to Jump
-            </div>
-
             {/* MOBILE ACTION BUTTON (Visible only on mobile) */}
             <a 
               href="/play/make"
