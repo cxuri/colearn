@@ -1,0 +1,575 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from 'react';
+import type { Game as GameType } from 'phaser';
+
+// --- 1. CSS STYLES FOR SNOW ANIMATION ---
+const snowStyles = `
+  @keyframes snowfall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+  .snowflake {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border: 2px solid black;
+    animation: snowfall linear infinite;
+    z-index: 0;
+  }
+`;
+
+interface GameProps {
+  playerImg?: string;
+  coinImg?: string;
+  obstacleImg?: string;
+}
+
+const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) => {
+  const gameContainerRef = useRef<HTMLDivElement>(null);
+  const gameInstance = useRef<GameType | null>(null);
+  
+  // -- REACT STATE --
+  const [gameState, setGameState] = useState<'start' | 'playing' | 'gameover'>('start');
+  const [formData, setFormData] = useState({ name: '', college: '', branch: '' });
+  const [finalScore, setFinalScore] = useState({ distance: 0, coins: 0, total: 0 });
+
+  // -- LOAD SAVED DATA --
+  useEffect(() => {
+    const savedData = localStorage.getItem('klaz_player_data');
+    if (savedData) {
+      try { setFormData(JSON.parse(savedData)); } catch (e) {}
+    }
+  }, []);
+
+  // -- GAME CONFIGURATION --
+  const JUMP_VELOCITY = -700;
+  const GRAVITY = 1600;
+  const GAME_SPEED_START = 6;
+
+  // -- BRIDGE FUNCTIONS --
+  const handleGameOver = (dist: number, coins: number) => {
+    setFinalScore({ distance: dist, coins: coins, total: dist + (coins * 50) });
+    setGameState('gameover');
+  };
+
+  const startGame = () => {
+    if (!formData.name.trim()) return alert("NAME IS REQUIRED!");
+    localStorage.setItem('klaz_player_data', JSON.stringify(formData));
+    setGameState('playing');
+  };
+
+  const restartGame = () => {
+    if (gameInstance.current) {
+      const scene = gameInstance.current.scene.getScene('AltoScene');
+      scene.scene.restart();
+    }
+    setGameState('playing');
+  };
+
+  // -- SHARE FUNCTIONS --
+  const handleShare = async () => {
+    const shareText = `I scored ${finalScore.total} in Klaz Runner! Can you beat my distance of ${finalScore.distance}m? #KlazRunner\n\nPlay here: ${window.location.href}`;
+    const shareData = { title: 'Klaz Runner Score', text: shareText };
+
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          navigator.clipboard.writeText(shareText);
+          alert("Score copied to clipboard!");
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert("Score copied to clipboard!");
+    }
+  };
+
+  const shareGameLink = async () => {
+    const text = "Check out Klaz Runner! Built on Klaz.app " + window.location.href;
+    if (navigator.share) {
+       try { await navigator.share({ title: 'Klaz Runner', text: text }); } catch (err) {}
+    } else {
+       navigator.clipboard.writeText(window.location.href);
+       alert("Game link copied!");
+    }
+  }
+
+  // -- PHASER ENGINE INITIALIZATION --
+  useEffect(() => {
+    if (gameInstance.current) return;
+
+    const initPhaser = async () => {
+      const Phaser = (await import('phaser')).default;
+
+      class AltoScene extends Phaser.Scene {
+        private player!: Phaser.Types.Physics.Arcade.Sprite;
+        private terrainGraphics!: Phaser.GameObjects.Graphics;
+        
+        // Game State
+        private gameSpeed = GAME_SPEED_START;
+        private globalDistance = 0;
+        private coinScore = 0;
+        private isJumping = false;
+        private isDead = false;
+        private lastObstacleX = -1000;
+        private lastJumpTime = 0;
+
+        // Power-Up State
+        private canDoubleJump = false;
+
+        // Physics Groups
+        private coinsGroup!: Phaser.Physics.Arcade.Group;
+        private obstaclesGroup!: Phaser.Physics.Arcade.Group;
+        private powerupsGroup!: Phaser.Physics.Arcade.Group;
+
+        // Visuals / HUD
+        private hudText!: Phaser.GameObjects.Text;
+        private djIndicator!: Phaser.GameObjects.Text; // Double Jump Text
+        private jumpParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
+
+        // Input
+        private jumpKey!: Phaser.Input.Keyboard.Key; 
+
+        constructor() { super('AltoScene'); }
+
+        init() { this.registry.set('onGameOver', handleGameOver); }
+
+        preload() {
+          if (playerImg) this.load.image('player', playerImg);
+          if (coinImg) this.load.image('coin', coinImg);
+          if (obstacleImg) this.load.image('spike', obstacleImg);
+
+          this.load.on('complete', () => {
+            const makeTexture = (key: string, color: number, lineColor: number, w: number, h: number, type: 'rect'|'circle'|'tri'|'diamond') => {
+              if (this.textures.exists(key)) return;
+              const g = this.make.graphics({x:0, y:0});
+              g.fillStyle(color, 1);
+              g.lineStyle(4, lineColor, 1);
+
+              if (type === 'rect') { g.fillRect(0, 0, w, h); g.strokeRect(0, 0, w, h); }
+              if (type === 'circle') { g.fillCircle(w/2, h/2, (w-4)/2); g.strokeCircle(w/2, h/2, (w-4)/2); }
+              if (type === 'tri') { g.beginPath(); g.moveTo(0, h); g.lineTo(w/2, 0); g.lineTo(w, h); g.closePath(); g.fillPath(); g.strokePath(); }
+              if (type === 'diamond') { 
+                g.beginPath(); g.moveTo(w/2, 0); g.lineTo(w, h/2); g.lineTo(w/2, h); g.lineTo(0, h/2); g.closePath(); g.fillPath(); g.strokePath(); 
+              }
+              g.generateTexture(key, w, h);
+            };
+            makeTexture('player', 0x22c55e, 0x000000, 40, 40, 'rect'); 
+            makeTexture('coin', 0xFFD700, 0x000000, 32, 32, 'circle'); 
+            makeTexture('spike', 0xFF4444, 0x000000, 40, 50, 'tri');   
+            makeTexture('particle', 0xFFFFFF, 0xFFFFFF, 6, 6, 'rect'); 
+            makeTexture('powerup', 0x8b5cf6, 0x000000, 30, 30, 'diamond');
+          });
+        }
+
+        create() {
+          this.isDead = false;
+          this.globalDistance = 0;
+          this.coinScore = 0;
+          this.gameSpeed = GAME_SPEED_START;
+          this.lastObstacleX = 0;
+          this.canDoubleJump = false;
+          this.lastJumpTime = 0;
+
+          const { width } = this.scale;
+
+          this.add.particles(0, 0, 'particle', {
+            x: { min: 0, max: width }, y: -50, lifespan: 4000, speedY: { min: 100, max: 300 }, speedX: { min: -50, max: 50 }, scale: { start: 0.5, end: 1 }, quantity: 1,
+          });
+
+          this.jumpParticles = this.add.particles(0, 0, 'particle', {
+            lifespan: 300, speed: { min: 100, max: 200 }, scale: { start: 0.4, end: 0 }, blendMode: 'ADD', emitting: false
+          });
+
+          this.coinsGroup = this.physics.add.group();
+          this.obstaclesGroup = this.physics.add.group();
+          this.powerupsGroup = this.physics.add.group();
+
+          this.player = this.physics.add.sprite(200, 200, 'player');
+          this.player.setGravityY(GRAVITY);
+          this.player.setCollideWorldBounds(false);
+          this.player.clearTint();
+          
+          this.terrainGraphics = this.add.graphics();
+
+          // --- IMPROVED HUD ---
+          
+          // 1. Stats Box (Top Left)
+          this.hudText = this.add.text(20, 20, "DIST: 0m\nCOINS: 0", {
+            fontFamily: 'Courier New, monospace', 
+            fontSize: '24px', 
+            fontStyle: 'bold',
+            color: '#000', 
+            backgroundColor: '#FFF',
+            padding: { x: 10, y: 10 }
+          });
+          this.hudText.setScrollFactor(0); // Stick to screen
+
+          // 2. Double Jump Indicator (Top Center)
+          this.djIndicator = this.add.text(width / 2, 50, "⚡ DOUBLE JUMP ACTIVE ⚡", {
+            fontFamily: 'Courier New, monospace',
+            fontSize: '22px',
+            fontStyle: 'bold',
+            color: '#FFF',
+            backgroundColor: '#8b5cf6', // Violet
+            padding: { x: 15, y: 8 }
+          })
+          .setOrigin(0.5)
+          .setScrollFactor(0)
+          .setVisible(false); // Hidden by default
+          
+          this.djIndicator.setStroke('#000', 4); // Thick black border
+          this.djIndicator.setShadow(4, 4, '#000000', 0, false, true);
+
+          // Input Handling
+          if (this.input.keyboard) {
+            this.input.keyboard.on('keydown-SPACE', () => { this.attemptJump(); });
+          }
+          this.input.on('pointerdown', () => {
+            this.game.canvas.focus();
+            this.attemptJump();
+          });
+        }
+
+        getTerrainHeight(x: number) {
+          return 600 + Math.sin(x * 0.002) * 80 + Math.cos(x * 0.005) * 40;
+        }
+
+        attemptJump() {
+          if (this.isDead) return;
+
+          const now = this.time.now;
+          if (now - this.lastJumpTime < 250) return; // 250ms Cooldown
+
+          // Ground Check
+          const playerGroundY = this.getTerrainHeight(this.globalDistance + this.player.x);
+          const playerBottom = this.player.y + (this.player.height / 2);
+          const isGrounded = (playerBottom >= playerGroundY - 15);
+
+          if (isGrounded || !this.isJumping) {
+            // JUMP 1 (Ground)
+            this.player.setVelocityY(JUMP_VELOCITY);
+            this.isJumping = true;
+            this.lastJumpTime = now;
+          } else if (this.canDoubleJump) {
+            // JUMP 2 (Air)
+            this.player.setVelocityY(JUMP_VELOCITY);
+            this.canDoubleJump = false; 
+            this.player.clearTint(); 
+            this.lastJumpTime = now;
+
+            this.jumpParticles.explode(10, this.player.x, this.player.y);
+            this.tweens.add({ targets: this.player, scaleX: 1.5, scaleY: 1.5, duration: 100, yoyo: true });
+          }
+        }
+
+        spawnObjects(currentX: number) {
+          const spawnX = 900; 
+          const worldX = this.globalDistance + 900;
+          const distanceSinceLast = worldX - this.lastObstacleX;
+
+          if (Math.random() < 0.04) { 
+            const groundY = this.getTerrainHeight(worldX);
+
+            if (distanceSinceLast > 400 && Math.random() > 0.4) {
+                const spike = this.obstaclesGroup.create(spawnX, groundY - 25, 'spike');
+                spike.body.allowGravity = false; spike.body.setImmovable(true); spike.body.setSize(20, 30); spike.body.setOffset(10, 20); spike.worldX = worldX;
+                this.lastObstacleX = worldX;
+            } else {
+                const itemHeight = groundY - (Math.random() * 200 + 60);
+                if (Math.random() < 0.1) {
+                    const powerup = this.powerupsGroup.create(spawnX, itemHeight, 'powerup');
+                    powerup.body.allowGravity = false; powerup.worldX = worldX;
+                    this.tweens.add({ targets: powerup, y: itemHeight - 20, duration: 1000, yoyo: true, repeat: -1 });
+                } else {
+                    const coin = this.coinsGroup.create(spawnX, itemHeight, 'coin');
+                    coin.body.allowGravity = false; coin.worldX = worldX;
+                }
+            }
+          }
+        }
+
+        update() {
+          if (this.isDead) return;
+
+          this.globalDistance += this.gameSpeed;
+          this.gameSpeed += 0.002;
+
+          const playerGroundY = this.getTerrainHeight(this.globalDistance + this.player.x);
+          const playerBottom = this.player.y + (this.player.height / 2);
+
+          if (playerBottom >= playerGroundY - 5 && this.player.body.velocity.y >= 0) {
+            this.player.y = playerGroundY - (this.player.height / 2);
+            this.player.setVelocityY(0);
+            this.isJumping = false; 
+            
+            const nextHeight = this.getTerrainHeight(this.globalDistance + this.player.x + 10);
+            const angle = Math.atan2(nextHeight - playerGroundY, 10);
+            this.player.setRotation(angle);
+          } else {
+            this.player.setRotation(this.player.rotation * 0.9);
+          }
+
+          this.terrainGraphics.clear();
+          this.terrainGraphics.lineStyle(8, 0x000000, 1);
+          this.terrainGraphics.fillStyle(0xFFFFFF, 1);
+          this.terrainGraphics.beginPath();
+          this.terrainGraphics.moveTo(0, this.getTerrainHeight(this.globalDistance));
+          for (let i = 0; i <= 850; i += 20) {
+            this.terrainGraphics.lineTo(i, this.getTerrainHeight(this.globalDistance + i));
+          }
+          this.terrainGraphics.lineTo(850, 850);
+          this.terrainGraphics.lineTo(0, 850);
+          this.terrainGraphics.closePath();
+          this.terrainGraphics.fillPath();
+          this.terrainGraphics.strokePath();
+
+          this.spawnObjects(this.globalDistance);
+
+          const moveObject = (obj: any) => {
+            if (!obj) return;
+            obj.x = obj.worldX - this.globalDistance;
+            if (obj.texture.key === 'spike') {
+                 const gH = this.getTerrainHeight(obj.worldX);
+                 obj.y = gH - 25;
+            }
+            if (obj.x < -100) obj.destroy();
+          };
+
+          this.coinsGroup.children.iterate((c: any) => { moveObject(c); return true; });
+          this.obstaclesGroup.children.iterate((o: any) => { moveObject(o); return true; });
+          this.powerupsGroup.children.iterate((p: any) => { moveObject(p); return true; });
+
+          this.physics.overlap(this.player, this.coinsGroup, (p, coin) => {
+            coin.destroy();
+            this.coinScore++;
+          });
+
+          this.physics.overlap(this.player, this.powerupsGroup, (p, powerup) => { 
+              powerup.destroy(); 
+              this.canDoubleJump = true; 
+              this.player.setTint(0x8b5cf6); 
+              
+              const txt = this.add.text(this.player.x, this.player.y - 50, "GOT POWER!", { fontSize: '20px', color: '#8b5cf6', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5);
+              this.tweens.add({ targets: txt, y: txt.y - 50, alpha: 0, duration: 800, onComplete: () => txt.destroy() });
+          });
+
+          this.physics.overlap(this.player, this.obstaclesGroup, () => {
+            this.isDead = true;
+            this.physics.pause();
+            this.player.setTint(0xff0000); 
+            const onGameOver = this.registry.get('onGameOver');
+            if (onGameOver) { onGameOver(Math.floor(this.globalDistance / 10), this.coinScore); }
+          });
+
+          // --- UI UPDATES ---
+          const distM = Math.floor(this.globalDistance / 10);
+          this.hudText.setText(`DIST: ${distM}m\nCOINS: ${this.coinScore}`);
+          
+          // Double Jump Indicator Logic
+          this.djIndicator.setVisible(this.canDoubleJump);
+          if (this.canDoubleJump) {
+             // Bobbing animation for the text
+             this.djIndicator.y = 50 + Math.sin(this.time.now / 150) * 3;
+          }
+        }
+      }
+
+      const config: Phaser.Types.Core.GameConfig = {
+        type: Phaser.AUTO,
+        parent: gameContainerRef.current!,
+        width: 800,
+        height: 800,
+        backgroundColor: '#87CEEB', 
+        scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+        physics: { default: 'arcade', arcade: { debug: false } }, 
+        scene: [AltoScene],
+      };
+
+      gameInstance.current = new Phaser.Game(config);
+    };
+
+    if (gameState !== 'start') { initPhaser(); }
+    
+    return () => {
+        if (gameState === 'start' && gameInstance.current) {
+            gameInstance.current.destroy(true);
+            gameInstance.current = null;
+        }
+    };
+  }, [gameState, playerImg, coinImg, obstacleImg]);
+
+  return (
+    <>
+    <style dangerouslySetInnerHTML={{ __html: snowStyles }} />
+    
+    <div className="flex flex-col items-center justify-center h-screen w-screen overflow-hidden bg-[#e0f2fe] font-mono relative selection:bg-yellow-400 selection:text-black">
+
+      {/* 1. GRAPH PAPER GRID BACKGROUND */}
+      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
+           style={{ 
+             backgroundImage: `
+                linear-gradient(to right, #000 1px, transparent 1px), 
+                linear-gradient(to bottom, #000 1px, transparent 1px)
+             `, 
+             backgroundSize: '40px 40px' 
+           }} 
+      />
+
+      {/* 2. BACKGROUND SNOW ANIMATION */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div 
+            key={i} 
+            className="snowflake"
+            style={{ 
+                left: `${Math.random() * 100}vw`, 
+                animationDuration: `${Math.random() * 5 + 5}s`,
+                animationDelay: `-${Math.random() * 5}s`
+            }} 
+          />
+        ))}
+      </div>
+
+      {/* 3. KLAZ.APP BADGE (Responsive) */}
+      <a 
+        href="https://klaz.app" 
+        target="_blank" rel="noopener noreferrer"
+        className="absolute top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] sm:shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[-2deg] hover:rotate-0"
+      >
+        KLAZ.APP ↗
+      </a>
+
+      {/* 4. JOIN KLAZ BUTTON */}
+      <a 
+        href="https://klaz.app/join" 
+        target="_blank" rel="noopener noreferrer"
+        className="absolute top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] sm:shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[2deg] hover:rotate-0"
+      >
+        JOIN KLAZ →
+      </a>
+
+      {/* 5. MAIN GAME CONTAINER */}
+      <div className="relative z-10 w-full max-w-[95vw] sm:max-w-[500px] lg:max-w-[600px] aspect-square bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col">
+        
+        {/* --- START SCREEN --- */}
+        {gameState === 'start' && (
+          <div className="absolute inset-0 z-20 bg-[#87CEEB] flex flex-col items-center justify-center p-4 sm:p-6 text-center">
+            
+            {/* Title */}
+            <h1 className="text-5xl sm:text-6xl md:text-8xl font-black mb-1 sm:mb-2 text-black drop-shadow-[3px_3px_0px_#fff] leading-none tracking-tighter">
+              KLAZ<br/>RUNNER
+            </h1>
+            
+            {/* Tagline */}
+            <div className="bg-black text-white px-3 sm:px-6 py-1 sm:py-2 mb-4 sm:mb-8 text-[10px] sm:text-sm font-bold -rotate-2 border-2 border-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
+              BEAT YOUR FRIENDS // JOIN THE LEADERBOARD
+            </div>
+            
+            {/* Form Container */}
+            <div className="w-full space-y-2 sm:space-y-4 max-w-[280px] sm:max-w-sm">
+              
+              <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+                <label className="block text-[10px] sm:text-xs font-bold bg-black text-white w-fit px-2 py-0.5 mb-0.5">USER_ID (REQ)</label>
+                <input 
+                  type="text" placeholder="YOUR NAME" 
+                  value={formData.name}
+                  className="w-full bg-transparent outline-none font-black uppercase text-lg sm:text-2xl placeholder:text-gray-300 text-black h-6 sm:h-8"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                 <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
+                    <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">COLLEGE</label>
+                    <input 
+                      type="text" placeholder="NCET" 
+                      value={formData.college}
+                      className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
+                      onChange={(e) => setFormData({...formData, college: e.target.value})}
+                    />
+                 </div>
+                 <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
+                    <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">BRANCH</label>
+                    <input 
+                      type="text" placeholder="CSE" 
+                      value={formData.branch}
+                      className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
+                      onChange={(e) => setFormData({...formData, branch: e.target.value})}
+                    />
+                 </div>
+              </div>
+
+              <button 
+                onClick={startGame}
+                className="w-full py-2 sm:py-4 mt-1 bg-[#FFD700] border-2 sm:border-4 border-black font-black text-xl sm:text-2xl hover:bg-[#ffe135] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wide text-black"
+              >
+                Start_Run();
+              </button>
+
+              <button onClick={shareGameLink} className="w-full text-[10px] sm:text-xs font-bold underline hover:text-blue-800 tracking-widest mt-1">
+                SHARE GAME LINK ↗
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* --- GAME OVER SCREEN --- */}
+        {gameState === 'gameover' && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 sm:p-8 bg-[#FF4444] bg-opacity-95 backdrop-grayscale">
+            <h2 className="text-5xl sm:text-7xl font-black text-white border-b-4 sm:border-b-8 border-black mb-4 sm:mb-6 px-2 sm:px-4 leading-tight shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-black rotate-1">
+              CRASHED
+            </h2>
+            
+            <div className="bg-white border-4 border-black p-4 sm:p-6 w-full max-w-[280px] sm:max-w-sm shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 sm:mb-6 transform -rotate-1">
+               <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
+                 <span className="font-bold text-gray-600 text-sm sm:text-base">DISTANCE</span>
+                 <span className="font-black text-xl sm:text-2xl">{finalScore.distance}m</span>
+               </div>
+               <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
+                 <span className="font-bold text-gray-600 text-sm sm:text-base">COINS</span>
+                 <span className="font-black text-xl sm:text-2xl text-yellow-600">${finalScore.coins}</span>
+               </div>
+               <div className="flex justify-between pt-1 sm:pt-2 items-end">
+                 <span className="font-black text-lg sm:text-xl">TOTAL SCORE</span>
+                 <span className="font-black text-3xl sm:text-4xl">{finalScore.total}</span>
+               </div>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[280px] sm:max-w-sm">
+                <button 
+                  onClick={handleShare}
+                  className="w-full py-3 sm:py-4 bg-black text-white border-4 border-black font-black text-lg sm:text-xl shadow-[4px_4px_0px_0px_#FFFFFF] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#FFFFFF] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="uppercase tracking-wider">Share Score</span>
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                </button>
+                
+                <button 
+                  onClick={restartGame}
+                  className="w-full py-2 sm:py-3 bg-white border-4 border-black font-black text-base sm:text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-2 active:shadow-none transition-all text-black"
+                >
+                  RETRY RUN
+                </button>
+            </div>
+          </div>
+        )}
+
+        {/* PHASER MOUNT POINT */}
+        <div ref={gameContainerRef} className="flex-grow w-full bg-cyan-100" />
+      </div>
+      
+      {/* 6. FOOTER CONTROLS */}
+      <div className="absolute bottom-6 z-0 pointer-events-none">
+        <p className="bg-black text-white px-3 py-1 sm:px-4 sm:py-2 font-bold text-[10px] sm:text-xs inline-block shadow-[3px_3px_0px_0px_#888] tracking-widest uppercase">
+          [SPACE] or [TAP] to Jump
+        </p>
+      </div>
+    </div>
+    </>
+  );
+};
+
+export default PhaserGame;
