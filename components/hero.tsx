@@ -108,7 +108,7 @@ export default function Hero() {
               className="hero-line relative text-[12vw] md:text-[8vw] uppercase leading-[0.85] tracking-tighter text-transparent drop-shadow-sm select-none text-center md:text-left z-10"
               style={{ WebkitTextStroke: '1.5px black' }}
             >
-              THE B.TECH
+              WHERE LEARNING
             </h1>
           </div>
           
@@ -117,7 +117,7 @@ export default function Hero() {
                 <h1 
                   className="text-[6vw] md:text-[6vw] uppercase leading-[0.85] tracking-tighter text-black bg-[#FBBF24] px-4 pt-4 pb-2 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] whitespace-nowrap"
                 >
-                  APP WE ALL NEED
+                 COMES TOGETHER
                 </h1>
              </div>
           </div>
@@ -128,12 +128,12 @@ export default function Hero() {
           
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform cursor-default">
             <Hammer size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Building In Public</span>
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>BuilT With Students</span>
           </div>
 
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#FBBF24] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <Code2 size={18} className="text-black" />
-            <span className={`text-xs md:text-sm font-bold uppercase text-black ${mono.className}`}>Open Dev</span>
+            <span className={`text-xs md:text-sm font-bold uppercase text-black ${mono.className}`}>Open Build</span>
           </div>
 
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#A855F7] text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
@@ -143,7 +143,7 @@ export default function Hero() {
 
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#2563EB] text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
             <BookOpen size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>KTU Syllabus</span>
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>KTU Focused</span>
           </div>
 
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#10B981] text-black px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
