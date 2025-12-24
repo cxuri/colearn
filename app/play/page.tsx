@@ -1,8 +1,11 @@
+'use client';
+
 import React, { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamic import
 const PhaserGame = dynamic(() => import('@/components/game/PhaserGame'), { 
+  ssr: false,
   loading: () => <div className="text-white font-mono animate-pulse">Initializing Engine...</div>
 });
 
