@@ -128,3 +128,62 @@ export async function getLeaderBoardData(gameId: string, currentPlayerName?: str
     return { top10: [], player: undefined }; 
   }
 }
+
+// Define the shape of the config object for type safety
+interface GameConfigData {
+  creator: string;
+  creator_social?: string;
+  player_url: string | null;
+  bgm_sfx: string | null;
+  jump_sfx: string | null;
+  crash_sfx: string | null;
+  powerup_sfx: string | null;
+  settings: {
+    gravity: number;
+    speed: number;
+  };
+}
+
+export async function saveGameConfig(data: GameConfigData) {
+  try {
+    const {
+      creator,
+      creator_social,
+      player_url,
+      bgm_sfx,
+      jump_sfx,
+      crash_sfx,
+      powerup_sfx,
+      settings
+    } = data;
+    
+    const result = await sql`
+      INSERT INTO game_configs (
+        creator,
+        creator_social,
+        player_url,
+        bgm_sfx,
+        jump_sfx,
+        crash_sfx,
+        powerup_sfx,
+        settings
+      ) VALUES (
+        ${creator},
+        ${creator_social || null},
+        ${player_url},
+        ${bgm_sfx},
+        ${jump_sfx},
+        ${crash_sfx},
+        ${powerup_sfx},
+        ${settings} 
+      )
+      RETURNING id
+    `;
+
+    return { success: true, gameId: result[0].id };
+
+  } catch (error: any) {
+    console.error('Failed to save game config:', error);
+    return { success: false, message: 'Database error occurred.' };
+  }
+}
