@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { Game as GameType } from 'phaser';
-import LeaderboardSidebar from './Leaderboard'; // Ensure this path is correct
+import LeaderboardSidebar from './Leaderboard';
 import { useSearchParams } from 'next/navigation';
 import { submitScore } from '@/app/actions';
 
@@ -52,7 +52,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const gameInstance = useRef<GameType | null>(null);
   
-  // FIX 1: Create a Ref for formData so Phaser can access current values inside closures
   const formDataRef = useRef({ name: '', college: '', branch: '' });
 
   // -- REACT STATE --
@@ -60,7 +59,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   const [formData, setFormData] = useState({ name: '', college: '', branch: '' });
   const [finalScore, setFinalScore] = useState({ distance: 0, coins: 0, total: 0 });
   
-  // FIX 2: Add state to force leaderboard refresh
   const [leaderboardKey, setLeaderboardKey] = useState(0);
 
   // -- SYNC STATE TO REF --
@@ -75,7 +73,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       try { 
         const parsed = JSON.parse(savedData);
         setFormData(parsed);
-        formDataRef.current = parsed; // Sync ref immediately
+        formDataRef.current = parsed; 
       } catch (e) {}
     }
   }, []);
@@ -86,16 +84,15 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     setFinalScore({ distance: dist, coins: coins, total: totalScore });
     setGameState('gameover');
 
-    const currentData = formDataRef.current; // Use the Ref
+    const currentData = formDataRef.current;
 
-    // --- DEBUG LOGS ---
     console.log("💀 GAME OVER DETECTED");
     console.log("Game ID:", gameId);
     console.log("Player Name:", currentData.name);
     console.log("Score:", totalScore);
 
     if (!gameId) {
-        console.error("❌ ABORTING: No Game ID found in URL. URL must be /play?id=...");
+        console.error("❌ ABORTING: No Game ID found in URL.");
         return;
     }
     if (!currentData.name) {
@@ -103,7 +100,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         return;
     }
 
-    // --- SUBMIT SCORE ---
     console.log("🚀 Sending score to server...");
     submitScore(
         gameId, 
@@ -114,7 +110,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     ).then((result) => {
         if (result.success) {
             console.log("✅ SUCCESS: Score saved!", result);
-            setLeaderboardKey(prev => prev + 1); // Refresh leaderboard
+            setLeaderboardKey(prev => prev + 1); 
         } else {
             console.error("⚠️ SERVER ERROR:", result.message);
         }
@@ -135,7 +131,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     setGameState('playing');
   };
 
-  // -- SHARE FUNCTIONS --
   const handleShare = async () => {
     const shareText = `I scored ${finalScore.total} in ${config.creator}'s Level! #KlazRunner\n\nPlay here: ${window.location.href}`;
     const shareData = { title: 'Klaz Runner Score', text: shareText, url: window.location.href };
@@ -174,7 +169,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         private player!: Phaser.Physics.Arcade.Sprite;
         private terrainGraphics!: Phaser.GameObjects.Graphics;
         
-        // Game State
         private gameSpeed = config.physics.speed; 
         private globalDistance = 0;
         private coinScore = 0;
@@ -183,21 +177,17 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         private lastObstacleX = -1000;
         private lastJumpTime = 0;
 
-        // Power-Up State
         private canDoubleJump = false;
 
-        // Audio
         private bgmSound?: Phaser.Sound.BaseSound;
         private jumpSound?: Phaser.Sound.BaseSound;
         private crashSound?: Phaser.Sound.BaseSound;
         private powerupSound?: Phaser.Sound.BaseSound;
 
-        // Physics Groups
         private coinsGroup!: Phaser.Physics.Arcade.Group;
         private obstaclesGroup!: Phaser.Physics.Arcade.Group;
         private powerupsGroup!: Phaser.Physics.Arcade.Group;
 
-        // Visuals / HUD
         private hudText!: Phaser.GameObjects.Text;
         private djIndicator!: Phaser.GameObjects.Text;
         private jumpParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -211,7 +201,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           if (config.assets.coin) this.load.image('coin', config.assets.coin);
           if (config.assets.obstacle) this.load.image('spike', config.assets.obstacle);
 
-          // Audio
           if (config.assets.bgm) this.load.audio('bgm', config.assets.bgm);
           if (config.assets.jump) this.load.audio('jump', config.assets.jump);
           if (config.assets.crash) this.load.audio('crash', config.assets.crash);
@@ -489,7 +478,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             gameInstance.current = null;
         }
     };
-  }, [gameState, config]); // Re-run if config changes
+  }, [gameState, config]); 
 
   return (
     <>
@@ -501,10 +490,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       {/* 1. GRAPH PAPER GRID BACKGROUND */}
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
            style={{ 
-             backgroundImage: `
-                linear-gradient(to right, #000 1px, transparent 1px), 
-                linear-gradient(to bottom, #000 1px, transparent 1px)
-             `, 
+             backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`, 
              backgroundSize: '40px 40px' 
            }} 
       />
@@ -512,48 +498,31 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       {/* 2. BACKGROUND SNOW ANIMATION */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {[...Array(20)].map((_, i) => (
-          <div 
-            key={i} 
-            className="snowflake"
-            style={{ 
-                left: `${Math.random() * 100}vw`, 
-                animationDuration: `${Math.random() * 5 + 5}s`,
-                animationDelay: `-${Math.random() * 5}s`
-            }} 
-          />
+          <div key={i} className="snowflake" style={{ left: `${Math.random() * 100}vw`, animationDuration: `${Math.random() * 5 + 5}s`, animationDelay: `-${Math.random() * 5}s` }} />
         ))}
       </div>
 
       {/* 3. KLAZ.APP BADGE */}
-      <a 
-        href="https://klaz.app" 
-        target="_blank" rel="noopener noreferrer"
-        className="fixed top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] sm:shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[-2deg] hover:rotate-0"
-      >
+      <a href="https://klaz.app" target="_blank" rel="noopener noreferrer" className="fixed top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] sm:shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[-2deg] hover:rotate-0">
         KLAZ.APP ↗
       </a>
 
       {/* 4. JOIN KLAZ BUTTON */}
-      <a 
-        href="https://klaz.app/join" 
-        target="_blank" rel="noopener noreferrer"
-        className="fixed top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] sm:shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[2deg] hover:rotate-0"
-      >
+      <a href="https://klaz.app/join" target="_blank" rel="noopener noreferrer" className="fixed top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] sm:shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[2deg] hover:rotate-0">
         JOIN KLAZ →
       </a>
 
-      {/* 5. MAIN CONTENT AREA - CENTERED & SCALED */}
-      {/* Mobile: Allows scroll if needed. Desktop: Flex row, no scroll. */}
+      {/* 5. MAIN CONTENT AREA */}
       <div className="relative z-10 flex-1 w-full flex items-center justify-center p-4 lg:p-8 overflow-y-auto lg:overflow-hidden scrollbar-hide">
         
-        {/* CONTAINER: Stacks on mobile, Side-by-side on desktop */}
+        {/* CONTAINER */}
         <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-8 w-full max-w-7xl h-auto lg:h-full pt-16 lg:pt-0">
 
-          {/* === LEFT COLUMN: GAME & CREATOR (Scales to fit height) === */}
+          {/* === LEFT COLUMN: GAME & CREATOR === */}
           <div className="flex flex-col items-center w-full lg:w-auto shrink-0">
             
-            {/* MAIN GAME CONTAINER - Height constrained on Desktop to prevent scrolling */}
-            <div className="w-full max-w-[500px] aspect-square lg:w-auto lg:h-[70vh] lg:max-h-[600px] lg:aspect-square bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden relative">
+            {/* MAIN GAME CONTAINER - Scaled up on Desktop */}
+            <div className="w-full max-w-[550px] aspect-square lg:w-auto lg:h-[75vh] lg:max-h-[800px] lg:aspect-square bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden relative">
               
               {/* --- START SCREEN --- */}
               {gameState === 'start' && (
@@ -651,8 +620,8 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               <div ref={gameContainerRef} className="flex-grow w-full h-full bg-cyan-100" />
             </div>
 
-            {/* CREATOR BOX - Fits width of game */}
-            <div className="w-full max-w-[500px] lg:max-w-none bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-3 flex items-center justify-between mt-4">
+            {/* CREATOR BOX */}
+            <div className="w-full max-w-[550px] lg:max-w-none bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-3 flex items-center justify-between mt-4">
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold uppercase text-gray-500 tracking-widest bg-yellow-50 w-fit px-1">
                   LEVEL DESIGNER
@@ -668,8 +637,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
                   ? (config.creator_social.startsWith('http') ? config.creator_social : `https://${config.creator_social}`)
                   : 'https://instagram.com/klaz.app'
                 }
-                target="_blank" 
-                rel="noopener noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 className="bg-[#FFD700] border-2 sm:border-4 border-black px-3 py-1 font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
               >
                 <span>CONNECT</span>
@@ -684,8 +652,8 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           </div>
 
           {/* === RIGHT COLUMN: LEADERBOARD === */}
-          {/* Matches the height of the game container + creator box approximately (70vh + ~100px) */}
-          <div className="w-full max-w-[500px] lg:w-[350px] lg:h-[calc(70vh+100px)] lg:max-h-[700px]">
+          {/* Scaled up width and height */}
+          <div className="w-full max-w-[550px] lg:w-[400px] lg:h-[calc(75vh+120px)] lg:max-h-[900px]">
             <LeaderboardSidebar 
               key={leaderboardKey}
               gameId={gameId} 
