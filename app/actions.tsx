@@ -129,7 +129,7 @@ export async function getLeaderBoardData(gameId: string, currentPlayerName?: str
   }
 }
 
-// Define the shape of the config object for type safety
+// Define the shape of the incoming data
 interface GameConfigData {
   creator: string;
   creator_social?: string;
@@ -156,34 +156,47 @@ export async function saveGameConfig(data: GameConfigData) {
       powerup_sfx,
       settings
     } = data;
-    
+
+    // 1. Validation: "creator" is NOT NULL in your schema
+    if (!creator) {
+      throw new Error("Creator name is required");
+    }
+
+    // 2. Formatting: Convert settings object to a JSON string
+    const settingsJson = JSON.stringify(settings);
+
+    // 3. Insert Command
+    // We do NOT insert 'id', 'rating', 'highscore', or 'created_at' 
+    // because your database handles those with DEFAULT values.
     const result = await sql`
       INSERT INTO game_configs (
         creator,
         creator_social,
         player_url,
         bgm_sfx,
+        powerup_sfx,
         jump_sfx,
         crash_sfx,
-        powerup_sfx,
         settings
       ) VALUES (
         ${creator},
         ${creator_social || null},
-        ${player_url},
-        ${bgm_sfx},
-        ${jump_sfx},
-        ${crash_sfx},
-        ${powerup_sfx},
-        ${settings} 
+        ${player_url || null},
+        ${bgm_sfx || null},
+        ${powerup_sfx || null},
+        ${jump_sfx || null},
+        ${crash_sfx || null},
+        ${settingsJson}::jsonb
       )
-      RETURNING id
+      RETURNING id;
     `;
 
+    // 4. Return the new UUID
     return { success: true, gameId: result[0].id };
 
   } catch (error: any) {
-    console.error('Failed to save game config:', error);
-    return { success: false, message: 'Database error occurred.' };
+    console.error('SERVER ERROR saving game:', error);
+    // Return a clean error message to the frontend
+    return { success: false, message: error.message || 'Database connection failed.' };
   }
 }
