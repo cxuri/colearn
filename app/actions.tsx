@@ -47,16 +47,6 @@ export async function getCount() {
   }
 }
 
-export async function getGame(id: String) {
-  try {
-    const data = await sql`SELECT * FROM games WHERE ID=${id} LIMIT 1`
-    return data[0] || null;
-  } catch (error) {
-    console.log('Failed to fetch the game:', error);
-    return 0;
-  }
-}
-
 export async function submitScore(gameId: string, playerName: string, score: number, college?: string, branch?: string) {
   try {
     await sql`
