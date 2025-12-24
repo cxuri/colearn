@@ -5,7 +5,7 @@ import { upload } from '@vercel/blob/client';
 import { saveGameConfig } from '@/app/actions';
 import { 
   Camera, Upload, Mic, Check, User, Eye, Music, Zap, X, 
-  Share2, Play, RefreshCw, Copy 
+  Share2, Play, RefreshCw 
 } from 'lucide-react';
 
 const gridStyle = {
@@ -67,15 +67,54 @@ const GameSettings = () => {
     resetForm();
   };
 
+  // --- HELPER: RESIZE IMAGE TO 100x100 ---
+  const resizeImageTo100 = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 100;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Draw image to fill 100x100 exactly
+          ctx.drawImage(img, 0, 0, 100, 100);
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Canvas conversion failed'));
+          }, 'image/png');
+        } else {
+          reject(new Error('Could not get canvas context'));
+        }
+      };
+      img.onerror = (err) => reject(err);
+    });
+  };
+
   const handleLocalFileSelect = (file: File | Blob, type: string, fileName: string) => {
     if (file.size > 3 * 1024 * 1024) return alert("File too large! Keep under 3MB.");
     const localUrl = URL.createObjectURL(file);
     setAssets(prev => ({ ...prev, [type]: { file, previewUrl: localUrl, originalName: fileName } }));
   };
 
-  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
     const file = e.target.files?.[0];
-    if (file) handleLocalFileSelect(file, type, file.name);
+    if (!file) return;
+
+    if (type === 'player') {
+      try {
+        // If it's the player image, force resize to 100x100
+        const resizedBlob = await resizeImageTo100(file);
+        handleLocalFileSelect(resizedBlob, type, file.name);
+      } catch (err) {
+        alert("Failed to process image.");
+        console.error(err);
+      }
+    } else {
+      // Audio or other assets pass through normally
+      handleLocalFileSelect(file, type, file.name);
+    }
   };
 
   const startCamera = async () => {
@@ -92,6 +131,8 @@ const GameSettings = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
+        // The canvas is already set to 100x100 in the JSX below
+        // This drawImage call squashes the video frame into that 100x100 box
         context.drawImage(videoRef.current, 0, 0, 100, 100);
         canvasRef.current.toBlob((blob) => {
           if (blob) {
@@ -181,15 +222,11 @@ const GameSettings = () => {
       const result = await saveGameConfig(payload);
       
       if (result.success) {
-        // --- UPDATED URL STRUCTURE HERE ---
-        // Uses current origin + /play?id=ID
         const gameUrl = `${window.location.origin}/play?id=${result.gameId}`;
-        
         setGameResult({
           id: result.gameId,
           url: gameUrl
         });
-        
         resetForm();
       }
       else throw new Error(result.message);
@@ -224,8 +261,8 @@ const GameSettings = () => {
         
         {/* HEADER */}
         <div className="text-center mb-6 md:mb-8">
-          <h1 className="text-4xl md:text-6xl font-black mb-2 tracking-tighter">GAME MAKER</h1>
-          <p className="text-bold text-xs md:text-sm uppercase tracking-widest text-gray-500">
+          <h1 className="text-4xl md:text-6xl text-black mb-2 tracking-tighter">GAME MAKER</h1>
+          <p className="font-bold text-xs md:text-sm uppercase tracking-widest text-gray-500">
             Build • Record • Play
           </p>
         </div>
@@ -237,8 +274,8 @@ const GameSettings = () => {
                <Check size={40} strokeWidth={3} />
              </div>
              
-             <h2 className="text-3xl font-black uppercase mb-2">Game Ready!</h2>
-             <p className="text-gray-500 text-bold text-sm mb-8">Your custom level has been published.</p>
+             <h2 className="text-3xl text-black uppercase mb-2">Game Ready!</h2>
+             <p className="text-gray-500 font-bold text-sm mb-8">Your custom level has been published.</p>
 
              {/* QR Code Container */}
              <div className="bg-white p-4 border-4 border-black mb-8 shadow-[4px_4px_0px_0px_rgba(200,200,200,1)]">
@@ -269,7 +306,7 @@ const GameSettings = () => {
 
              <button 
                onClick={handleCreateNew}
-               className="mt-8 text-gray-400 text-bold text-xs uppercase flex items-center gap-2 hover:text-black transition-colors"
+               className="mt-8 text-gray-400 font-bold text-xs uppercase flex items-center gap-2 hover:text-black transition-colors"
              >
                <RefreshCw size={14} /> Create Another Game
              </button>
@@ -296,7 +333,7 @@ const GameSettings = () => {
                     <label className="block font-black text-sm uppercase">Creator Name</label>
                     <input 
                       type="text" 
-                      className="w-full bg-gray-50 border-4 border-black p-3 text-bold text-lg focus:outline-none focus:bg-yellow-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
+                      className="w-full bg-gray-50 border-4 border-black p-3 font-bold text-lg focus:outline-none focus:bg-yellow-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
                       placeholder="ENTER NAME"
                       value={creatorName}
                       onChange={(e) => setCreatorName(e.target.value)}
@@ -306,7 +343,7 @@ const GameSettings = () => {
                     <label className="block font-black text-sm uppercase">Social Link : <i>optional</i></label>
                     <input 
                       type="text" 
-                      className="w-full bg-gray-50 border-4 border-black p-3 text-bold text-lg focus:outline-none focus:bg-blue-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
+                      className="w-full bg-gray-50 border-4 border-black p-3 font-bold text-lg focus:outline-none focus:bg-blue-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
                       placeholder="Your Social Media Handle"
                       value={socialLink}
                       onChange={(e) => setSocialLink(e.target.value)}
@@ -324,7 +361,7 @@ const GameSettings = () => {
                     ) : (
                       <div className="text-center text-gray-400">
                         <Eye size={40} className="mx-auto mb-2 opacity-50" />
-                        <span className="block text-[10px] text-bold">NO AVATAR</span>
+                        <span className="block text-[10px] font-bold">NO AVATAR</span>
                       </div>
                     )}
                     <canvas ref={canvasRef} width="100" height="100" className="hidden" />
@@ -334,6 +371,7 @@ const GameSettings = () => {
                     <label className="flex flex-col items-center justify-center p-4 border-4 border-black bg-blue-50 hover:bg-blue-200 active:translate-y-1 transition-all cursor-pointer rounded-none">
                       <Upload strokeWidth={2.5} />
                       <span className="font-black text-xs mt-2 uppercase">Upload</span>
+                      {/* Note: onChange updated to be async for resizing */}
                       <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="hidden" />
                     </label>
 
@@ -367,7 +405,7 @@ const GameSettings = () => {
                         <div className={`w-2 h-10 ${assets[id as keyof typeof assets].file ? 'bg-green-500' : 'bg-gray-200'}`} />
                         <div>
                           <div className="font-black uppercase text-sm">{id}</div>
-                          {assets[id as keyof typeof assets].file && <div className="text-[10px] text-bold text-green-600">READY</div>}
+                          {assets[id as keyof typeof assets].file && <div className="text-[10px] font-bold text-green-600">READY</div>}
                         </div>
                       </div>
                       
@@ -402,14 +440,14 @@ const GameSettings = () => {
                     <div key={item.label} className="space-y-4">
                       <div className="flex justify-between items-end border-b-4 border-black pb-2">
                         <label className="font-black text-2xl uppercase tracking-tighter">{item.label}</label>
-                        <span className={`font-mono text-bold text-2xl ${item.color}`}>{item.value}</span>
+                        <span className={`font-mono font-bold text-2xl ${item.color}`}>{item.value}</span>
                       </div>
                       <input 
                         type="range" min={item.min} max={item.max} step={item.step} 
                         value={item.value} onChange={(e) => item.set(Number(e.target.value))} 
                         className="w-full h-6 bg-gray-200 appearance-none cursor-pointer border-4 border-black accent-black hover:bg-gray-300"
                       />
-                      <p className="text-xs text-bold text-gray-400 uppercase tracking-widest">{item.note}</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.note}</p>
                     </div>
                   ))}
                 </div>
