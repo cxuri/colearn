@@ -169,7 +169,7 @@ export async function saveGameConfig(data: GameConfigData) {
     // We do NOT insert 'id', 'rating', 'highscore', or 'created_at' 
     // because your database handles those with DEFAULT values.
     const result = await sql`
-      INSERT INTO game_configs (
+      INSERT INTO games (
         creator,
         creator_social,
         player_url,
