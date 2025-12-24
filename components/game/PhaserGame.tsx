@@ -530,7 +530,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               className="group relative bg-[#FFD700] text-black border-4 border-black p-6 font-black text-xl uppercase tracking-widest shadow-[6px_6px_0px_0px_#000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all text-center cursor-pointer w-[220px]"
             >
               <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
-              <span className="block text-black stext-5xl mb-4 group-hover:scale-110 transition-transform">🛠️</span>
+              <span className="block text-5xl mb-4 group-hover:scale-110 transition-transform">🛠️</span>
               BUILD<br/>LEVEL
             </a>
         </div>
