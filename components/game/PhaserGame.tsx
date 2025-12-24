@@ -20,13 +20,28 @@ const snowStyles = `
   }
 `;
 
-interface GameProps {
-  playerImg?: string;
-  coinImg?: string;
-  obstacleImg?: string;
+// --- INTERFACES ---
+interface GameConfigProps {
+  config: {
+    creator: string;
+    creator_social: string;
+    assets: {
+      player?: string;
+      coin?: string;
+      obstacle?: string;
+      bgm?: string;
+      jump?: string;
+      crash?: string;
+      powerup?: string;
+    };
+    physics: {
+      gravity: number;
+      speed: number;
+    };
+  };
 }
 
-const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) => {
+const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const gameInstance = useRef<GameType | null>(null);
   
@@ -42,11 +57,6 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
       try { setFormData(JSON.parse(savedData)); } catch (e) {}
     }
   }, []);
-
-  // -- GAME CONFIGURATION --
-  const JUMP_VELOCITY = -700;
-  const GRAVITY = 1600;
-  const GAME_SPEED_START = 6;
 
   // -- BRIDGE FUNCTIONS --
   const handleGameOver = (dist: number, coins: number) => {
@@ -70,8 +80,8 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
 
   // -- SHARE FUNCTIONS --
   const handleShare = async () => {
-    const shareText = `I scored ${finalScore.total} in Klaz Runner! Can you beat my distance of ${finalScore.distance}m? #KlazRunner\n\nPlay here: ${window.location.href}`;
-    const shareData = { title: 'Klaz Runner Score', text: shareText };
+    const shareText = `I scored ${finalScore.total} in ${config.creator}'s Level! #KlazRunner\n\nPlay here: ${window.location.href}`;
+    const shareData = { title: 'Klaz Runner Score', text: shareText, url: window.location.href };
 
     if (navigator.share) {
       try { await navigator.share(shareData); } catch (err: any) {
@@ -87,9 +97,9 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
   };
 
   const shareGameLink = async () => {
-    const text = "Check out Klaz Runner! Built on Klaz.app " + window.location.href;
+    const text = `Check out this game by ${config.creator}! Built on Klaz.app ${window.location.href}`;
     if (navigator.share) {
-       try { await navigator.share({ title: 'Klaz Runner', text: text }); } catch (err) {}
+       try { await navigator.share({ title: 'Klaz Runner', text: text, url: window.location.href }); } catch (err) {}
     } else {
        navigator.clipboard.writeText(window.location.href);
        alert("Game link copied!");
@@ -108,7 +118,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
         private terrainGraphics!: Phaser.GameObjects.Graphics;
         
         // Game State
-        private gameSpeed = GAME_SPEED_START;
+        private gameSpeed = config.physics.speed; // Dynamic Speed
         private globalDistance = 0;
         private coinScore = 0;
         private isJumping = false;
@@ -119,6 +129,12 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
         // Power-Up State
         private canDoubleJump = false;
 
+        // Audio
+        private bgmSound?: Phaser.Sound.BaseSound;
+        private jumpSound?: Phaser.Sound.BaseSound;
+        private crashSound?: Phaser.Sound.BaseSound;
+        private powerupSound?: Phaser.Sound.BaseSound;
+
         // Physics Groups
         private coinsGroup!: Phaser.Physics.Arcade.Group;
         private obstaclesGroup!: Phaser.Physics.Arcade.Group;
@@ -126,22 +142,27 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
 
         // Visuals / HUD
         private hudText!: Phaser.GameObjects.Text;
-        private djIndicator!: Phaser.GameObjects.Text; // Double Jump Text
+        private djIndicator!: Phaser.GameObjects.Text;
         private jumpParticles!: Phaser.GameObjects.Particles.ParticleEmitter;
-
-        // Input
-        private jumpKey!: Phaser.Input.Keyboard.Key; 
 
         constructor() { super('AltoScene'); }
 
         init() { this.registry.set('onGameOver', handleGameOver); }
 
         preload() {
-          if (playerImg) this.load.image('player', playerImg);
-          if (coinImg) this.load.image('coin', coinImg);
-          if (obstacleImg) this.load.image('spike', obstacleImg);
+          // --- FIX: USE CONFIG ASSETS ---
+          if (config.assets.player) this.load.image('player', config.assets.player);
+          if (config.assets.coin) this.load.image('coin', config.assets.coin);
+          if (config.assets.obstacle) this.load.image('spike', config.assets.obstacle);
+
+          // Audio
+          if (config.assets.bgm) this.load.audio('bgm', config.assets.bgm);
+          if (config.assets.jump) this.load.audio('jump', config.assets.jump);
+          if (config.assets.crash) this.load.audio('crash', config.assets.crash);
+          if (config.assets.powerup) this.load.audio('powerup', config.assets.powerup);
 
           this.load.on('complete', () => {
+            // Fallback Texture Generator (if assets missing)
             const makeTexture = (key: string, color: number, lineColor: number, w: number, h: number, type: 'rect'|'circle'|'tri'|'diamond') => {
               if (this.textures.exists(key)) return;
               const g = this.make.graphics({x:0, y:0});
@@ -156,6 +177,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
               }
               g.generateTexture(key, w, h);
             };
+            
             makeTexture('player', 0x22c55e, 0x000000, 40, 40, 'rect'); 
             makeTexture('coin', 0xFFD700, 0x000000, 32, 32, 'circle'); 
             makeTexture('spike', 0xFF4444, 0x000000, 40, 50, 'tri');   
@@ -168,10 +190,19 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           this.isDead = false;
           this.globalDistance = 0;
           this.coinScore = 0;
-          this.gameSpeed = GAME_SPEED_START;
+          this.gameSpeed = config.physics.speed;
           this.lastObstacleX = 0;
           this.canDoubleJump = false;
           this.lastJumpTime = 0;
+
+          // Audio Setup
+          if (this.cache.audio.exists('bgm')) {
+            this.bgmSound = this.sound.add('bgm', { loop: true, volume: 0.5 });
+            this.bgmSound.play();
+          }
+          if (this.cache.audio.exists('jump')) this.jumpSound = this.sound.add('jump');
+          if (this.cache.audio.exists('crash')) this.crashSound = this.sound.add('crash');
+          if (this.cache.audio.exists('powerup')) this.powerupSound = this.sound.add('powerup');
 
           const { width } = this.scale;
 
@@ -188,15 +219,14 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           this.powerupsGroup = this.physics.add.group();
 
           this.player = this.physics.add.sprite(200, 200, 'player');
-          this.player.setGravityY(GRAVITY);
+          // --- FIX: USE CONFIG GRAVITY ---
+          this.player.setGravityY(config.physics.gravity);
           this.player.setCollideWorldBounds(false);
           this.player.clearTint();
           
           this.terrainGraphics = this.add.graphics();
 
-          // --- IMPROVED HUD ---
-          
-          // 1. Stats Box (Top Left)
+          // --- HUD ---
           this.hudText = this.add.text(20, 20, "DIST: 0m\nCOINS: 0", {
             fontFamily: 'Courier New, monospace', 
             fontSize: '24px', 
@@ -205,23 +235,21 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
             backgroundColor: '#FFF',
             padding: { x: 10, y: 10 }
           });
-          this.hudText.setScrollFactor(0); // Stick to screen
+          this.hudText.setScrollFactor(0);
 
-          // 2. Double Jump Indicator (Top Center)
           this.djIndicator = this.add.text(width / 2, 50, "⚡ DOUBLE JUMP ACTIVE ⚡", {
             fontFamily: 'Courier New, monospace',
             fontSize: '22px',
             fontStyle: 'bold',
             color: '#FFF',
-            backgroundColor: '#8b5cf6', // Violet
+            backgroundColor: '#8b5cf6',
             padding: { x: 15, y: 8 }
           })
           .setOrigin(0.5)
           .setScrollFactor(0)
-          .setVisible(false); // Hidden by default
-          
-          this.djIndicator.setStroke('#000', 4); // Thick black border
-          this.djIndicator.setShadow(4, 4, '#000000', 0, false, true);
+          .setVisible(false)
+          .setStroke('#000', 4)
+          .setShadow(4, 4, '#000000', 0, false, true);
 
           // Input Handling
           if (this.input.keyboard) {
@@ -241,24 +269,26 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           if (this.isDead) return;
 
           const now = this.time.now;
-          if (now - this.lastJumpTime < 250) return; // 250ms Cooldown
+          if (now - this.lastJumpTime < 250) return;
 
-          // Ground Check
           const playerGroundY = this.getTerrainHeight(this.globalDistance + this.player.x);
           const playerBottom = this.player.y + (this.player.height / 2);
           const isGrounded = (playerBottom >= playerGroundY - 15);
 
+          // Fixed jump velocity of -700 works well for most gravity settings between 1000-2000
+          const jumpVel = -700; 
+
           if (isGrounded || !this.isJumping) {
-            // JUMP 1 (Ground)
-            this.player.setVelocityY(JUMP_VELOCITY);
+            this.player.setVelocityY(jumpVel);
             this.isJumping = true;
             this.lastJumpTime = now;
+            this.jumpSound?.play();
           } else if (this.canDoubleJump) {
-            // JUMP 2 (Air)
-            this.player.setVelocityY(JUMP_VELOCITY);
+            this.player.setVelocityY(jumpVel);
             this.canDoubleJump = false; 
             this.player.clearTint(); 
             this.lastJumpTime = now;
+            this.jumpSound?.play();
 
             this.jumpParticles.explode(10, this.player.x, this.player.y);
             this.tweens.add({ targets: this.player, scaleX: 1.5, scaleY: 1.5, duration: 100, yoyo: true });
@@ -275,7 +305,16 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
 
             if (distanceSinceLast > 400 && Math.random() > 0.4) {
                 const spike = this.obstaclesGroup.create(spawnX, groundY - 25, 'spike');
-                spike.body.allowGravity = false; spike.body.setImmovable(true); spike.body.setSize(20, 30); spike.body.setOffset(10, 20); spike.worldX = worldX;
+                spike.body.allowGravity = false; 
+                spike.body.setImmovable(true); 
+                
+                // Adjust collider based on texture type
+                if(this.textures.get('spike').key === 'spike') {
+                   // Generic fit
+                   spike.body.setSize(20, 30); spike.body.setOffset(10, 20);
+                }
+                
+                spike.worldX = worldX;
                 this.lastObstacleX = worldX;
             } else {
                 const itemHeight = groundY - (Math.random() * 200 + 60);
@@ -297,15 +336,12 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           this.globalDistance += this.gameSpeed;
           this.gameSpeed += 0.002;
 
-          // --- NEW LINES START ---
           const body = this.player.body as Phaser.Physics.Arcade.Body;
           if (!body) return;
-          // --- NEW LINES END ---
 
           const playerGroundY = this.getTerrainHeight(this.globalDistance + this.player.x);
           const playerBottom = this.player.y + (this.player.height / 2);
 
-          // Change: Use 'body.velocity.y' instead of 'this.player.body.velocity.y'
           if (playerBottom >= playerGroundY - 5 && body.velocity.y >= 0) {
             this.player.y = playerGroundY - (this.player.height / 2);
             this.player.setVelocityY(0);
@@ -357,6 +393,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
               powerup.destroy(); 
               this.canDoubleJump = true; 
               this.player.setTint(0x8b5cf6); 
+              this.powerupSound?.play();
               
               const txt = this.add.text(this.player.x, this.player.y - 50, "GOT POWER!", { fontSize: '20px', color: '#8b5cf6', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5);
               this.tweens.add({ targets: txt, y: txt.y - 50, alpha: 0, duration: 800, onComplete: () => txt.destroy() });
@@ -366,6 +403,8 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
             this.isDead = true;
             this.physics.pause();
             this.player.setTint(0xff0000); 
+            this.bgmSound?.stop();
+            this.crashSound?.play();
             const onGameOver = this.registry.get('onGameOver');
             if (onGameOver) { onGameOver(Math.floor(this.globalDistance / 10), this.coinScore); }
           });
@@ -374,16 +413,14 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           const distM = Math.floor(this.globalDistance / 10);
           this.hudText.setText(`DIST: ${distM}m\nCOINS: ${this.coinScore}`);
           
-          // Double Jump Indicator Logic
           this.djIndicator.setVisible(this.canDoubleJump);
           if (this.canDoubleJump) {
-             // Bobbing animation for the text
              this.djIndicator.y = 50 + Math.sin(this.time.now / 150) * 3;
           }
         }
       }
 
-      const config: Phaser.Types.Core.GameConfig = {
+      const phaserConfig: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent: gameContainerRef.current!,
         width: 800,
@@ -394,7 +431,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
         scene: [AltoScene],
       };
 
-      gameInstance.current = new Phaser.Game(config);
+      gameInstance.current = new Phaser.Game(phaserConfig);
     };
 
     if (gameState !== 'start') { initPhaser(); }
@@ -405,7 +442,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
             gameInstance.current = null;
         }
     };
-  }, [gameState, playerImg, coinImg, obstacleImg]);
+  }, [gameState, config]); // Re-run if config changes
 
   return (
     <>
@@ -470,8 +507,10 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
             </h1>
             
             {/* Tagline */}
-            <div className="bg-black text-white px-3 sm:px-6 py-1 sm:py-2 mb-4 sm:mb-8 text-[10px] sm:text-sm font-bold -rotate-2 border-2 border-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
-              BEAT YOUR FRIENDS // JOIN THE LEADERBOARD
+            <div className="bg-white text-black px-3 sm:px-6 py-1 sm:py-2 mb-4 sm:mb-8 border-2 border-black rotate-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
+               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">CUSTOM LEVEL BY</p>
+               <p className="text-lg sm:text-xl font-black uppercase">{config.creator || 'UNKNOWN'}</p>
+               {config.creator_social && <p className="text-xs font-bold text-blue-600">@{config.creator_social}</p>}
             </div>
             
             {/* Form Container */}
