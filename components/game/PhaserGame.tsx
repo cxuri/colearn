@@ -104,7 +104,7 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
       const Phaser = (await import('phaser')).default;
 
       class AltoScene extends Phaser.Scene {
-        private player!: Phaser.Types.Physics.Arcade.Sprite;
+        private player!: Phaser.Physics.Arcade.Sprite;
         private terrainGraphics!: Phaser.GameObjects.Graphics;
         
         // Game State
@@ -297,10 +297,16 @@ const PhaserGame: React.FC<GameProps> = ({ playerImg, coinImg, obstacleImg }) =>
           this.globalDistance += this.gameSpeed;
           this.gameSpeed += 0.002;
 
+          // --- NEW LINES START ---
+          const body = this.player.body as Phaser.Physics.Arcade.Body;
+          if (!body) return;
+          // --- NEW LINES END ---
+
           const playerGroundY = this.getTerrainHeight(this.globalDistance + this.player.x);
           const playerBottom = this.player.y + (this.player.height / 2);
 
-          if (playerBottom >= playerGroundY - 5 && this.player.body.velocity.y >= 0) {
+          // Change: Use 'body.velocity.y' instead of 'this.player.body.velocity.y'
+          if (playerBottom >= playerGroundY - 5 && body.velocity.y >= 0) {
             this.player.y = playerGroundY - (this.player.height / 2);
             this.player.setVelocityY(0);
             this.isJumping = false; 
