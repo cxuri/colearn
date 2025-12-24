@@ -511,7 +511,8 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       </a>
 
       {/* 4. CENTER STAGE - FLEX ROW FOR DESKTOP, COL FOR MOBILE */}
-      <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 p-4 pt-16 lg:pt-0 overflow-y-auto lg:overflow-hidden">
+      {/* overflow-y-auto allows internal scrolling on small screens if needed, without scrollbar bouncing */}
+      <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-6 lg:gap-8 p-4 pt-20 lg:pt-0 overflow-y-auto lg:overflow-hidden scrollbar-hide">
 
         {/* === COLUMN 1: LEFT ACTION (DESKTOP ONLY) === */}
         {/* On Desktop: Shows on left. On Mobile: Hidden (moved below game) */}
@@ -521,7 +522,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               className="group relative bg-[#FFD700] text-black border-4 border-black p-6 font-black text-2xl uppercase tracking-widest shadow-[8px_8px_0px_0px_#000] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all text-center cursor-pointer leading-tight"
             >
               <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
-              <span className="block text-4xl mb-2">🛠️</span>
+              <span className="block text-4xl mb-4">🛠️</span>
               BUILD<br/>LEVEL
             </a>
         </div>
@@ -616,7 +617,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             {/* MOBILE ACTION BUTTON (Visible only on mobile) */}
             <a 
               href="/play/make"
-              className="lg:hidden w-full bg-[#FFD700] text-black border-4 border-black py-4 font-black text-xl uppercase tracking-widest shadow-[4px_4px_0px_0px_#000] hover:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-6 mb-8"
+              className="lg:hidden w-full bg-[#FFD700] text-black border-4 border-black py-4 font-black text-xl uppercase tracking-widest shadow-[6px_6px_0px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 mt-6 mb-8"
             >
               <span>🛠️ BUILD LEVEL</span>
             </a>
@@ -624,7 +625,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         </div>
 
         {/* === COLUMN 3: LEADERBOARD (RIGHT) === */}
-        <div className="w-full max-w-[550px] lg:w-[350px] lg:h-[70vh] lg:max-h-[750px] shrink-0">
+        <div className="w-full max-w-[550px] lg:w-[350px] lg:h-[70vh] lg:max-h-[750px] shrink-0 mb-8 lg:mb-0">
           <LeaderboardSidebar 
             key={leaderboardKey}
             gameId={gameId} 
