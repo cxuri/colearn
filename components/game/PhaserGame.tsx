@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { Game as GameType } from 'phaser';
-
+import { SearchParams } from 'next/dist/server/request/search-params';
+import LeaderboardSidebar from './Leaderboard';
+import { useSearchParams } from 'next/navigation';
 // --- 1. CSS STYLES FOR SNOW ANIMATION ---
 const snowStyles = `
   @keyframes snowfall {
@@ -444,14 +446,19 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     };
   }, [gameState, config]); // Re-run if config changes
 
+  // Add this inside your component before the return if not already present
+  const searchParams = useSearchParams();
+  const gameId = searchParams?.get('id') ?? '';
+
   return (
     <>
     <style dangerouslySetInnerHTML={{ __html: snowStyles }} />
     
-    <div className="flex flex-col items-center justify-center h-screen w-screen overflow-hidden bg-[#e0f2fe] font-mono relative selection:bg-yellow-400 selection:text-black">
+    {/* MAIN PAGE WRAPPER */}
+    <div className="flex flex-col items-center min-h-screen w-full bg-[#e0f2fe] font-mono relative selection:bg-yellow-400 selection:text-black py-8 overflow-y-auto scrollbar-hide">
 
       {/* 1. GRAPH PAPER GRID BACKGROUND */}
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
+      <div className="fixed inset-0 z-0 opacity-10 pointer-events-none" 
            style={{ 
              backgroundImage: `
                 linear-gradient(to right, #000 1px, transparent 1px), 
@@ -462,7 +469,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       />
 
       {/* 2. BACKGROUND SNOW ANIMATION */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <div 
             key={i} 
@@ -476,11 +483,11 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         ))}
       </div>
 
-      {/* 3. KLAZ.APP BADGE (Responsive) */}
+      {/* 3. KLAZ.APP BADGE */}
       <a 
         href="https://klaz.app" 
         target="_blank" rel="noopener noreferrer"
-        className="absolute top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] sm:shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[-2deg] hover:rotate-0"
+        className="fixed top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] sm:shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[-2deg] hover:rotate-0"
       >
         KLAZ.APP ↗
       </a>
@@ -489,128 +496,159 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       <a 
         href="https://klaz.app/join" 
         target="_blank" rel="noopener noreferrer"
-        className="absolute top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] sm:shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[2deg] hover:rotate-0"
+        className="fixed top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] sm:shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer no-underline rotate-[2deg] hover:rotate-0"
       >
         JOIN KLAZ →
       </a>
 
-      {/* 5. MAIN GAME CONTAINER */}
-      <div className="relative z-10 w-full max-w-[95vw] sm:max-w-[500px] lg:max-w-[600px] aspect-square bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col">
-        
-        {/* --- START SCREEN --- */}
-        {gameState === 'start' && (
-          <div className="absolute inset-0 z-20 bg-[#87CEEB] flex flex-col items-center justify-center p-4 sm:p-6 text-center">
+      {/* 5. RESPONSIVE GRID LAYOUT CONTAINER */}
+      {/* Mobile: 1 Column. Desktop: 2 Columns (Game Left, Leaderboard Right) */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start mt-12 lg:mt-4">
+
+        {/* === LEFT COLUMN: GAME, CREATOR & CONTROLS === */}
+        <div className="flex flex-col items-center w-full">
+          
+          {/* MAIN GAME CONTAINER */}
+          <div className="w-full max-w-[500px] lg:max-w-[600px] aspect-square bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden relative">
             
-            {/* Title */}
-            <h1 className="text-5xl sm:text-6xl md:text-8xl font-black mb-1 sm:mb-2 text-black drop-shadow-[3px_3px_0px_#fff] leading-none tracking-tighter">
-              KLAZ<br/>RUNNER
-            </h1>
-            
-            {/* Tagline */}
-            <div className="bg-white text-black px-3 sm:px-6 py-1 sm:py-2 mb-4 sm:mb-8 border-2 border-black rotate-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
-               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">CUSTOM LEVEL BY</p>
-               <p className="text-lg sm:text-xl font-black uppercase">{config.creator || 'UNKNOWN'}</p>
-               {config.creator_social && <p className="text-xs font-bold text-blue-600">@{config.creator_social}</p>}
-            </div>
-            
-            {/* Form Container */}
-            <div className="w-full space-y-2 sm:space-y-4 max-w-[280px] sm:max-w-sm">
-              
-              <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-shadow">
-                <label className="block text-[10px] sm:text-xs font-bold bg-black text-white w-fit px-2 py-0.5 mb-0.5">USER_ID (REQ)</label>
-                <input 
-                  type="text" placeholder="YOUR NAME" 
-                  value={formData.name}
-                  className="w-full bg-transparent outline-none font-black uppercase text-lg sm:text-2xl placeholder:text-gray-300 text-black h-6 sm:h-8"
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                 <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
-                    <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">COLLEGE</label>
-                    <input 
-                      type="text" placeholder="NCET" 
-                      value={formData.college}
-                      className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
-                      onChange={(e) => setFormData({...formData, college: e.target.value})}
-                    />
-                 </div>
-                 <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
-                    <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">BRANCH</label>
-                    <input 
-                      type="text" placeholder="CSE" 
-                      value={formData.branch}
-                      className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
-                      onChange={(e) => setFormData({...formData, branch: e.target.value})}
-                    />
-                 </div>
-              </div>
-
-              <button 
-                onClick={startGame}
-                className="w-full py-2 sm:py-4 mt-1 bg-[#FFD700] border-2 sm:border-4 border-black font-black text-xl sm:text-2xl hover:bg-[#ffe135] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wide text-black"
-              >
-                Start_Run();
-              </button>
-
-              <button onClick={shareGameLink} className="w-full text-[10px] sm:text-xs font-bold underline hover:text-blue-800 tracking-widest mt-1">
-                SHARE GAME LINK ↗
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* --- GAME OVER SCREEN --- */}
-        {gameState === 'gameover' && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 sm:p-8 bg-[#FF4444] bg-opacity-95 backdrop-grayscale">
-            <h2 className="text-5xl sm:text-7xl font-black text-white border-b-4 sm:border-b-8 border-black mb-4 sm:mb-6 px-2 sm:px-4 leading-tight shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-black rotate-1">
-              CRASHED
-            </h2>
-            
-            <div className="bg-white border-4 border-black p-4 sm:p-6 w-full max-w-[280px] sm:max-w-sm shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 sm:mb-6 transform -rotate-1">
-               <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
-                 <span className="font-bold text-gray-600 text-sm sm:text-base">DISTANCE</span>
-                 <span className="font-black text-xl sm:text-2xl">{finalScore.distance}m</span>
-               </div>
-               <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
-                 <span className="font-bold text-gray-600 text-sm sm:text-base">COINS</span>
-                 <span className="font-black text-xl sm:text-2xl text-yellow-600">${finalScore.coins}</span>
-               </div>
-               <div className="flex justify-between pt-1 sm:pt-2 items-end">
-                 <span className="font-black text-lg sm:text-xl">TOTAL SCORE</span>
-                 <span className="font-black text-3xl sm:text-4xl">{finalScore.total}</span>
-               </div>
-            </div>
-
-            <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[280px] sm:max-w-sm">
-                <button 
-                  onClick={handleShare}
-                  className="w-full py-3 sm:py-4 bg-black text-white border-4 border-black font-black text-lg sm:text-xl shadow-[4px_4px_0px_0px_#FFFFFF] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#FFFFFF] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="uppercase tracking-wider">Share Score</span>
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-                </button>
+            {/* --- START SCREEN --- */}
+            {gameState === 'start' && (
+              <div className="absolute inset-0 z-20 bg-[#87CEEB] flex flex-col items-center justify-center p-4 sm:p-6 text-center">
                 
-                <button 
-                  onClick={restartGame}
-                  className="w-full py-2 sm:py-3 bg-white border-4 border-black font-black text-base sm:text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-2 active:shadow-none transition-all text-black"
-                >
-                  RETRY RUN
-                </button>
-            </div>
-          </div>
-        )}
+                <h1 className="text-5xl sm:text-6xl md:text-8xl font-black mb-6 text-black drop-shadow-[3px_3px_0px_#fff] leading-none tracking-tighter">
+                  KLAZ<br/>RUNNER
+                </h1>
+                
+                {/* Form Container */}
+                <div className="w-full space-y-2 sm:space-y-4 max-w-[280px] sm:max-w-sm relative z-30">
+                  
+                  <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+                    <label className="block text-[10px] sm:text-xs font-bold bg-black text-white w-fit px-2 py-0.5 mb-0.5">USER_ID (REQ)</label>
+                    <input 
+                      type="text" placeholder="YOUR NAME" 
+                      value={formData.name}
+                      className="w-full bg-transparent outline-none font-black uppercase text-lg sm:text-2xl placeholder:text-gray-300 text-black h-6 sm:h-8"
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    />
+                  </div>
 
-        {/* PHASER MOUNT POINT */}
-        <div ref={gameContainerRef} className="flex-grow w-full bg-cyan-100" />
-      </div>
-      
-      {/* 6. FOOTER CONTROLS */}
-      <div className="absolute bottom-6 z-0 pointer-events-none">
-        <p className="bg-black text-white px-3 py-1 sm:px-4 sm:py-2 font-bold text-[10px] sm:text-xs inline-block shadow-[3px_3px_0px_0px_#888] tracking-widest uppercase">
-          [SPACE] or [TAP] to Jump
-        </p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
+                        <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">COLLEGE</label>
+                        <input 
+                          type="text" placeholder="NCET" 
+                          value={formData.college}
+                          className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
+                          onChange={(e) => setFormData({...formData, college: e.target.value})}
+                        />
+                    </div>
+                    <div className="bg-white border-2 sm:border-4 border-black p-1 sm:p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-left">
+                        <label className="block text-[8px] sm:text-[10px] font-bold text-gray-400">BRANCH</label>
+                        <input 
+                          type="text" placeholder="CSE" 
+                          value={formData.branch}
+                          className="w-full bg-transparent outline-none font-bold uppercase text-xs sm:text-sm text-black h-4 sm:h-auto"
+                          onChange={(e) => setFormData({...formData, branch: e.target.value})}
+                        />
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={startGame}
+                    className="w-full py-2 sm:py-4 mt-1 bg-[#FFD700] border-2 sm:border-4 border-black font-black text-xl sm:text-2xl hover:bg-[#ffe135] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wide text-black"
+                  >
+                    Start_Run();
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* --- GAME OVER SCREEN --- */}
+            {gameState === 'gameover' && (
+              <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 sm:p-8 bg-[#FF4444] bg-opacity-95 backdrop-grayscale">
+                <h2 className="text-5xl sm:text-7xl font-black text-white border-b-4 sm:border-b-8 border-black mb-4 sm:mb-6 px-2 sm:px-4 leading-tight shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-black rotate-1">
+                  CRASHED
+                </h2>
+                
+                <div className="bg-white border-4 border-black p-4 sm:p-6 w-full max-w-[280px] sm:max-w-sm shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 sm:mb-6 transform -rotate-1">
+                  <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
+                    <span className="font-bold text-gray-600 text-sm sm:text-base">DISTANCE</span>
+                    <span className="font-black text-xl sm:text-2xl">{finalScore.distance}m</span>
+                  </div>
+                  <div className="flex justify-between border-b-2 border-black border-dashed pb-1 sm:pb-2 mb-1 sm:mb-2">
+                    <span className="font-bold text-gray-600 text-sm sm:text-base">COINS</span>
+                    <span className="font-black text-xl sm:text-2xl text-yellow-600">${finalScore.coins}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 sm:pt-2 items-end">
+                    <span className="font-black text-lg sm:text-xl">TOTAL SCORE</span>
+                    <span className="font-black text-3xl sm:text-4xl">{finalScore.total}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[280px] sm:max-w-sm">
+                    <button 
+                      onClick={handleShare}
+                      className="w-full py-3 sm:py-4 bg-black text-white border-4 border-black font-black text-lg sm:text-xl shadow-[4px_4px_0px_0px_#FFFFFF] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#FFFFFF] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2"
+                    >
+                      <span className="uppercase tracking-wider">Share Score</span>
+                    </button>
+                    
+                    <button 
+                      onClick={restartGame}
+                      className="w-full py-2 sm:py-3 bg-white border-4 border-black font-black text-base sm:text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-2 active:shadow-none transition-all text-black"
+                    >
+                      RETRY RUN
+                    </button>
+                </div>
+              </div>
+            )}
+
+            {/* PHASER MOUNT POINT */}
+            <div ref={gameContainerRef} className="flex-grow w-full bg-cyan-100" />
+          </div>
+
+          {/* CREATOR BOX */}
+          <div className="w-full max-w-[500px] lg:max-w-[600px] bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-3 sm:p-4 flex items-center justify-between mt-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase text-gray-500 tracking-widest bg-yellow-50 w-fit px-1">
+                LEVEL DESIGNER
+              </span>
+              <span className="text-xl sm:text-2xl font-black uppercase leading-none mt-1 truncate max-w-[150px] sm:max-w-xs">
+                {config.creator || 'KLAZ'}
+              </span>
+            </div>
+
+            <a 
+              href={
+                config.creator_social 
+                ? (config.creator_social.startsWith('http') ? config.creator_social : `https://instagram.com/${config.creator_social}`)
+                : 'https://instagram.com/klaz.app'
+              }
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-[#FFD700] border-2 sm:border-4 border-black px-3 py-2 sm:px-4 font-black text-xs sm:text-sm uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+            >
+              <span>CONNECT</span>
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          </div>
+
+          {/* CONTROLS HINT */}
+          <div className="bg-black text-white px-4 py-1 font-bold text-[10px] sm:text-xs inline-block shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] tracking-widest uppercase mt-4">
+            [SPACE] or [TAP] to Jump
+          </div>
+        </div>
+
+        {/* === RIGHT COLUMN: LEADERBOARD === */}
+        {/* On Mobile: This naturally flows below because of grid-cols-1. */}
+        {/* On Desktop: It goes to the second column and stays sticky. */}
+        <div className="w-full h-[500px] lg:h-[600px] lg:sticky lg:top-8">
+          <LeaderboardSidebar 
+            gameId={gameId} 
+            currentPlayerName={formData.name || undefined}
+          />
+        </div>
+
       </div>
     </div>
     </>
