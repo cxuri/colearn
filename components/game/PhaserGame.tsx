@@ -578,37 +578,37 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
 
               {/* --- GAME OVER SCREEN --- */}
               {gameState === 'gameover' && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-8 bg-[#FF4444] bg-opacity-95 backdrop-grayscale">
-                  <h2 className="text-6xl font-black text-white border-b-8 border-black mb-6 px-4 leading-tight shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-black rotate-1">
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 lg:p-8 bg-[#FF4444] bg-opacity-95 backdrop-grayscale">
+                  <h2 className="text-5xl lg:text-6xl font-black text-white border-b-4 lg:border-b-8 border-black mb-4 lg:mb-6 px-2 lg:px-4 leading-tight shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-black rotate-1">
                     CRASHED
                   </h2>
                   
-                  <div className="bg-white border-4 border-black p-6 w-full max-w-sm shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6 transform -rotate-1">
-                    <div className="flex justify-between border-b-2 border-black border-dashed pb-2 mb-2">
-                      <span className="font-bold text-gray-600">DISTANCE</span>
-                      <span className="font-black text-2xl">{finalScore.distance}m</span>
+                  <div className="bg-white border-4 border-black p-4 lg:p-6 w-full max-w-[280px] lg:max-w-sm shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 lg:mb-6 transform -rotate-1">
+                    <div className="flex justify-between border-b-2 border-black border-dashed pb-1 lg:pb-2 mb-1 lg:mb-2">
+                      <span className="font-bold text-gray-600 text-sm lg:text-base">DISTANCE</span>
+                      <span className="font-black text-xl lg:text-2xl">{finalScore.distance}m</span>
                     </div>
-                    <div className="flex justify-between border-b-2 border-black border-dashed pb-2 mb-2">
-                      <span className="font-bold text-gray-600">COINS</span>
-                      <span className="font-black text-2xl text-yellow-600">${finalScore.coins}</span>
+                    <div className="flex justify-between border-b-2 border-black border-dashed pb-1 lg:pb-2 mb-1 lg:mb-2">
+                      <span className="font-bold text-gray-600 text-sm lg:text-base">COINS</span>
+                      <span className="font-black text-xl lg:text-2xl text-yellow-600">${finalScore.coins}</span>
                     </div>
-                    <div className="flex justify-between pt-2 items-end">
-                      <span className="font-black text-xl">TOTAL SCORE</span>
-                      <span className="font-black text-4xl">{finalScore.total}</span>
+                    <div className="flex justify-between pt-1 lg:pt-2 items-end">
+                      <span className="font-black text-lg lg:text-xl">TOTAL SCORE</span>
+                      <span className="font-black text-3xl lg:text-4xl">{finalScore.total}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 w-full max-w-sm">
+                  <div className="flex flex-col gap-2 lg:gap-3 w-full max-w-[280px] lg:max-w-sm">
                       <button 
                         onClick={handleShare}
-                        className="w-full py-3 bg-black text-white border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_#FFFFFF] hover:translate-y-1 hover:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-2 lg:py-3 bg-black text-white border-4 border-black font-black text-lg lg:text-xl shadow-[4px_4px_0px_0px_#FFFFFF] hover:translate-y-1 hover:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
                       >
                         <span className="uppercase tracking-wider">Share Score</span>
                       </button>
                       
                       <button 
                         onClick={restartGame}
-                        className="w-full py-3 bg-white border-4 border-black font-black text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none active:translate-y-1 transition-all text-black"
+                        className="w-full py-2 lg:py-3 bg-white border-4 border-black font-black text-base lg:text-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none active:translate-y-1 transition-all text-black"
                       >
                         RETRY RUN
                       </button>
@@ -668,4 +668,4 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     </>
   );
 };
-export default PhaserGame;
+export default PhaserGame;s
