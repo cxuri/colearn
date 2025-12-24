@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Archivo_Black, Space_Mono } from 'next/font/google';
 import { Plus, Minus, BadgeCheck, CornerRightDown, LifeBuoy, ArrowRight } from 'lucide-react';
 
@@ -9,24 +10,24 @@ const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
 const FAQs = [
   {
-    question: "Is this app affiliated with KTU?",
-    answer: "Absolutely not. If we were, the site would crash every time you opened it. We are an independent archive built by students, for students."
+    "question": "What is this app?",
+    "answer": "Klaz is a free, community driven learning app created by B.Tech students tired of traditional methods."
   },
   {
-    question: "Is it actually free?",
-    answer: "Yes. Education shouldn't be paywalled. We might add a 'Pro' tier later for advanced analytics, but the core archive (Notes/QP) will remains open source and free."
+    "question": "Is this app affiliated with KTU?",
+    "answer": "No, we are an independent archive built by students for students."
   },
   {
-    question: "How do I get off the waitlist?",
-    answer: "We let people in batches of 50 every Friday to prevent server fires. Sharing your referral link bumps you up the queue. Spamming us on Instagram might also work."
+    "question": "Is it actually free?",
+    "answer": "Yes, education should be accessible. The core archive will always remain free, though we may introduce a Pro tier later."
   },
   {
-    question: "Will you sell my data?",
-    answer: "We are too lazy to figure out how to do that. Your email is only used for login and 'Exam Tomorrow' panic alerts. No third-party tracking."
+    "question": "Will you sell my data?",
+    "answer": "We collect data solely to inform students about app updates and launches."
   },
   {
-    question: "Can I upload my own notes?",
-    answer: "Yes. That's the whole point. Contributors get a special 'Verified' badge and priority access to new features."
+    "question": "Can I upload my own notes?",
+    "answer": "Absolutely! Klaz is designed for students to share their notes with the community."
   }
 ];
 
@@ -96,7 +97,7 @@ export default function FAQ() {
                         <span className={`text-xs font-bold text-gray-400 ${mono.className}`}>#NO_BS</span>
                     </div>
                     <div className={`text-sm font-bold leading-relaxed text-gray-800 ${mono.className}`}>
-                        "We are building the tool we wished we had during our S3 exams. This isn't a startup; it's a survival mechanism."
+                        "We're building this because we need it as much as you do"
                     </div>
                     {/* Barcode */}
                     <div className="mt-6 flex items-end justify-between opacity-80">
@@ -159,21 +160,28 @@ export default function FAQ() {
                         </div>
                     </div>
 
-                    {/* Wireframe Button (Clean & Sharp) */}
-                    <button className={`
-                        group-hover:bg-black group-hover:text-white
-                        bg-white text-black px-6 py-3 
-                        text-sm font-bold uppercase tracking-wider
-                        border-2 border-black 
-                        shadow-[4px_4px_0px_0px_#000] 
-                        hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
-                        transition-all duration-200
-                        flex items-center gap-2
-                        ${mono.className}
-                    `}>
+
+                    <Link 
+                        href="https://linkedin.com/in/dhaneshupai" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`
+                            group
+                            bg-white text-black px-6 py-3 
+                            text-sm font-bold uppercase tracking-wider
+                            border-[4px] border-black 
+                            shadow-[4px_4px_0px_0px_#000] 
+                            hover:translate-x-[2px] hover:translate-y-[2px] 
+                            hover:shadow-none
+                            hover:bg-black hover:text-white
+                            transition-all duration-200
+                            flex items-center justify-center gap-2
+                            ${mono.className}
+                        `}
+                    >
                         Contact Support
-                        <ArrowRight size={16} />
-                    </button>
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
                 </div>
             </div>
 

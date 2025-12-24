@@ -63,7 +63,6 @@ export default function Manifesto() {
         <div className="text-right hidden md:block">
            <p className={`text-gray-500 text-xs uppercase tracking-widest max-w-xs text-left md:text-right ${mono.className}`}>
               We reject the bloat. <br/>
-              We reject the ads. <br/>
               We reject the chaos.
            </p>
         </div>
@@ -80,19 +79,19 @@ export default function Manifesto() {
         <ManifestoItem 
           num="02"
           title="Built by Victims."
-          desc="We are students, not a corporation. We know the pain of 'Module 3 not found' the night before the exam."
+          desc="We are students, We know how it feel's when you get ignored by all your friends and faculty, the night before exams" 
           icon={ShieldAlert}
         />
         <ManifestoItem 
           num="03"
-          title="Speed > Aesthetics."
-          desc="No fancy animations that slow you down. No login walls for basic data. Get in, learn, get out."
+          title="Enhanced Learning Experience."
+          desc="We offer diverse learning methods and pace-based options to cater to every student's unique journey." 
           icon={Zap}
         />
         <ManifestoItem 
           num="04"
-          title="No Soldier Left Behind."
-          desc="The backbencher deserves the same resources as the topper. We democratize the 9.0 GPA."
+          title="Backlog Relief."
+          desc="We understand the struggle to clear backlogs. Every student deserves the support to succeed and thrive." 
           icon={Crosshair}
         />
       </div>

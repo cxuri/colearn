@@ -10,7 +10,8 @@ import {
   Globe,
   Server,
   Zap,
-  BrainCircuit
+  BrainCircuit,
+  Activity,
 } from 'lucide-react';
 
 const archivo = Archivo_Black({ weight: '400', subsets: ['latin'] });
@@ -24,14 +25,14 @@ const MODULES = [
     name: 'NEURAL CORE', 
     version: 'v0.5.0', 
     status: 'TRAINING', 
-    tech: 'LLM / RAG',
+    tech: 'PYTHON',
     bg: 'bg-[#E11D48]', // Deep Rose (Industrial Red)
     fg: 'text-white',
     icon: BrainCircuit
   },
   { 
     id: 'APP', 
-    name: 'MOBILE APP', 
+    name: 'CROSS PLATFORM DEVELOPMENT', 
     version: 'ALPHA_1', 
     status: 'BUILDING', 
     tech: 'FLUTTER / DART', 
@@ -39,17 +40,7 @@ const MODULES = [
     fg: 'text-white',
     icon: Smartphone
   },
-  { 
-    id: 'WEB', 
-    name: 'WEB CLIENT', 
-    version: 'v1.0.2', 
-    status: 'LIVE', 
-    tech: 'NEXT.JS 14',
-    bg: 'bg-[#10B981]', // Emerald (Matches Hero/Blueprint)
-    fg: 'text-black',
-    icon: Globe
-  },
-  { 
+  {
     id: 'API', 
     name: 'BACKEND API', 
     version: 'v0.9.5', 
@@ -153,76 +144,88 @@ export default function StatusPage() {
       </div>
 
       {/* --- MAIN CONTENT --- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-12 relative z-20">
+         <div className="max-w-7xl mx-auto px-4 md:px-6 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-20">
 
-        {/* 1. MODULE GRID (Cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-           {MODULES.map((mod) => (
-              <div key={mod.id} className={`bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_#000] hover:-translate-y-2 hover:shadow-[12px_12px_0px_0px_#000] transition-all group`}>
-                 <div className="flex justify-between items-start mb-6">
-                    <div className="text-black">
-                        <mod.icon size={32} strokeWidth={2.5} />
-                    </div>
-                    {/* Status Badge */}
-                    <span className={`px-2 py-1 text-xs font-bold border-2 border-black ${mod.bg} ${mod.fg} ${mono.className}`}>
-                       {mod.status}
-                    </span>
-                 </div>
-                 
-                 <h3 className="text-3xl font-black uppercase leading-none mb-2 text-black">{mod.name}</h3>
-                 <p className={`text-xs font-bold text-black uppercase tracking-widest ${mono.className}`}>
-                    {mod.tech}
-                 </p>
-              </div>
-           ))}
-        </div>
+         {/* 1. MODULES (Left Sidebar - 4 Columns) */}
+         <div className="lg:col-span-4 space-y-6">
+            <div className="flex items-center gap-3 mb-6 border-b-4 border-black pb-2">
+               <Activity className="text-black" size={24} strokeWidth={3} />
+               <h2 className={`text-xl font-black uppercase text-black ${mono.className}`}>Active_Modules</h2>
+            </div>
 
-        {/* 2. ROADMAP (Full Width) */}
-        <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[12px_12px_0px_0px_#000]">
-           <div className="flex items-center gap-3 mb-10 border-b-4 border-black pb-4">
-              <Zap size={32} fill="black" className="text-black"/>
-              <h2 className="text-3xl md:text-4xl font-black uppercase text-black">Mission Plan</h2>
-           </div>
+            <div className="flex flex-col gap-4">
+               {MODULES.map((mod) => (
+               <div key={mod.id} className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_#000] flex justify-between items-center group">
+                  <div>
+                     <h3 className="text-xl font-black uppercase leading-tight text-black">{mod.name}</h3>
+                     <p className={`text-[10px] font-bold uppercase text-black opacity-70 ${mono.className}`}>{mod.tech}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-[10px] font-black border-2 border-black shadow-[2px_2px_0px_0px_#000] ${mod.bg} ${mod.fg}`}>
+                     {mod.status}
+                  </span>
+               </div>
+               ))}
+            </div>
+         </div>
 
-           <div className="space-y-0 relative">
-              {/* Vertical Line */}
-              <div className="absolute left-[18px] md:left-[26px] top-4 bottom-10 w-[4px] md:w-[6px] bg-black/10"></div>
-              
-              {ROADMAP.map((phase, i) => (
-                 <div key={i} className={`relative pl-14 md:pl-20 pb-12 ${phase.done || phase.current ? 'opacity-100' : 'opacity-50 grayscale'}`}>
-                    
-                    {/* Icon Bubble */}
-                    <div className={`absolute left-0 top-0 w-10 h-10 md:w-14 md:h-14 border-4 border-black flex items-center justify-center z-10 shadow-[4px_4px_0px_0px_#000]
-                       ${phase.done ? 'bg-[#10B981]' : phase.current ? 'bg-[#FBBF24]' : 'bg-white'}
-                    `}>
-                       {phase.done ? <Check className="w-5 h-5 md:w-7 md:h-7 text-black" strokeWidth={4} /> : 
-                        phase.current ? <Construction className="w-5 h-5 md:w-7 md:h-7 animate-pulse text-black" strokeWidth={3} /> :
-                        <div className="w-3 h-3 md:w-4 md:h-4 bg-black/20"></div>}
-                    </div>
-                    
-                    <div>
-                       <div className={`flex flex-wrap gap-2 md:gap-3 items-center mb-2 ${mono.className}`}>
-                          <span className="text-[10px] md:text-xs font-bold bg-black text-white px-2 py-1">{phase.phase}</span>
-                          <span className="text-[10px] md:text-xs font-bold border-2 border-black px-2 py-1 bg-white text-black">{phase.date}</span>
-                          {/* Current Tag: Warm Amber */}
-                          {phase.current && <span className="text-[10px] md:text-xs font-bold bg-[#FBBF24] text-black px-2 py-1 border-2 border-black animate-pulse">CURRENT</span>}
-                       </div>
-                       <h3 className="text-2xl md:text-4xl font-black uppercase mb-2 text-black">{phase.title}</h3>
-                       <p className={`text-xs md:text-sm font-bold mb-4 uppercase text-black ${mono.className}`}>{phase.desc}</p>
-                       <ul className={`space-y-3 ${mono.className}`}>
-                          {phase.items.map((item, idx) => (
-                             <li key={idx} className="flex items-start gap-2 md:gap-3 text-xs md:text-sm font-bold border-l-4 border-gray-200 pl-3">
-                                <span className={phase.done ? 'line-through decoration-4 decoration-black/30 text-gray-400' : 'text-black'}>{item}</span>
-                             </li>
-                          ))}
-                       </ul>
-                    </div>
-                 </div>
-              ))}
-           </div>
-        </div>
+         {/* 2. MISSION PLAN (Main Content - 8 Columns) */}
+         <div className="lg:col-span-8">
+            <div className="flex items-center gap-3 mb-6 border-b-4 border-black pb-2">
+               <Zap className="text-black" size={24} strokeWidth={3} fill="black" />
+               <h2 className={`text-xl font-black uppercase text-black ${mono.className}`}>Mission_Plan</h2>
+            </div>
 
-      </div>
+            <div className="flex flex-col gap-8">
+               {ROADMAP.map((phase, i) => (
+               <div 
+                  key={i} 
+                  className={`border-4 border-black p-6 md:p-8 transition-all ${
+                     phase.current 
+                     ? 'bg-[#FBBF24] shadow-[10px_10px_0px_0px_#000]' 
+                     : 'bg-white opacity-60'
+                  }`}
+               >
+                  {/* Header Section */}
+                  <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+                     <div className="space-y-2">
+                     <div className={`flex gap-2 items-center ${mono.className} text-[10px] font-bold`}>
+                        <span className="bg-black text-white px-2 py-1 uppercase">{phase.phase}</span>
+                        <span className="border-2 border-black text-black px-2 py-1 uppercase bg-white">{phase.date}</span>
+                        {phase.current && (
+                           <span className="bg-black text-[#FBBF24] px-2 py-1 border-2 border-black animate-pulse">ACTIVE</span>
+                        )}
+                     </div>
+                     <h3 className="text-3xl md:text-5xl font-black uppercase leading-none text-black">
+                        {phase.title}
+                     </h3>
+                     </div>
+                     
+                     <div className="flex items-center gap-2">
+                        {phase.done && <Check size={40} strokeWidth={4} className="text-black bg-[#10B981] p-1 border-4 border-black" />}
+                        {phase.current && <Construction size={40} strokeWidth={3} className="text-black animate-bounce" />}
+                     </div>
+                  </div>
+
+                  <p className={`text-sm font-black uppercase text-black mb-6 border-l-4 border-black pl-4 ${mono.className}`}>
+                     {phase.desc}
+                  </p>
+                  
+                  {/* Task List - Explicit text-black and spacing */}
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t-4 border-black pt-6">
+                     {phase.items.map((item, idx) => (
+                     <li key={idx} className={`flex items-start gap-3 text-xs md:text-sm font-black text-black ${mono.className}`}>
+                        <div className={`mt-1 w-3 h-3 border-2 border-black flex-shrink-0 ${phase.done ? 'bg-black' : 'bg-transparent'}`} />
+                        <span className={phase.done ? 'line-through decoration-2 opacity-50' : ''}>
+                           {item}
+                        </span>
+                     </li>
+                     ))}
+                  </ul>
+               </div>
+               ))}
+            </div>
+         </div>
+         </div>
 
     </main>
   );

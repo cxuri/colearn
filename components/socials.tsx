@@ -51,17 +51,6 @@ const SOCIAL_LINKS: SocialLink[] = [
     desc: 'Discussions & theories',
     badge: { text: 'HOT TOPIC', icon: Flame }
   },
-  {
-    id: 'discord',
-    label: 'Discord',
-    handle: 'discord.gg/klaz',
-    url: 'https://discord.gg/yourlink', 
-    // Uses your local file
-    iconSrc: '/discord.png',
-    bgColor: 'bg-[#5865F2]', // Discord Blurple
-    desc: 'Voice channels & chaos',
-    badge: { text: '99+ PINGS', icon: Bell }
-  },
 ];
 
 export default function Socials() {
