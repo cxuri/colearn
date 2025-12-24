@@ -645,14 +645,22 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             </div>
 
             {/* CONTROLS HINT */}
-            <div className="bg-black text-white px-4 py-1 font-bold text-[10px] inline-block shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] tracking-widest uppercase mt-4 mb-8 lg:mb-0">
+            <div className="bg-black text-white px-4 py-1 font-bold text-[10px] inline-block shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] tracking-widest uppercase mt-4 mb-4 lg:mb-0">
               [SPACE] or [TAP] to Jump
             </div>
+
+            {/* --- NEW: CREATE YOUR OWN BUTTON (WITH HIGHLIGHT) --- */}
+            <a 
+              href="/"
+              className="w-full max-w-[550px] lg:max-w-none bg-black text-white hover:bg-[#FFD700] hover:text-black border-4 border-black py-3 lg:py-4 font-black text-lg lg:text-xl uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,215,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 mt-4 text-center cursor-pointer"
+            >
+              <span>🛠️ CREATE YOUR OWN LEVEL</span>
+            </a>
+
           </div>
 
           {/* === RIGHT COLUMN: LEADERBOARD === */}
-          {/* Scaled up width and height */}
-          <div className="w-full max-w-[550px] lg:w-[400px] lg:h-[calc(75vh+120px)] lg:max-h-[900px]">
+          <div className="w-full max-w-[550px] lg:w-[400px] lg:h-[calc(75vh+200px)] lg:max-h-[950px] mb-8 lg:mb-0">
             <LeaderboardSidebar 
               key={leaderboardKey}
               gameId={gameId} 
