@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             'audio/aac',     // aac
             'audio/flac',    // flac
             'audio/midi',    // midi
-            'audio/x-wav'    // alternative wav header
+            'audio/x-wav',    // alternative wav header
           ],
         };
       },

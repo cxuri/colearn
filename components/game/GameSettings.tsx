@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { upload } from '@vercel/blob/client'; // npm install @vercel/blob
+import { upload } from '@vercel/blob/client'; 
 import { saveGameConfig } from '@/app/actions';
 
 // --- STYLES FOR GRID BACKGROUND ---
@@ -17,7 +17,7 @@ const GameSettings = () => {
   // -- STATE --
   const [activeTab, setActiveTab] = useState<'profile' | 'visuals' | 'audio' | 'physics'>('profile');
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingState, setUploadingState] = useState<string | null>(null); // tracks which file is uploading
+  const [uploadingState, setUploadingState] = useState<string | null>(null); 
 
   // Profile Data
   const [creatorName, setCreatorName] = useState('');
@@ -27,7 +27,7 @@ const GameSettings = () => {
   const [gravity, setGravity] = useState(1600);
   const [speed, setSpeed] = useState(6);
 
-  // File URLs (The final URLs from Vercel Blob)
+  // File URLs
   const [fileUrls, setFileUrls] = useState({
     player: null as string | null,
     bgm: null as string | null,
@@ -44,19 +44,25 @@ const GameSettings = () => {
   const chunksRef = useRef<Blob[]>([]);
   const [recordingType, setRecordingType] = useState<string | null>(null);
 
-  // --- 1. CORE UPLOAD LOGIC ---
+  // --- 1. CORE UPLOAD LOGIC (WITH 3MB LIMIT) ---
   const handleBlobUpload = async (file: File | Blob, type: string, fileName: string) => {
+    // 3MB Limit Check (3 * 1024 * 1024 bytes)
+    if (file.size > 3 * 1024 * 1024) {
+        alert("File too large! Please keep it under 3MB to save bandwidth.");
+        return;
+    }
+
     setUploadingState(type);
     try {
       const newBlob = await upload(fileName, file, {
         access: 'public',
-        handleUploadUrl: '/api/upload', // Ensure you created this route in Step 1
+        handleUploadUrl: '/api/upload',
       });
 
       setFileUrls((prev) => ({ ...prev, [type]: newBlob.url }));
     } catch (error) {
       console.error('Upload failed:', error);
-      alert(`Failed to upload ${type}. Check console.`);
+      alert(`Failed to upload ${type}.`);
     } finally {
       setUploadingState(null);
     }
@@ -84,10 +90,7 @@ const GameSettings = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
-        // Draw video frame to canvas
         context.drawImage(videoRef.current, 0, 0, 100, 100);
-        
-        // Convert canvas to Blob, then Upload
         canvasRef.current.toBlob(async (blob) => {
           if (blob) {
             await handleBlobUpload(blob, 'player', `player-${Date.now()}.png`);
@@ -104,11 +107,20 @@ const GameSettings = () => {
     setIsCameraOpen(false);
   };
 
-  // --- 3. AUDIO RECORDING LOGIC ---
+  // --- 3. AUDIO RECORDING LOGIC (FIXED MIME TYPE) ---
   const startRecording = async (type: string) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      // Determine supported Audio MIME type (Chrome/Firefox vs Safari)
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+      }
+
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       chunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (e) => {
@@ -116,9 +128,13 @@ const GameSettings = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        // Upload the recorded blob
-        await handleBlobUpload(blob, type, `${type}-${Date.now()}.webm`);
+        // Create Blob with specific audio type
+        const blob = new Blob(chunksRef.current, { type: mimeType.split(';')[0] });
+        
+        // Determine extension
+        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        
+        await handleBlobUpload(blob, type, `${type}-${Date.now()}.${ext}`);
         
         stream.getTracks().forEach(track => track.stop());
         setRecordingType(null);
@@ -126,7 +142,10 @@ const GameSettings = () => {
 
       mediaRecorderRef.current.start();
       setRecordingType(type);
-    } catch (err) { alert("Microphone permission denied."); }
+    } catch (err) { 
+        console.error(err);
+        alert("Microphone permission denied or not supported."); 
+    }
   };
 
   const stopRecording = () => {
@@ -174,11 +193,8 @@ const GameSettings = () => {
   };
 
   // -- UI COMPONENTS --
-  
   return (
     <div className="min-h-screen w-full bg-[#e0f2fe] font-mono relative text-black overflow-y-auto pb-20">
-      
-      {/* BACKGROUND */}
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none fixed" style={gridStyle} />
 
       <div className="relative z-10 max-w-4xl mx-auto p-4 md:p-8">
@@ -248,35 +264,29 @@ const GameSettings = () => {
           {activeTab === 'visuals' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 className="text-3xl text-black border-l-8 border-[#FF4444] pl-4">PLAYER AVATAR</h2>
-              
               <div className="grid md:grid-cols-2 gap-8">
-                {/* Upload / Camera Area */}
-                <div className="space-y-4">
-                  <div className="bg-gray-100 border-4 border-black border-dashed p-6 text-center">
-                    {isCameraOpen ? (
-                      <div className="relative">
-                        <video ref={videoRef} autoPlay className="w-full border-4 border-black mb-4" />
-                        <button onClick={takePhoto} className="bg-red-500 text-white w-16 h-16 rounded-full border-4 border-black shadow-[2px_2px_0px_0px_#000] hover:scale-110 transition-transform" />
-                        <button onClick={stopCamera} className="absolute top-2 right-2 bg-white px-2 border-2 border-black font-bold text-xs">CLOSE</button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {uploadingState === 'player' ? (
-                            <div className="font-bold text-xl animate-pulse">UPLOADING...</div>
-                        ) : (
-                            <>
-                                <p className="font-bold text-gray-500">UPLOAD OR SNAP A PHOTO</p>
-                                <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:border-2 file:border-black file:text-sm file:font-bold file:bg-[#87CEEB] file:text-black hover:file:bg-[#FFD700] cursor-pointer" />
-                                <div className="text-center font-bold text-sm">- OR -</div>
-                                <button onClick={startCamera} className="w-full py-3 bg-black text-white font-bold border-2 border-transparent hover:border-black hover:bg-gray-900 transition-colors">OPEN CAMERA</button>
-                            </>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <div className="bg-gray-100 border-4 border-black border-dashed p-6 text-center">
+                  {isCameraOpen ? (
+                    <div className="relative">
+                      <video ref={videoRef} autoPlay className="w-full border-4 border-black mb-4" />
+                      <button onClick={takePhoto} className="bg-red-500 text-white w-16 h-16 rounded-full border-4 border-black shadow-[2px_2px_0px_0px_#000] hover:scale-110 transition-transform" />
+                      <button onClick={stopCamera} className="absolute top-2 right-2 bg-white px-2 border-2 border-black font-bold text-xs">CLOSE</button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {uploadingState === 'player' ? (
+                          <div className="font-bold text-xl animate-pulse">UPLOADING...</div>
+                      ) : (
+                          <>
+                              <p className="font-bold text-gray-500">UPLOAD OR SNAP A PHOTO</p>
+                              <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:border-2 file:border-black file:text-sm file:font-bold file:bg-[#87CEEB] file:text-black hover:file:bg-[#FFD700] cursor-pointer" />
+                              <div className="text-center font-bold text-sm">- OR -</div>
+                              <button onClick={startCamera} className="w-full py-3 bg-black text-white font-bold border-2 border-transparent hover:border-black hover:bg-gray-900 transition-colors">OPEN CAMERA</button>
+                          </>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                {/* Preview Area */}
                 <div className="flex flex-col items-center justify-center bg-[#e0f2fe] border-4 border-black p-4 shadow-[4px_4px_0px_0px_#000]">
                   <p className="font-bold mb-4 bg-white px-2 border-2 border-black">PREVIEW</p>
                   <div className="relative w-32 h-32 border-4 border-black bg-white overflow-hidden flex items-center justify-center">
@@ -286,7 +296,6 @@ const GameSettings = () => {
                       <div className="w-16 h-16 bg-[#22c55e] border-2 border-black" />
                     )}
                   </div>
-                  {/* Hidden Canvas for capture */}
                   <canvas ref={canvasRef} width="100" height="100" className="hidden" />
                 </div>
               </div>
@@ -297,7 +306,6 @@ const GameSettings = () => {
           {activeTab === 'audio' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 className="text-3xl text-black border-l-8 border-[#8b5cf6] pl-4">SOUND STUDIO</h2>
-              
               <div className="grid gap-6">
                 {[
                   { id: 'jump', label: 'JUMP SFX', color: 'bg-green-100' },
@@ -308,7 +316,6 @@ const GameSettings = () => {
                   <div key={item.id} className={`flex flex-col md:flex-row items-center gap-4 border-4 border-black p-4 ${item.color} shadow-[4px_4px_0px_0px_#000]`}>
                     <div className="text-black text-xl w-48 font-black">{item.label}</div>
                     
-                    {/* Audio Player if exists */}
                     {fileUrls[item.id as keyof typeof fileUrls] && (
                       <audio controls src={fileUrls[item.id as keyof typeof fileUrls]!} className="h-10 w-full md:w-48" />
                     )}
@@ -347,39 +354,23 @@ const GameSettings = () => {
           {activeTab === 'physics' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 className="text-3xl text-black border-l-8 border-[#FFD700] pl-4">GAME PHYSICS</h2>
-              
               <div className="space-y-8 p-6 bg-gray-50 border-4 border-black shadow-[inset_4px_4px_0px_0px_rgba(0,0,0,0.1)]">
-                
-                {/* Gravity Slider */}
                 <div className="space-y-2">
                   <div className="flex justify-between font-bold text-xl">
                     <label>GRAVITY FORCE</label>
                     <span className="bg-black text-white px-2">{gravity}</span>
                   </div>
-                  <input 
-                    type="range" min="500" max="3000" step="50"
-                    value={gravity}
-                    onChange={(e) => setGravity(Number(e.target.value))}
-                    className="w-full h-6 bg-white border-2 border-black appearance-none cursor-pointer accent-[#FF4444]"
-                  />
+                  <input type="range" min="500" max="3000" step="50" value={gravity} onChange={(e) => setGravity(Number(e.target.value))} className="w-full h-6 bg-white border-2 border-black appearance-none cursor-pointer accent-[#FF4444]" />
                   <p className="text-xs font-bold text-gray-500">HIGHER = FALL FASTER (HARDER)</p>
                 </div>
-
-                {/* Speed Slider */}
                 <div className="space-y-2">
                   <div className="flex justify-between font-bold text-xl">
                     <label>GAME SPEED</label>
                     <span className="bg-black text-white px-2">{speed}</span>
                   </div>
-                  <input 
-                    type="range" min="4" max="20" step="1"
-                    value={speed}
-                    onChange={(e) => setSpeed(Number(e.target.value))}
-                    className="w-full h-6 bg-white border-2 border-black appearance-none cursor-pointer accent-[#FFD700]"
-                  />
+                  <input type="range" min="4" max="20" step="1" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="w-full h-6 bg-white border-2 border-black appearance-none cursor-pointer accent-[#FFD700]" />
                   <p className="text-xs font-bold text-gray-500">BASE SCROLLING SPEED</p>
                 </div>
-
               </div>
             </div>
           )}
