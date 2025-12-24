@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { Game as GameType } from 'phaser';
-import { SearchParams } from 'next/dist/server/request/search-params';
-import LeaderboardSidebar from './Leaderboard';
+import LeaderboardSidebar from './Leaderboard'; // Ensure this path is correct
 import { useSearchParams } from 'next/navigation';
 import { submitScore } from '@/app/actions';
+
 // --- 1. CSS STYLES FOR SNOW ANIMATION ---
 const snowStyles = `
   @keyframes snowfall {
@@ -45,40 +45,64 @@ interface GameConfigProps {
 }
 
 const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
+  // HOOKS MUST BE AT THE TOP
+  const searchParams = useSearchParams();
+  const gameId = searchParams?.get('id') ?? '';
+
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const gameInstance = useRef<GameType | null>(null);
   
+  // FIX 1: Create a Ref for formData so Phaser can access current values inside closures
+  const formDataRef = useRef({ name: '', college: '', branch: '' });
+
   // -- REACT STATE --
   const [gameState, setGameState] = useState<'start' | 'playing' | 'gameover'>('start');
   const [formData, setFormData] = useState({ name: '', college: '', branch: '' });
   const [finalScore, setFinalScore] = useState({ distance: 0, coins: 0, total: 0 });
+  
+  // FIX 2: Add state to force leaderboard refresh
+  const [leaderboardKey, setLeaderboardKey] = useState(0);
+
+  // -- SYNC STATE TO REF --
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   // -- LOAD SAVED DATA --
   useEffect(() => {
     const savedData = localStorage.getItem('klaz_player_data');
     if (savedData) {
-      try { setFormData(JSON.parse(savedData)); } catch (e) {}
+      try { 
+        const parsed = JSON.parse(savedData);
+        setFormData(parsed);
+        formDataRef.current = parsed; // Sync ref immediately
+      } catch (e) {}
     }
   }, []);
 
   // -- BRIDGE FUNCTIONS --
   const handleGameOver = (dist: number, coins: number) => {
     const totalScore = dist + (coins * 50);
-    setFinalScore({ distance: dist, coins: coins, total: dist + (coins * 50) });
+    setFinalScore({ distance: dist, coins: coins, total: totalScore });
     setGameState('gameover');
 
+    // FIX 1 Usage: Use the Ref to get the LATEST name, not the stale one
+    const currentData = formDataRef.current;
+
     // --- SUBMIT SCORE LOGIC ---
-    if (gameId && formData.name) {
-      // We don't await this so the UI doesn't freeze while uploading
+    if (gameId && currentData.name) {
+      console.log("Submitting score for:", currentData.name);
+      
       submitScore(
         gameId, 
-        formData.name, 
+        currentData.name, 
         totalScore, 
-        formData.college, 
-        formData.branch
+        currentData.college, 
+        currentData.branch
       ).then(() => {
         console.log("Score saved!");
-        // Optional: If you have a refresh function passed down to sidebar, call it here
+        // FIX 2 Usage: Trigger leaderboard refresh
+        setLeaderboardKey(prev => prev + 1);
       }).catch(err => console.error("Score save failed", err));
     }
   };
@@ -137,7 +161,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         private terrainGraphics!: Phaser.GameObjects.Graphics;
         
         // Game State
-        private gameSpeed = config.physics.speed; // Dynamic Speed
+        private gameSpeed = config.physics.speed; 
         private globalDistance = 0;
         private coinScore = 0;
         private isJumping = false;
@@ -169,7 +193,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         init() { this.registry.set('onGameOver', handleGameOver); }
 
         preload() {
-          // --- FIX: USE CONFIG ASSETS ---
           if (config.assets.player) this.load.image('player', config.assets.player);
           if (config.assets.coin) this.load.image('coin', config.assets.coin);
           if (config.assets.obstacle) this.load.image('spike', config.assets.obstacle);
@@ -181,7 +204,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           if (config.assets.powerup) this.load.audio('powerup', config.assets.powerup);
 
           this.load.on('complete', () => {
-            // Fallback Texture Generator (if assets missing)
             const makeTexture = (key: string, color: number, lineColor: number, w: number, h: number, type: 'rect'|'circle'|'tri'|'diamond') => {
               if (this.textures.exists(key)) return;
               const g = this.make.graphics({x:0, y:0});
@@ -214,7 +236,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           this.canDoubleJump = false;
           this.lastJumpTime = 0;
 
-          // Audio Setup
           if (this.cache.audio.exists('bgm')) {
             this.bgmSound = this.sound.add('bgm', { loop: true, volume: 0.5 });
             this.bgmSound.play();
@@ -238,14 +259,12 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           this.powerupsGroup = this.physics.add.group();
 
           this.player = this.physics.add.sprite(200, 200, 'player');
-          // --- FIX: USE CONFIG GRAVITY ---
           this.player.setGravityY(config.physics.gravity);
           this.player.setCollideWorldBounds(false);
           this.player.clearTint();
           
           this.terrainGraphics = this.add.graphics();
 
-          // --- HUD ---
           this.hudText = this.add.text(20, 20, "DIST: 0m\nCOINS: 0", {
             fontFamily: 'Courier New, monospace', 
             fontSize: '24px', 
@@ -270,7 +289,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           .setStroke('#000', 4)
           .setShadow(4, 4, '#000000', 0, false, true);
 
-          // Input Handling
           if (this.input.keyboard) {
             this.input.keyboard.on('keydown-SPACE', () => { this.attemptJump(); });
           }
@@ -294,7 +312,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
           const playerBottom = this.player.y + (this.player.height / 2);
           const isGrounded = (playerBottom >= playerGroundY - 15);
 
-          // Fixed jump velocity of -700 works well for most gravity settings between 1000-2000
           const jumpVel = -700; 
 
           if (isGrounded || !this.isJumping) {
@@ -327,9 +344,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
                 spike.body.allowGravity = false; 
                 spike.body.setImmovable(true); 
                 
-                // Adjust collider based on texture type
                 if(this.textures.get('spike').key === 'spike') {
-                   // Generic fit
                    spike.body.setSize(20, 30); spike.body.setOffset(10, 20);
                 }
                 
@@ -428,7 +443,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             if (onGameOver) { onGameOver(Math.floor(this.globalDistance / 10), this.coinScore); }
           });
 
-          // --- UI UPDATES ---
           const distM = Math.floor(this.globalDistance / 10);
           this.hudText.setText(`DIST: ${distM}m\nCOINS: ${this.coinScore}`);
           
@@ -462,10 +476,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         }
     };
   }, [gameState, config]); // Re-run if config changes
-
-  // Add this inside your component before the return if not already present
-  const searchParams = useSearchParams();
-  const gameId = searchParams?.get('id') ?? '';
 
   return (
     <>
@@ -519,7 +529,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
       </a>
 
       {/* 5. RESPONSIVE GRID LAYOUT CONTAINER */}
-      {/* Mobile: 1 Column. Desktop: 2 Columns (Game Left, Leaderboard Right) */}
       <div className="relative z-10 w-full max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start mt-12 lg:mt-4">
 
         {/* === LEFT COLUMN: GAME, CREATOR & CONTROLS === */}
@@ -638,7 +647,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             <a 
               href={
                 config.creator_social 
-                ? (config.creator_social.startsWith('http') ? config.creator_social : config.creator_social)
+                ? (config.creator_social.startsWith('http') ? config.creator_social : `https://${config.creator_social}`)
                 : 'https://instagram.com/klaz.app'
               }
               target="_blank" 
@@ -657,10 +666,10 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         </div>
 
         {/* === RIGHT COLUMN: LEADERBOARD === */}
-        {/* On Mobile: This naturally flows below because of grid-cols-1. */}
-        {/* On Desktop: It goes to the second column and stays sticky. */}
+        {/* FIX 2 Usage: Passed the key to force re-render/fetch on update */}
         <div className="w-full h-[500px] lg:h-[600px] lg:sticky lg:top-8">
           <LeaderboardSidebar 
+            key={leaderboardKey}
             gameId={gameId} 
             currentPlayerName={formData.name || undefined}
           />
