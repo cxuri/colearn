@@ -640,8 +640,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
                 target="_blank" rel="noopener noreferrer"
                 className="bg-[#FFD700] border-2 sm:border-4 border-black px-3 py-1 font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
               >
-                <span>CONNECT</span>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                <span className='text-black'>CONNECT</span>
               </a>
             </div>
 
