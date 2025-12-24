@@ -104,7 +104,7 @@ const LeaderboardSidebar: React.FC<LeaderboardProps> = ({
             <div 
               key={index} 
               className={`
-                bg-white border-2 border-black p-2 flex items-center justify-between shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all
+                bg-white border-2 text-black border-black p-2 flex items-center justify-between shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all
                 ${currentPlayerName === entry.player_name ? 'bg-yellow-50 border-yellow-600' : ''}
               `}
             >
@@ -116,7 +116,7 @@ const LeaderboardSidebar: React.FC<LeaderboardProps> = ({
                 <div className="flex flex-col min-w-0">
                   <span className="font-black text-sm uppercase truncate">{entry.player_name}</span>
                   {entry.college && (
-                    <span className="text-[10px] text-gray-500 font-bold truncate flex items-center gap-1">
+                    <span className="text-[10px] text-gray-500 text-bold truncate flex items-center gap-1">
                       <MapPin size={8} /> {entry.college}
                     </span>
                   )}
@@ -126,7 +126,7 @@ const LeaderboardSidebar: React.FC<LeaderboardProps> = ({
               {/* Score */}
               <div className="text-right pl-2">
                 <span className="block font-black text-lg leading-none">{entry.score}</span>
-                <span className="text-[9px] font-bold text-gray-400 uppercase">PTS</span>
+                <span className="text-[9px] text-bold text-gray-400 uppercase">PTS</span>
               </div>
             </div>
           ))

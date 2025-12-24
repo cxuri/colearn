@@ -626,7 +626,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
                 <span className="text-[10px] font-bold uppercase text-gray-500 tracking-widest bg-yellow-50 w-fit px-1">
                   LEVEL DESIGNER
                 </span>
-                <span className="text-xl font-black uppercase leading-none mt-1 truncate max-w-[150px]">
+                <span className="text-xl text-black uppercase leading-none mt-1 truncate max-w-[150px]">
                   {config.creator || 'KLAZ'}
                 </span>
               </div>
@@ -668,4 +668,4 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     </>
   );
 };
-export default PhaserGame;s
+export default PhaserGame;
