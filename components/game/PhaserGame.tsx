@@ -649,12 +649,14 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               [SPACE] or [TAP] to Jump
             </div>
 
-            {/* --- NEW: CREATE YOUR OWN BUTTON (WITH HIGHLIGHT) --- */}
+            {/* --- NEW: HIGH VISIBILITY "MAKE" BUTTON --- */}
             <a 
-              href="/"
-              className="w-full max-w-[550px] lg:max-w-none bg-black text-white hover:bg-[#FFD700] hover:text-black border-4 border-black py-3 lg:py-4 font-black text-lg lg:text-xl uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(255,215,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 mt-4 text-center cursor-pointer"
+              href="/play/make"
+              className="group relative w-full max-w-[550px] lg:max-w-none bg-[#FFD700] text-black border-4 border-black py-4 lg:py-5 font-black text-xl lg:text-2xl uppercase tracking-widest shadow-[6px_6px_0px_0px_#000] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all flex items-center justify-center gap-3 mt-6 text-center cursor-pointer overflow-hidden"
             >
-              <span>🛠️ CREATE YOUR OWN LEVEL</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
+              <span className="text-2xl">🛠️</span>
+              <span>BUILD YOUR OWN LEVEL</span>
             </a>
 
           </div>
