@@ -64,7 +64,6 @@ const GameSettings = () => {
 
   const handleCreateNew = () => {
     setGameResult(null);
-    // Form is already cleared by handleSave, but just in case
     resetForm();
   };
 
@@ -182,15 +181,15 @@ const GameSettings = () => {
       const result = await saveGameConfig(payload);
       
       if (result.success) {
-        // Assume the game URL is based on the ID (adjust based on your actual routing)
-        const gameUrl = `${window.location.origin}/play/${result.gameId}`;
+        // --- UPDATED URL STRUCTURE HERE ---
+        // Uses current origin + /play?id=ID
+        const gameUrl = `${window.location.origin}/play?id=${result.gameId}`;
         
         setGameResult({
           id: result.gameId,
           url: gameUrl
         });
         
-        // Clear forms immediately so they are fresh if user clicks "Make Another"
         resetForm();
       }
       else throw new Error(result.message);
