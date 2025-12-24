@@ -52,9 +52,16 @@ export async function submitScore(gameId: string, playerName: string, score: num
     await sql`
       INSERT INTO leaderboard (player_name, score, game_id, college, branch)
       VALUES (${playerName}, ${score}, ${gameId}, ${college}, ${branch})
+      ON CONFLICT (game_id, player_name) 
+      DO UPDATE SET 
+        score = GREATEST(leaderboard.score, EXCLUDED.score),
+        college = COALESCE(EXCLUDED.college, leaderboard.college),
+        branch = COALESCE(EXCLUDED.branch, leaderboard.branch)
     `;
-    // Revalidate the leaderboard page so the new score shows up immediately
-    revalidatePath(`/game/${gameId}/leaderboard`);
+
+    // Revalidate so the leaderboard sidebar updates immediately
+    revalidatePath(`/play`); 
+    
     return { success: true, message: 'Score submitted successfully.' };
   } catch (error: any) {
     console.error('Database error when submitting score:', error);

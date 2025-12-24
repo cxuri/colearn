@@ -5,6 +5,7 @@ import type { Game as GameType } from 'phaser';
 import { SearchParams } from 'next/dist/server/request/search-params';
 import LeaderboardSidebar from './Leaderboard';
 import { useSearchParams } from 'next/navigation';
+import { submitScore } from '@/app/actions';
 // --- 1. CSS STYLES FOR SNOW ANIMATION ---
 const snowStyles = `
   @keyframes snowfall {
@@ -62,8 +63,24 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
 
   // -- BRIDGE FUNCTIONS --
   const handleGameOver = (dist: number, coins: number) => {
+    const totalScore = dist + (coins * 50);
     setFinalScore({ distance: dist, coins: coins, total: dist + (coins * 50) });
     setGameState('gameover');
+
+    // --- SUBMIT SCORE LOGIC ---
+    if (gameId && formData.name) {
+      // We don't await this so the UI doesn't freeze while uploading
+      submitScore(
+        gameId, 
+        formData.name, 
+        totalScore, 
+        formData.college, 
+        formData.branch
+      ).then(() => {
+        console.log("Score saved!");
+        // Optional: If you have a refresh function passed down to sidebar, call it here
+      }).catch(err => console.error("Score save failed", err));
+    }
   };
 
   const startGame = () => {
@@ -621,7 +638,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
             <a 
               href={
                 config.creator_social 
-                ? (config.creator_social.startsWith('http') ? config.creator_social : `https://instagram.com/${config.creator_social}`)
+                ? (config.creator_social.startsWith('http') ? config.creator_social : config.creator_social)
                 : 'https://instagram.com/klaz.app'
               }
               target="_blank" 
