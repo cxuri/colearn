@@ -484,7 +484,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     <>
     <style dangerouslySetInnerHTML={{ __html: snowStyles }} />
     
-    {/* MAIN PAGE WRAPPER - FIXED 100dvh (No Page Scroll) */}
+    {/* MAIN PAGE WRAPPER - FIXED 100dvh */}
     <div className="fixed inset-0 h-[100dvh] w-full bg-[#e0f2fe] font-mono relative selection:bg-yellow-400 selection:text-black overflow-hidden flex flex-col">
 
       {/* 1. GRAPH PAPER GRID BACKGROUND */}
@@ -502,20 +502,30 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
         ))}
       </div>
 
-      {/* 3. TOP NAVIGATION (Absolute) */}
-      <a href="https://klaz.app" target="_blank" rel="noopener noreferrer" className="fixed top-4 left-4 z-50 bg-black text-white border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all rotate-[-2deg] hover:rotate-0">
+      {/* 3. DESKTOP NAVIGATION (FIXED CORNERS) - Hidden on Mobile */}
+      <a href="https://klaz.app" target="_blank" rel="noopener noreferrer" className="hidden lg:block fixed top-4 left-4 z-50 bg-black text-white border-4 border-black px-4 py-2 font-black text-xl shadow-[4px_4px_0px_0px_#ff0000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all rotate-[-2deg] hover:rotate-0">
         KLAZ.APP ↗
       </a>
-      <a href="https://klaz.app/join" target="_blank" rel="noopener noreferrer" className="fixed top-4 right-4 z-50 bg-white text-black border-2 sm:border-4 border-black px-2 sm:px-4 py-1 sm:py-2 font-black text-xs sm:text-xl shadow-[2px_2px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all rotate-[2deg] hover:rotate-0">
+      <a href="https://klaz.app/join" target="_blank" rel="noopener noreferrer" className="hidden lg:block fixed top-4 right-4 z-50 bg-white text-black border-4 border-black px-4 py-2 font-black text-xl shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all rotate-[2deg] hover:rotate-0">
         JOIN KLAZ →
       </a>
 
-      {/* 4. CENTER STAGE - FLEX ROW FOR DESKTOP, COL FOR MOBILE */}
-      {/* overflow-y-auto allows internal scrolling on small screens if needed, without scrollbar bouncing */}
-      <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-6 lg:gap-8 p-4 pt-20 lg:pt-0 overflow-y-auto lg:overflow-hidden scrollbar-hide">
+      {/* 4. MOBILE NAVIGATION (STATIC HEADER) - Visible only on Mobile */}
+      {/* This removes the "bar" feel by making buttons part of the flow */}
+      <div className="lg:hidden w-full flex justify-between items-center p-2 z-50 shrink-0">
+        <a href="https://klaz.app" target="_blank" rel="noopener noreferrer" className="bg-black text-white border-2 border-black px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_#ff0000]">
+          KLAZ.APP ↗
+        </a>
+        <a href="https://klaz.app/join" target="_blank" rel="noopener noreferrer" className="bg-white text-black border-2 border-black px-2 py-1 font-bold text-xs shadow-[2px_2px_0px_0px_#000]">
+          JOIN KLAZ →
+        </a>
+      </div>
+
+      {/* 5. CENTER STAGE */}
+      {/* Removed pt-20, added flex-1 to fill remaining height */}
+      <div className="relative z-10 w-full flex-1 flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-4 lg:gap-8 p-4 lg:p-0 overflow-y-auto lg:overflow-hidden scrollbar-hide">
 
         {/* === COLUMN 1: LEFT ACTION (DESKTOP ONLY) === */}
-        {/* On Desktop: Shows on left. On Mobile: Hidden (moved below game) */}
         <div className="hidden lg:flex flex-col items-end justify-center h-full w-[200px] shrink-0">
            <a 
               href="/play/make"
@@ -609,10 +619,15 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
               </a>
             </div>
 
-            {/* MOBILE ACTION BUTTON (Visible only on mobile) */}
+            {/* CONTROLS HINT */}
+            <div className="bg-black text-white px-4 py-1 font-bold text-[10px] inline-block shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] tracking-widest uppercase mt-4">
+              [SPACE] or [TAP] to Jump
+            </div>
+
+            {/* MOBILE ACTION BUTTON */}
             <a 
               href="/play/make"
-              className="lg:hidden w-full bg-[#FFD700] text-black border-4 border-black py-4 font-black text-xl uppercase tracking-widest shadow-[6px_6px_0px_0px_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-2 mt-6 mb-8"
+              className="lg:hidden w-full bg-[#FFD700] text-black border-4 border-black py-4 font-black text-xl uppercase tracking-widest shadow-[4px_4px_0px_0px_#000] hover:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-6 mb-8"
             >
               <span>🛠️ BUILD LEVEL</span>
             </a>
