@@ -3,24 +3,16 @@
 import React, { useState, useRef } from 'react';
 import { upload } from '@vercel/blob/client'; 
 import { saveGameConfig } from '@/app/actions';
+// 1. Import Lucide Icons
+import { 
+  Camera, Upload, Mic, Check, User, Eye, Music, Zap, X 
+} from 'lucide-react';
 
-// --- ICONS (Inline SVGs to avoid dependencies) ---
-const Icons = {
-  Camera: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
-  Upload: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-  Mic: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
-  Play: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
-  Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-  Close: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-};
-
-// --- STYLES ---
 const gridStyle = {
   backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
   backgroundSize: '40px 40px'
 };
 
-// Types
 interface GameAsset {
   file: File | Blob | null;
   previewUrl: string | null;
@@ -56,7 +48,7 @@ const GameSettings = () => {
   const chunksRef = useRef<Blob[]>([]);
   const [recordingType, setRecordingType] = useState<string | null>(null);
 
-  // --- LOGIC FUNCTIONS (Kept identical to before) ---
+  // -- LOGIC --
   const handleLocalFileSelect = (file: File | Blob, type: string, fileName: string) => {
     if (file.size > 3 * 1024 * 1024) return alert("File too large! Keep under 3MB.");
     const localUrl = URL.createObjectURL(file);
@@ -75,7 +67,7 @@ const GameSettings = () => {
         videoRef.current.srcObject = stream;
         setIsCameraOpen(true);
       }
-    } catch (err) { alert("Camera denied."); }
+    } catch (err) { alert("Camera permission denied."); }
   };
 
   const takePhoto = () => {
@@ -160,69 +152,71 @@ const GameSettings = () => {
     finally { setIsSaving(false); setStatusMessage(null); }
   };
 
-  // --- RENDER HELPERS ---
-  const TabButton = ({ id, label }: { id: typeof activeTab, label: string }) => (
+  // --- TAB BUTTON ---
+  const TabButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: React.ElementType }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`flex-1 py-3 text-sm md:text-base font-black uppercase border-b-4 transition-colors ${
-        activeTab === id 
-          ? 'border-black bg-yellow-300 text-black' 
-          : 'border-transparent text-gray-500 hover:text-black hover:bg-gray-100'
-      }`}
+      className={`
+        flex flex-col items-center justify-center py-4 px-2
+        transition-all duration-200 border-b-4 md:border-b-0 md:border-r-4
+        ${activeTab === id 
+          ? 'bg-black text-yellow-400 border-yellow-400' 
+          : 'bg-white text-gray-400 border-gray-200 hover:bg-gray-50'
+        }
+      `}
     >
-      {label}
+      <div className="mb-1"><Icon strokeWidth={2.5} size={20} /></div>
+      <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">{label}</span>
     </button>
   );
 
   return (
     <div className="min-h-screen w-full bg-[#f0f9ff] font-mono text-black pb-32">
-      {/* Background Grid */}
       <div className="fixed inset-0 z-0 opacity-5 pointer-events-none" style={gridStyle} />
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-2xl mx-auto p-4 md:pt-10">
+      <div className="relative z-10 max-w-3xl mx-auto p-4 md:p-8">
         
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-black mb-2 tracking-tighter">GAME MAKER</h1>
-          <div className="inline-block bg-black text-white px-3 py-1 text-xs font-bold transform -rotate-2 border-2 border-white shadow-md">
-            BUILD YOUR OWN CHAOS
-          </div>
+        {/* HEADER */}
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-4xl md:text-6xl font-black mb-2 tracking-tighter">GAME MAKER</h1>
+          <p className="font-bold text-xs md:text-sm uppercase tracking-widest text-gray-500">
+            Build • Record • Play
+          </p>
         </div>
 
-        {/* Card Container */}
-        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        {/* MAIN UI CARD */}
+        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col md:flex-row min-h-[500px]">
           
-          {/* Navigation */}
-          <div className="flex border-b-4 border-black overflow-x-auto no-scrollbar">
-            <TabButton id="profile" label="Identity" />
-            <TabButton id="visuals" label="Visuals" />
-            <TabButton id="audio" label="Audio" />
-            <TabButton id="physics" label="Physics" />
+          {/* GRID TABS */}
+          <div className="grid grid-cols-4 md:grid-cols-1 md:w-24 border-b-4 md:border-b-0 md:border-r-4 border-black">
+            <TabButton id="profile" label="Profile" icon={User} />
+            <TabButton id="visuals" label="Visuals" icon={Eye} />
+            <TabButton id="audio" label="Audio" icon={Music} />
+            <TabButton id="physics" label="Physics" icon={Zap} />
           </div>
 
-          {/* Content Area */}
-          <div className="p-6 min-h-[400px]">
+          {/* CONTENT AREA */}
+          <div className="flex-1 p-6 md:p-8 bg-white">
             
             {/* PROFILE TAB */}
             {activeTab === 'profile' && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
                 <div className="space-y-2">
-                  <label className="block font-black text-sm uppercase bg-black text-white w-fit px-2">Creator Name *</label>
+                  <label className="block font-black text-sm uppercase">Creator Name</label>
                   <input 
                     type="text" 
-                    className="w-full bg-gray-50 border-4 border-black p-3 font-bold focus:outline-none focus:bg-yellow-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-                    placeholder="e.g. The Gaming Warlord"
+                    className="w-full bg-gray-50 border-4 border-black p-3 font-bold text-lg focus:outline-none focus:bg-yellow-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
+                    placeholder="ENTER NAME"
                     value={creatorName}
                     onChange={(e) => setCreatorName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block font-black text-sm uppercase text-gray-500">Social Link</label>
+                  <label className="block font-black text-sm uppercase">Social Link</label>
                   <input 
                     type="text" 
-                    className="w-full bg-gray-50 border-4 border-black p-3 font-bold focus:outline-none focus:bg-blue-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-                    placeholder="twitter.com/..."
+                    className="w-full bg-gray-50 border-4 border-black p-3 font-bold text-lg focus:outline-none focus:bg-blue-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all placeholder:text-gray-300"
+                    placeholder="TWITTER / INSTA"
                     value={socialLink}
                     onChange={(e) => setSocialLink(e.target.value)}
                   />
@@ -232,86 +226,75 @@ const GameSettings = () => {
 
             {/* VISUALS TAB */}
             {activeTab === 'visuals' && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                <div className="flex flex-col items-center gap-6">
-                  {/* Preview Box */}
-                  <div className="relative w-40 h-40 bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden group">
-                    {assets.player.previewUrl ? (
-                      <img src={assets.player.previewUrl} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="font-bold text-gray-400 text-xs text-center px-2">NO AVATAR</span>
-                    )}
-                    {/* Hidden Canvas */}
-                    <canvas ref={canvasRef} width="100" height="100" className="hidden" />
-                  </div>
-
-                  {/* Controls */}
-                  <div className="w-full grid grid-cols-2 gap-3">
-                    <label className="flex flex-col items-center justify-center p-4 border-4 border-black bg-blue-100 hover:bg-blue-200 active:translate-y-1 transition-all cursor-pointer text-center">
-                      <Icons.Upload />
-                      <span className="font-black text-xs mt-2 uppercase">Upload</span>
-                      <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="hidden" />
-                    </label>
-
-                    <button 
-                      onClick={startCamera}
-                      className="flex flex-col items-center justify-center p-4 border-4 border-black bg-green-100 hover:bg-green-200 active:translate-y-1 transition-all"
-                    >
-                      <Icons.Camera />
-                      <span className="font-black text-xs mt-2 uppercase">Camera</span>
-                    </button>
-                  </div>
-
-                  {/* Camera Modal Overlay */}
-                  {isCameraOpen && (
-                    <div className="absolute inset-0 bg-black z-50 flex flex-col items-center justify-center p-4">
-                      <video ref={videoRef} autoPlay className="w-full aspect-square object-cover border-4 border-white mb-4" />
-                      <div className="flex gap-4">
-                        <button onClick={takePhoto} className="w-16 h-16 rounded-full bg-red-500 border-4 border-white hover:scale-110 transition-transform" />
-                        <button onClick={stopCamera} className="px-4 py-2 bg-white font-bold border-2 border-black">CANCEL</button>
-                      </div>
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200 flex flex-col items-center">
+                <div className="relative w-48 h-48 bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
+                  {assets.player.previewUrl ? (
+                    <img src={assets.player.previewUrl} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <Eye size={40} className="mx-auto mb-2 opacity-50" />
+                      <span className="block text-[10px] font-bold">NO AVATAR</span>
                     </div>
                   )}
+                  <canvas ref={canvasRef} width="100" height="100" className="hidden" />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
+                  <label className="flex flex-col items-center justify-center p-4 border-4 border-black bg-blue-50 hover:bg-blue-200 active:translate-y-1 transition-all cursor-pointer rounded-none">
+                    <Upload strokeWidth={2.5} />
+                    <span className="font-black text-xs mt-2 uppercase">Upload</span>
+                    <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="hidden" />
+                  </label>
+
+                  <button 
+                    onClick={startCamera}
+                    className="flex flex-col items-center justify-center p-4 border-4 border-black bg-green-50 hover:bg-green-200 active:translate-y-1 transition-all"
+                  >
+                    <Camera strokeWidth={2.5} />
+                    <span className="font-black text-xs mt-2 uppercase">Camera</span>
+                  </button>
+                </div>
+
+                {isCameraOpen && (
+                  <div className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4">
+                    <video ref={videoRef} autoPlay className="w-full max-w-sm aspect-square object-cover border-4 border-white mb-6" />
+                    <div className="flex gap-6">
+                      <button onClick={stopCamera} className="w-16 h-16 rounded-full bg-gray-600 border-4 border-white flex items-center justify-center text-white"><X size={32} /></button>
+                      <button onClick={takePhoto} className="w-20 h-20 rounded-full bg-red-600 border-8 border-white shadow-lg active:scale-95 transition-transform" />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* AUDIO TAB */}
             {activeTab === 'audio' && (
-              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+              <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
                 {['jump', 'crash', 'powerup', 'bgm'].map((id) => (
-                  <div key={id} className="border-4 border-black p-3 bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-black uppercase text-sm bg-black text-white px-2 py-0.5">{id}</span>
-                      {assets[id as keyof typeof assets].file && (
-                        <span className="flex items-center gap-1 text-xs font-bold text-green-600">
-                          <Icons.Check /> SET
-                        </span>
-                      )}
+                  <div key={id} className="border-4 border-black p-3 bg-white hover:bg-gray-50 transition-colors flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-10 ${assets[id as keyof typeof assets].file ? 'bg-green-500' : 'bg-gray-200'}`} />
+                      <div>
+                        <div className="font-black uppercase text-sm">{id}</div>
+                        {assets[id as keyof typeof assets].file && <div className="text-[10px] font-bold text-green-600">READY</div>}
+                      </div>
                     </div>
                     
                     <div className="flex gap-2">
-                      {/* Playback Preview */}
-                      {assets[id as keyof typeof assets].previewUrl && (
-                        <audio controls src={assets[id as keyof typeof assets].previewUrl!} className="h-8 w-24 opacity-50 hover:opacity-100" />
-                      )}
+                      <label className="w-10 h-10 flex items-center justify-center border-2 border-black bg-gray-100 hover:bg-white cursor-pointer active:scale-95">
+                        <Upload size={18} strokeWidth={2.5} />
+                        <input type="file" accept="audio/*" className="hidden" onChange={(e) => onFileInputChange(e, id)} />
+                      </label>
                       
-                      <div className="flex-1 flex justify-end gap-2">
-                        <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border-2 border-black p-2 flex items-center justify-center rounded-sm">
-                          <Icons.Upload />
-                          <input type="file" accept="audio/*" className="hidden" onChange={(e) => onFileInputChange(e, id)} />
-                        </label>
-                        
-                        {id !== 'bgm' && (
-                          <button
-                            onMouseDown={() => startRecording(id)} onMouseUp={stopRecording}
-                            onTouchStart={() => startRecording(id)} onTouchEnd={stopRecording}
-                            className={`p-2 border-2 border-black rounded-sm transition-all ${recordingType === id ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 hover:bg-red-100'}`}
-                          >
-                            <Icons.Mic />
-                          </button>
-                        )}
-                      </div>
+                      {id !== 'bgm' && (
+                        <button
+                          onMouseDown={() => startRecording(id)} onMouseUp={stopRecording}
+                          onTouchStart={() => startRecording(id)} onTouchEnd={stopRecording}
+                          className={`w-10 h-10 flex items-center justify-center border-2 border-black active:scale-95 transition-all ${recordingType === id ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 hover:bg-white'}`}
+                        >
+                          <Mic size={18} strokeWidth={2.5} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -320,32 +303,24 @@ const GameSettings = () => {
 
             {/* PHYSICS TAB */}
             {activeTab === 'physics' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 py-4">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end border-b-2 border-black pb-1">
-                    <label className="font-black text-lg">GRAVITY</label>
-                    <span className="font-mono font-bold text-xl text-blue-600">{gravity}</span>
+              <div className="space-y-8 animate-in fade-in zoom-in-95 duration-200 py-4">
+                {[
+                  { label: 'Gravity', value: gravity, min: 500, max: 3000, step: 50, set: setGravity, color: 'text-blue-600', note: 'Low = Moon / High = Jupiter' },
+                  { label: 'Speed', value: speed, min: 4, max: 20, step: 1, set: setSpeed, color: 'text-red-600', note: 'Scrolling Velocity' }
+                ].map((item) => (
+                  <div key={item.label} className="space-y-4">
+                    <div className="flex justify-between items-end border-b-4 border-black pb-2">
+                      <label className="font-black text-2xl uppercase tracking-tighter">{item.label}</label>
+                      <span className={`font-mono font-bold text-2xl ${item.color}`}>{item.value}</span>
+                    </div>
+                    <input 
+                      type="range" min={item.min} max={item.max} step={item.step} 
+                      value={item.value} onChange={(e) => item.set(Number(e.target.value))} 
+                      className="w-full h-6 bg-gray-200 appearance-none cursor-pointer border-4 border-black accent-black hover:bg-gray-300"
+                    />
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.note}</p>
                   </div>
-                  <input 
-                    type="range" min="500" max="3000" step="50" 
-                    value={gravity} onChange={(e) => setGravity(Number(e.target.value))} 
-                    className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer border-2 border-black accent-black"
-                  />
-                  <p className="text-xs font-bold text-gray-400 uppercase">Lower = Moon / Higher = Jupiter</p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end border-b-2 border-black pb-1">
-                    <label className="font-black text-lg">SPEED</label>
-                    <span className="font-mono font-bold text-xl text-red-600">{speed}</span>
-                  </div>
-                  <input 
-                    type="range" min="4" max="20" step="1" 
-                    value={speed} onChange={(e) => setSpeed(Number(e.target.value))} 
-                    className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer border-2 border-black accent-black"
-                  />
-                  <p className="text-xs font-bold text-gray-400 uppercase">Start slow or go fast</p>
-                </div>
+                ))}
               </div>
             )}
 
@@ -353,20 +328,18 @@ const GameSettings = () => {
         </div>
       </div>
 
-      {/* Sticky Bottom Save Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t-4 border-black z-40 flex justify-center">
+      {/* STICKY SAVE BAR */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t-4 border-black z-40 flex justify-center">
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full max-w-2xl py-4 bg-[#FFD700] border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-0 active:shadow-[2px_2px_0px_0px_#000] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full max-w-md py-4 bg-[#FFD700] border-4 border-black font-black text-xl shadow-[4px_4px_0px_0px_#000] active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 uppercase tracking-wider"
         >
           {isSaving ? (
-            <>
-              <span className="animate-spin text-2xl">⏳</span> {statusMessage || 'SAVING...'}
-            </>
+            <span className="animate-pulse">Saving...</span>
           ) : (
             <>
-              <Icons.Check /> SAVE & CREATE
+              <Check strokeWidth={3} /> Save Config
             </>
           )}
         </button>
