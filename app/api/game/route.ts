@@ -1,32 +1,23 @@
 import { NextResponse } from 'next/server';
 import { neon } from '@neondatabase/serverless';
 
-// Force this route to always run dynamically (no caching old results)
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    // 1. Safe URL Parsing
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
-    if (!id) {
-      return NextResponse.json({ error: 'Missing ID parameter' }, { status: 400 });
-    }
+    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    // 2. Database Connection
     const sql = neon(process.env.DATABASE_URL!);
     
-    // 3. Query
+    // Note: ensure table name 'games' matches your DB exactly
     const result = await sql`SELECT * FROM games WHERE id=${id} LIMIT 1`;
     const gameData = result[0];
 
-    if (!gameData) {
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
-    }
+    if (!gameData) return NextResponse.json({ error: 'Game not found' }, { status: 404 });
 
-    // 4. Safe Data Formatting
-    // This ensures your frontend never crashes due to missing fields
     const safeConfig = {
       creator: gameData.creator || 'Unknown',
       creator_social: gameData.creator_social || '',
@@ -49,6 +40,6 @@ export async function GET(request: Request) {
 
   } catch (error: any) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Server Error', details: error.message }, { status: 500 });
   }
 }
