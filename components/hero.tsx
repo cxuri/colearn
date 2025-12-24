@@ -118,7 +118,7 @@ export default function Hero() {
           
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform cursor-default">
             <Hammer size={18} />
-            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>BuilT With Students</span>
+            <span className={`text-xs md:text-sm font-bold uppercase ${mono.className}`}>Built With Students</span>
           </div>
 
           <div className="tag-pill flex items-center gap-2 border-2 border-black bg-[#FBBF24] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-default">
