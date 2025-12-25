@@ -238,25 +238,55 @@ export async function getAllGames() {
   }
 }
 
-// 2. Fetch Deep Analytics for a Single Game (For the Detail Page)
+// Helper to map messy user input to clean shortcodes
+function normalizeCollege(name: string): string {
+  const normalized = name.toLowerCase().trim();
+  
+  if (normalized.includes('mar baselios') || normalized.includes('mbits')) {
+    return 'MBITS';
+  }
+  if (normalized.includes('viswajyothi') || normalized.includes('viswajyoti') || normalized.includes('vjcet')) {
+    return 'VJCET';
+  }
+  if (normalized.includes('rajagiri') || normalized.includes('rset')) {
+    return 'RSET';
+  }
+  if (normalized.includes('muthoot') || normalized.includes('mits')) {
+    return 'MITS';
+  }
+  
+  // Return original uppercase if no match found
+  return name.toUpperCase();
+}
+
 export async function getGameAnalytics(gameId: string) {
   try {
-    // A. Game Details
     const gameResult = await sql`SELECT * FROM games WHERE id = ${gameId}`;
     if (gameResult.length === 0) return null;
     const game = gameResult[0];
 
-    // B. College Stats
-    const colleges = await sql`
+    // Fetch RAW college data first to normalize in JS
+    const rawColleges = await sql`
       SELECT college, COUNT(*) as count 
       FROM leaderboard 
       WHERE game_id = ${gameId} AND college IS NOT NULL AND college <> ''
-      GROUP BY college 
-      ORDER BY count DESC 
-      LIMIT 5
+      GROUP BY college
     `;
 
-    // C. Branch Stats
+    // Process and Group messy data
+    const collegeMap: Record<string, number> = {};
+    rawColleges.forEach(row => {
+      const cleanName = normalizeCollege(row.college);
+      collegeMap[cleanName] = (collegeMap[cleanName] || 0) + parseInt(row.count);
+    });
+
+    // Convert back to array, sort, and limit
+    const normalizedColleges = Object.entries(collegeMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Fetch Branches (You can apply similar normalization here if needed)
     const branches = await sql`
       SELECT branch, COUNT(*) as count 
       FROM leaderboard 
@@ -266,7 +296,6 @@ export async function getGameAnalytics(gameId: string) {
       LIMIT 5
     `;
 
-    // D. Leaderboard (Top 10)
     const leaderboard = await sql`
       SELECT player_name, score, college 
       FROM leaderboard 
@@ -275,16 +304,18 @@ export async function getGameAnalytics(gameId: string) {
       LIMIT 10
     `;
 
-    // E. Total Plays Count
     const totalPlaysResult = await sql`SELECT count(*) FROM leaderboard WHERE game_id = ${gameId}`;
     const totalPlays = parseInt(totalPlaysResult[0].count, 10);
 
     return {
       game,
       totalPlays,
-      colleges: colleges.map(c => ({ name: c.college, count: parseInt(c.count) })),
-      branches: branches.map(b => ({ name: b.branch, count: parseInt(b.count) })),
-      leaderboard
+      colleges: normalizedColleges,
+      branches: branches.map(b => ({ name: b.branch.toUpperCase(), count: parseInt(b.count) })),
+      leaderboard: leaderboard.map(p => ({
+        ...p,
+        college: normalizeCollege(p.college || 'GUEST')
+      }))
     };
 
   } catch (err) {
