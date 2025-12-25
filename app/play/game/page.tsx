@@ -1,24 +1,25 @@
 import { getGameAnalytics } from '@/app/actions';
 import Link from 'next/link';
-import { ArrowLeft, Play, BarChart3, MapPin, Briefcase, Zap, Globe, Activity } from 'lucide-react';
+import { Archivo_Black, Space_Mono } from 'next/font/google';
+import { 
+  ArrowLeft, Play, BarChart3, MapPin, 
+  Briefcase, Zap, Globe, Activity,
+  Target, TrendingUp, ArrowDownRight
+} from 'lucide-react';
+
+const archivo = Archivo_Black({ weight: '400', subsets: ['latin'] });
+const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
 interface PageProps {
   searchParams: Promise<{ id?: string }>;
 }
 
-// STYLES SYSTEM
-const UI = {
-  h1: "text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] xl:text-[9rem] uppercase tracking-tighter italic font-black leading-[0.8] text-black",
-  h2: "text-4xl md:text-6xl uppercase italic tracking-tighter font-black text-black",
-  label: "text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-black",
-  mono: "font-mono font-black text-[10px] uppercase tracking-widest text-black",
-  cardShadow: "shadow-[8px_8px_0px_0px_#000] md:shadow-[16px_16px_0px_0px_#000]",
-};
-
 export default async function GameAnalyticsPage({ searchParams }: PageProps) {
-  const { id } = await searchParams;
+  // 1. Properly await the searchParams promise
+  const params = await searchParams;
+  const id = params.id;
 
-  if (!id) return <ErrorState message="MISSING_ID" />;
+  if (!id) return <ErrorState message="MISSING_ID" submessage="No target node specified in request." />;
 
   const data = await getGameAnalytics(id);
   if (!data) return <ErrorState message="NODE_OFFLINE" submessage={`Target_ID: ${id}`} />;
@@ -27,166 +28,136 @@ export default async function GameAnalyticsPage({ searchParams }: PageProps) {
   const getPercent = (val: number, max: number) => Math.max(8, (val / (max || 1)) * 100);
 
   return (
-    <div className="min-h-screen w-full bg-[#EAEAEA] text-black font-black selection:bg-black selection:text-[#BCF139] overflow-x-hidden leading-none">
-      {/* INDUSTRIAL DOT GRID */}
-      <div className="fixed inset-0 z-0 opacity-20 pointer-events-none" 
-           style={{ backgroundImage: `radial-gradient(#000 1.5px, transparent 1.5px)`, backgroundSize: '24px 24px' }} />
+    <div className={`min-h-screen w-full bg-[#F0F2F5] text-black ${archivo.className} selection:bg-[#FBBF24] selection:text-black overflow-x-hidden`}
+         style={{ backgroundImage: 'radial-gradient(#94A3B8 2px, transparent 2px)', backgroundSize: '40px 40px' }}>
+      
+      {/* NAVIGATION */}
+      <nav className="relative z-30 w-full px-4 md:px-8 pt-8 max-w-7xl mx-auto">
+        <Link href="/play/explore" className={`group inline-flex items-center gap-2 bg-white border-2 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all ${mono.className}`}>
+          <ArrowLeft size={18} strokeWidth={2.5} />
+          <span className="text-xs font-bold uppercase tracking-widest">Archive_Return</span>
+        </Link>
+      </nav>
 
-      {/* HEADER */}
-      <header className="relative z-10 bg-white border-b-[10px] md:border-b-[14px] border-black pt-10 pb-10 px-4 md:px-6">
-        <div className="max-w-7xl mx-auto">
-          <Link href="/play/explore" className="inline-flex items-center text-xs uppercase mb-8 border-[5px] border-black px-4 py-2 hover:bg-black hover:text-[#BCF139] transition-all text-black">
-            <ArrowLeft className="mr-3 w-5 h-5" strokeWidth={6} /> BACK_TO_ARCHIVE
-          </Link>
+      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 py-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10">
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="bg-black text-[#BCF139] p-3 border-4 border-black shadow-[4px_4px_0px_black]">
-                    <Zap className="w-7 h-7" fill="currentColor" />
-                </div>
-                <span className={UI.mono}>TELEMETRY_NODE // {id.slice(0,8)}</span>
-              </div>
-              <h1 className={UI.h1}>
-                {game.creator}<br/>
-                <span className="text-[#BCF139] drop-shadow-[4px_4px_0px_black]" style={{ WebkitTextStroke: '3px black' }}>REPORTS</span>
-              </h1>
+          <div className="space-y-4">
+            <div className={`inline-flex items-center gap-2 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase border-2 border-black ${mono.className}`}>
+               <Zap size={14} className="text-[#FBBF24]" fill="currentColor" />
+               // Telemetry: {id ? id.slice(0, 8) : '00000000'}
             </div>
+            <h1 className="text-5xl md:text-7xl uppercase leading-[0.85] tracking-tighter text-black">
+              {game.creator}<br/>
+              <span className="text-transparent" style={{ WebkitTextStroke: '1.5px black' }}>ANALYTICS</span>
+            </h1>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 w-full lg:w-auto">
-              <div className="bg-black text-[#BCF139] p-8 border-[6px] md:border-[8px] border-[#BCF139] flex-1 sm:min-w-[240px] shadow-[10px_10px_0px_black]">
-                <p className="text-xs uppercase tracking-[0.3em] mb-3 italic font-black">GLOBAL_RUNS</p>
-                <p className="text-6xl md:text-8xl italic font-black">{totalPlays.toLocaleString()}</p>
-              </div>
-              <Link href={`/play?id=${id}`} className="bg-[#BCF139] text-black border-[6px] md:border-[10px] border-black px-10 py-8 text-4xl md:text-6xl hover:bg-black hover:text-[#BCF139] transition-all flex items-center justify-center gap-6 shadow-[12px_12px_0px_black] active:translate-x-1 active:translate-y-1 active:shadow-none">
-                <Play fill="currentColor" className="w-10 h-10 md:w-14 md:h-14" /> DEPLOY
-              </Link>
+          <div className="flex flex-col sm:flex-row gap-6 w-full md:w-auto">
+            <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_#FBBF24] -rotate-1">
+               <p className={`text-[10px] font-bold uppercase text-gray-500 mb-2 ${mono.className}`}>Global_Runs</p>
+               <div className="flex items-center gap-3">
+                  <TrendingUp className="text-[#10B981]" size={24} />
+                  <span className="text-4xl md:text-5xl font-black">{totalPlays.toLocaleString()}</span>
+               </div>
             </div>
+            <Link href={`/play?id=${id}`} className="group bg-[#FBBF24] text-black border-4 border-black px-8 py-6 text-xl font-black uppercase flex items-center justify-center gap-3 shadow-[8px_8px_0px_0px_#000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+              Deploy Run <ArrowDownRight className="group-hover:-rotate-90 transition-transform" />
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="relative z-10 max-w-7xl mx-auto p-4 md:p-8 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-24">
-        
-        {/* STATS COLUMN */}
-        <div className="lg:col-span-7 space-y-24">
-          <StatSection 
-            title="Regional_Intel" 
-            icon={<MapPin className="text-black w-8 h-8" strokeWidth={6} />} 
-            data={colleges} 
-            color="bg-blue-600"
-            getPercent={getPercent}
-          />
-          <StatSection 
-            title="Sector_Intel" 
-            icon={<Briefcase className="text-black w-8 h-8" strokeWidth={6} />} 
-            data={branches} 
-            color="bg-[#BCF139]"
-            getPercent={getPercent}
-          />
+      <main className="relative z-20 max-w-7xl mx-auto px-4 md:px-8 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7 space-y-12">
+          <StatCard title="Regional_Distribution" icon={<MapPin size={20} />} data={colleges} barColor="bg-[#2563EB]" getPercent={getPercent} />
+          <StatCard title="Stream_Intel" icon={<Briefcase size={20} />} data={branches} barColor="bg-[#A855F7]" getPercent={getPercent} />
         </div>
 
-        {/* LEADERBOARD COLUMN */}
         <div className="lg:col-span-5">
-          <aside className={`bg-white border-[8px] border-black p-8 ${UI.cardShadow} lg:sticky lg:top-12`}>
-            <div className="flex items-center justify-between mb-10 border-b-[6px] border-black pb-6">
-              <h2 className="text-4xl md:text-5xl uppercase italic tracking-tighter flex items-center gap-4 text-black">
-                <BarChart3 strokeWidth={6} className="w-10 h-10" /> RANK
-              </h2>
-              <div className="bg-black text-[#BCF139] px-3 py-1 text-xs border-2 border-[#BCF139] animate-pulse font-black">LIVE_FEED</div>
-            </div>
-            
-            <div className="space-y-6">
-              {leaderboard.length > 0 ? leaderboard.map((p: any, i: number) => (
-                <div key={i} className={`flex items-center justify-between p-6 border-[5px] border-black transition-all ${i === 0 ? 'bg-[#BCF139]' : 'bg-white shadow-[6px_6px_0px_black]'}`}>
-                  <div className="flex items-center gap-6 min-w-0">
-                    <span className="italic text-3xl md:text-4xl text-black opacity-30">#{i + 1}</span>
-                    <div className="min-w-0">
-                      <p className="uppercase text-lg md:text-xl truncate leading-none mb-1 text-black">{p.player_name || 'ANON_USER'}</p>
-                      <p className="text-xs text-black uppercase truncate italic font-black tracking-widest">{p.college || 'GUEST_ZONE'}</p>
-                    </div>
-                  </div>
-                  <p className="text-4xl md:text-5xl italic text-black">{p.score}</p>
-                </div>
-              )) : <EmptyState icon={<Activity size={50} className="animate-bounce text-black" strokeWidth={6} />} label="WAITING_FOR_ENTRIES" />}
+          <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[12px_12px_0px_0px_#000] lg:sticky lg:top-8">
+            <div className="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
+               <div className="flex items-center gap-3 text-black">
+                  <BarChart3 size={24} />
+                  <h2 className="text-2xl uppercase tracking-tighter">Leaderboard</h2>
+               </div>
+               <div className={`flex items-center gap-2 text-[10px] font-bold bg-[#10B981]/10 text-[#10B981] px-2 py-1 border border-[#10B981] ${mono.className}`}>
+                  <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse" />
+                  LIVE_SYNC
+               </div>
             </div>
 
-            <div className="mt-12 pt-8 border-t-[6px] border-black border-dashed flex justify-between items-center text-black">
-                <div className="flex items-center gap-3 text-xs uppercase font-black italic">
-                    <Globe className="w-5 h-5" strokeWidth={6} /> SYNC: ACTIVE
+            <div className="space-y-4">
+              {leaderboard.length > 0 ? leaderboard.map((p: any, i: number) => (
+                <div key={i} className={`relative group ${mono.className}`}>
+                  <div className="absolute inset-0 bg-black translate-x-1 translate-y-1 transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></div>
+                  <div className={`relative flex items-center justify-between p-4 border-2 border-black bg-white ${i === 0 ? 'border-[#FBBF24] border-4' : ''}`}>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-bold opacity-30">0{i + 1}</span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold uppercase truncate max-w-[140px] text-black">{p.player_name || 'Anonymous'}</span>
+                        <span className="text-[10px] text-gray-500 font-bold">{p.college || 'General'}</span>
+                      </div>
+                    </div>
+                    <span className="text-xl font-black text-black">{p.score}</span>
+                  </div>
                 </div>
-                <span className="text-[10px] bg-black text-[#BCF139] px-3 py-1 italic tracking-widest uppercase border-2 border-black font-black">v3.0.4</span>
+              )) : (
+                <div className="p-8 border-2 border-dashed border-gray-300 text-center uppercase text-[10px] font-bold text-gray-400">
+                    Awaiting entries...
+                </div>
+              )}
             </div>
-          </aside>
+          </div>
         </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="mt-32 bg-black border-t-[15px] border-[#BCF139] p-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex flex-wrap justify-center gap-10 items-center text-[#BCF139] text-xs tracking-[0.4em] uppercase italic font-black">
-            <span>TERMINAL_ARCHIVE</span>
-            <span className="hidden md:inline text-[#BCF139] opacity-40">//</span>
-            <span>USER: {game.creator}</span>
-            <span className="hidden md:inline text-[#BCF139] opacity-40">//</span>
-            <span>ENCRYPTED_FEED</span>
-          </div>
-          <p className="text-[10px] text-[#BCF139]/50 uppercase tracking-[0.5em] italic font-black">© 2025 KLAZ_RUNNER_PROTOCOL</p>
-        </div>
-      </footer>
     </div>
   );
 }
 
-/* HELPER COMPONENTS */
-
-function StatSection({ title, icon, data, color, getPercent }: any) {
+function StatCard({ title, icon, data, barColor, getPercent }: any) {
   return (
-    <section>
-      <div className="flex items-center gap-6 mb-10">
-        <div className="bg-black p-3 border-[5px] border-black shadow-[6px_6px_0px_black] text-white">
+    <div className="bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="bg-black text-white p-2 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,0.2)]">
           {icon}
         </div>
-        <h2 className={UI.h2}>{title}</h2>
+        <h2 className="text-2xl uppercase tracking-tighter text-black">{title}</h2>
       </div>
-      <div className="space-y-10">
+
+      <div className="space-y-6">
         {data.length > 0 ? data.map((item: any, i: number) => (
-          <div key={i} className="group">
-            <div className="flex justify-between items-end mb-3">
-              <span className="text-xs md:text-sm uppercase tracking-widest font-black text-black truncate pr-4">{item.name}</span>
-              <span className="text-3xl md:text-5xl italic font-black text-black leading-none">{item.count}</span>
+          <div key={i} className={mono.className}>
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-xs font-bold uppercase truncate max-w-[70%] text-black">{item.name}</span>
+              <span className="text-sm font-black text-black">{item.count}</span>
             </div>
-            <div className="h-12 md:h-16 w-full bg-white border-[6px] border-black relative overflow-hidden shadow-[6px_6px_0px_black]">
+            <div className="h-6 w-full bg-[#F0F2F5] border-2 border-black relative">
               <div 
-                className={`h-full ${color} border-r-[6px] border-black transition-all duration-1000 ease-out`} 
-                style={{ width: `${getPercent(item.count, data[0].count)}%` }} 
+                className={`h-full ${barColor} border-r-2 border-black transition-all duration-1000`}
+                style={{ width: `${getPercent(item.count, data[0].count)}%` }}
               />
             </div>
           </div>
-        )) : <EmptyState label={`AWAITING_${title.toUpperCase()}`} />}
+        )) : (
+            <div className={`text-[10px] font-bold text-gray-400 uppercase ${mono.className}`}>No data logged for {title}</div>
+        )}
       </div>
-    </section>
-  );
-}
-
-function ErrorState({ message, submessage }: { message: string, submessage?: string }) {
-  return (
-    <div className="min-h-screen bg-[#EAEAEA] flex flex-col items-center justify-center p-6 text-center font-black">
-      <h1 className="text-5xl md:text-8xl text-black uppercase italic tracking-tighter underline decoration-[12px]">{message}</h1>
-      {submessage && <p className="mt-6 uppercase text-sm text-black tracking-[0.3em] font-black">{submessage}</p>}
-      <Link href="/play/explore" className="mt-12 bg-black text-[#BCF139] px-12 py-6 border-[6px] border-black uppercase hover:bg-[#BCF139] hover:text-black transition-all text-2xl font-black shadow-[10px_10px_0px_black]">
-        Return to Archive
-      </Link>
     </div>
   );
 }
 
-function EmptyState({ icon, label }: any) {
+function ErrorState({ message, submessage }: { message: string, submessage: string }) {
   return (
-    <div className="p-20 border-[8px] border-black border-dashed text-center bg-white/50">
-      {icon && <div className="mb-8 flex justify-center">{icon}</div>}
-      <p className="uppercase italic text-xs tracking-[0.4em] font-black text-black">{label}</p>
+    <div className={`min-h-screen flex flex-col items-center justify-center bg-[#F0F2F5] ${archivo.className}`}>
+      <div className="bg-white border-4 border-black p-12 text-center shadow-[16px_16px_0px_0px_#000] max-w-md mx-4">
+        <Activity size={48} className="mx-auto mb-6 text-red-500 animate-pulse" />
+        <h1 className="text-4xl uppercase tracking-tighter mb-4 text-black">{message}</h1>
+        <p className={`${mono.className} text-xs font-bold text-gray-500 mb-8 uppercase leading-relaxed`}>{submessage}</p>
+        <Link href="/play/explore" className="block w-full bg-black text-white px-8 py-4 uppercase text-sm font-bold hover:bg-[#FBBF24] hover:text-black transition-colors">
+          Return to Archive
+        </Link>
+      </div>
     </div>
   );
 }
