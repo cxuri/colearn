@@ -119,7 +119,7 @@ export default async function ExploreGames() {
                         <Play size={16} className="mr-2 fill-current" /> Deploy
                     </Link>
                     <Link 
-                        href={`/play/game/${game.id}`}
+                        href={`/play/game?id=${game.id}`}
                         className="flex-1 flex items-center justify-center bg-white py-5 text-black text-black uppercase text-sm hover:bg-gray-100 transition-all active:translate-y-1"
                     >
                         Analytics
