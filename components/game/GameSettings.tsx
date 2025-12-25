@@ -172,15 +172,14 @@ const GameSettings = () => {
     if (mediaRecorderRef.current && recordingType) mediaRecorderRef.current.stop();
   };
 
-  // --- UPDATED SHARE FUNCTION (CHRISTMAS EDITION) ---
+  // --- UPDATED SHARE FUNCTION (Direct Share) ---
   const handleShare = async () => {
     if (!gameResult) return;
     setIsSharing(true);
 
     const shareUrl = gameResult.url;
     
-    // CUSTOM CHRISTMAS MESSAGE
-    // Note: We combine the message and link into one variable
+    // CUSTOM CHRISTMAS MESSAGE (Includes the link inside the text)
     const fullShareText = 
 `❄️*This Christmas, slow down for a moment* ❄️
 We've dropped something fun - quick to start and fun to keep going 
@@ -194,17 +193,9 @@ Link : ${shareUrl}
 *Klaz - Where Learning Comes Together*`;
 
     try {
-      // 1. THE FIX: Copy text to clipboard immediately
-      // This is the backup for when WhatsApp ignores the caption.
-      try {
-        await navigator.clipboard.writeText(fullShareText);
-      } catch (err) {
-        console.warn("Clipboard copy failed", err);
-      }
-
       let shareFiles: File[] = [];
 
-      // 2. Fetch 'christmas_card.jpeg'
+      // 1. Fetch 'christmas_card.jpeg'
       try {
         const response = await fetch('/christmas_card.jpeg');
         if (response.ok) {
@@ -218,37 +209,29 @@ Link : ${shareUrl}
          console.warn("Error fetching card", e);
       }
 
-      // 3. Construct Share Data
-      // CRITICAL: We DO NOT pass 'url' or 'title' here if we have a file.
-      // We only pass 'text' (which has the link inside) and 'files'.
+      // 2. Construct Share Data
+      // OPTIMIZATION: We do NOT include 'url' or 'title' in the object properties.
+      // We only pass 'text' and 'files'. This forces apps to treat the text as the caption.
       const shareData: ShareData = {
         text: fullShareText,
         files: shareFiles.length > 0 ? shareFiles : undefined
       };
-      
-      // If image failed to load, we can add the URL field back for better non-image sharing
-      if (!shareFiles.length) {
-          (shareData as any).url = shareUrl;
-          (shareData as any).title = 'Klaz Christmas ❄️';
-      }
 
-      // 4. Native Share
+      // 3. Native Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        // Alert user to paste the caption if we are sending a file
-        if (shareFiles.length > 0) {
-            alert("Caption copied! Paste it in WhatsApp 📋");
-        }
         await navigator.share(shareData);
       } else {
-        // Fallback for Desktop/Unsupported
+        // Fallback for Desktop/Unsupported browsers where native share doesn't exist
         navigator.clipboard.writeText(fullShareText);
-        alert('Message & Link copied to clipboard!');
+        alert('Sharing not supported on this device. Message copied to clipboard!');
       }
     } catch (err: any) {
+      // Handle user cancelling the share or errors
       if (err.name !== 'AbortError') {
-        console.log('Fallback to clipboard', err);
+        console.error('Share failed', err);
+        // Only copy to clipboard if the actual share fails
         navigator.clipboard.writeText(fullShareText);
-        alert('Message copied to clipboard!');
+        alert('Share failed. Message copied to clipboard!');
       }
     } finally {
       setIsSharing(false);

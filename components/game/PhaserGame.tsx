@@ -131,7 +131,7 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     setGameState('playing');
   };
 
-  const handleShare = async () => {
+  const handleShare = async () => {    
     const shareUrl = window.location.href;
     
     // 1. Combine everything into one text block (Message + Link)
@@ -148,6 +148,9 @@ Link: ${shareUrl}
 *Klaz - Where Learning Comes Together*`;
 
     try {
+      // --- AUTO-COPY TRICK ---
+      // We copy the text immediately. If WhatsApp ignores the text (which it often does with images),
+      // the user will see the alert below and know to simply hit "Paste".
       try {
         await navigator.clipboard.writeText(fullShareText);
       } catch (err) {
@@ -156,54 +159,49 @@ Link: ${shareUrl}
 
       let shareFiles: File[] = [];
 
+      // 2. Fetch the Christmas Card
       try {
         const response = await fetch('/christmas_card.jpeg');
         if (response.ok) {
           const blob = await response.blob();
           const file = new File([blob], 'christmas_card.jpeg', { type: 'image/jpeg' });
           shareFiles = [file];
+        } else {
+           console.warn("christmas_card.jpeg not found in public folder");
         }
       } catch (e) {
         console.warn("Card load failed", e);
       }
 
-      // 2. Construct Share Data
-      // CRITICAL CHANGE: We do NOT pass 'url' or 'title' here. 
+      // 3. Construct Share Data
+      // CRITICAL: We do NOT pass 'url' or 'title' here. 
       // We only pass 'text' (which contains the link) and 'files'.
-      // This increases the chance WhatsApp treats 'text' as the image caption.
       const shareData: ShareData = {
         text: fullShareText,
         files: shareFiles.length > 0 ? shareFiles : undefined
       };
 
+      // 4. Native Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        // Show a helper toast/alert before opening the sheet
+        // Show a helper toast/alert right before the sheet opens
         if (shareFiles.length > 0) {
-            // Short delay to ensure clipboard write finishes
+            // Slight delay to ensure the clipboard write has registered
             setTimeout(() => alert("Caption copied! Paste it in WhatsApp 📋"), 100);
         }
         await navigator.share(shareData);
       } else {
+        // Fallback for Desktop
         navigator.clipboard.writeText(fullShareText);
-        alert("Link & Message copied!");
+        alert("Link & Message copied to clipboard!");
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
+         console.error("Share failed", err);
          navigator.clipboard.writeText(fullShareText);
-         alert("Message copied!");
+         alert("Message copied to clipboard!");
       }
     }
   };
-  const shareGameLink = async () => {
-    const text = `Check out this game by ${config.creator}! Built on Klaz.app ${window.location.href}`;
-    if (navigator.share) {
-       try { await navigator.share({ title: 'Klaz Runner', text: text, url: window.location.href }); } catch (err) {}
-    } else {
-       navigator.clipboard.writeText(window.location.href);
-       alert("Game link copied!");
-    }
-  }
-
   // -- PHASER ENGINE INITIALIZATION --
   useEffect(() => {
     if (gameInstance.current) return;
