@@ -118,7 +118,7 @@ function GameCard({ game, rank }: { game: any, rank: number }) {
         
         <div className="hidden md:block flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-4 mb-3">
-            <h3 className="text-3xl md:text-5xl uppercase tracking-tighter truncate group-hover:text-[#FBBF24] transition-colors">
+            <h3 className="text-3xl text-black md:text-5xl uppercase tracking-tighter truncate group-hover:text-[#FBBF24] transition-colors">
               {game.creator || 'ANON_USER'}
             </h3>
             {isTop && (
