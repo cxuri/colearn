@@ -131,10 +131,10 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
     setGameState('playing');
   };
 
-  const handleShare = async () => {    
+  const handleShare = async () => {
     const shareUrl = window.location.href;
     
-    // 1. Combine everything into one text block (Message + Link)
+    // 1. The Message
     const fullShareText = 
 `❄️ *I just scored ${finalScore.total} in ${config.creator}'s Level!* ❄️
 
@@ -148,15 +148,6 @@ Link: ${shareUrl}
 *Klaz - Where Learning Comes Together*`;
 
     try {
-      // --- AUTO-COPY TRICK ---
-      // We copy the text immediately. If WhatsApp ignores the text (which it often does with images),
-      // the user will see the alert below and know to simply hit "Paste".
-      try {
-        await navigator.clipboard.writeText(fullShareText);
-      } catch (err) {
-        console.warn("Clipboard failed", err);
-      }
-
       let shareFiles: File[] = [];
 
       // 2. Fetch the Christmas Card
@@ -174,31 +165,26 @@ Link: ${shareUrl}
       }
 
       // 3. Construct Share Data
-      // CRITICAL: We do NOT pass 'url' or 'title' here. 
-      // We only pass 'text' (which contains the link) and 'files'.
+      // We strictly pass ONLY 'text' and 'files'. 
+      // No 'url' field, to force apps to look at the 'text' field for the caption.
       const shareData: ShareData = {
         text: fullShareText,
         files: shareFiles.length > 0 ? shareFiles : undefined
       };
 
-      // 4. Native Share
+      // 4. Direct Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        // Show a helper toast/alert right before the sheet opens
-        if (shareFiles.length > 0) {
-            // Slight delay to ensure the clipboard write has registered
-            setTimeout(() => alert("Caption copied! Paste it in WhatsApp 📋"), 100);
-        }
         await navigator.share(shareData);
       } else {
-        // Fallback for Desktop
+        // Fallback for Desktop/Unsupported browsers only
         navigator.clipboard.writeText(fullShareText);
-        alert("Link & Message copied to clipboard!");
+        alert("Sharing not supported. Message copied to clipboard.");
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
          console.error("Share failed", err);
          navigator.clipboard.writeText(fullShareText);
-         alert("Message copied to clipboard!");
+         alert("Share failed. Message copied to clipboard.");
       }
     }
   };
