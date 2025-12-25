@@ -44,6 +44,16 @@ interface GameConfigProps {
   };
 }
 
+export const metadata = {
+  title: 'Klaz Runner',
+  description: 'Try beating my score in Klaz Runner!',
+  openGraph: {
+    title: 'Klaz Christmas Challenge ❄️',
+    description: 'This Christmas, slow down for a moment. Play and enjoy!',
+    images: ['/christmas_card.jpeg'], 
+  },
+}
+
 const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   // HOOKS MUST BE AT THE TOP
   const searchParams = useSearchParams();
@@ -134,7 +144,6 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   const handleShare = async () => {
     const shareUrl = window.location.href;
     
-    // 1. The Message
     const fullShareText = 
 `❄️ *I just scored ${finalScore.total} in ${config.creator}'s Level!* ❄️
 
@@ -147,45 +156,28 @@ Link: ${shareUrl}
 
 *Klaz - Where Learning Comes Together*`;
 
+    // Pure Text + Link Share
+    // This forces WhatsApp to use the Link Preview card + your full caption
+    const shareData: ShareData = {
+      title: 'Klaz Christmas ❄️',
+      text: fullShareText,
+      url: shareUrl
+    };
+
     try {
-      let shareFiles: File[] = [];
-
-      // 2. Fetch the Christmas Card
-      try {
-        const response = await fetch('/christmas_card.jpeg');
-        if (response.ok) {
-          const blob = await response.blob();
-          const file = new File([blob], 'christmas_card.jpeg', { type: 'image/jpeg' });
-          shareFiles = [file];
-        } else {
-           console.warn("christmas_card.jpeg not found in public folder");
-        }
-      } catch (e) {
-        console.warn("Card load failed", e);
-      }
-
-      // 3. Construct Share Data
-      // We strictly pass ONLY 'text' and 'files'. 
-      // No 'url' field, to force apps to look at the 'text' field for the caption.
-      const shareData: ShareData = {
-        text: fullShareText,
-        files: shareFiles.length > 0 ? shareFiles : undefined
-      };
-
-      // 4. Direct Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback for Desktop/Unsupported browsers only
+        // Fallback
         navigator.clipboard.writeText(fullShareText);
-        alert("Sharing not supported. Message copied to clipboard.");
+        alert("Link & Message copied to clipboard!");
       }
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-         console.error("Share failed", err);
-         navigator.clipboard.writeText(fullShareText);
-         alert("Share failed. Message copied to clipboard.");
-      }
+       if (err.name !== 'AbortError') {
+          console.error(err);
+          navigator.clipboard.writeText(fullShareText);
+          alert("Message copied to clipboard!");
+       }
     }
   };
   // -- PHASER ENGINE INITIALIZATION --

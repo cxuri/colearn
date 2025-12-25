@@ -19,6 +19,17 @@ interface GameAsset {
   originalName: string;
 }
 
+
+export const metadata = {
+  title: 'Klaz Runner',
+  description: 'Play my custom level on Klaz Runner!',
+  openGraph: {
+    title: 'Klaz Christmas Challenge ❄️',
+    description: 'This Christmas, slow down for a moment. Play and enjoy!',
+    images: ['/christmas_card.jpeg'], 
+  },
+}
+
 const GameSettings = () => {
   // -- STATE --
   const [activeTab, setActiveTab] = useState<'profile' | 'visuals' | 'audio' | 'physics'>('profile');
@@ -172,14 +183,12 @@ const GameSettings = () => {
     if (mediaRecorderRef.current && recordingType) mediaRecorderRef.current.stop();
   };
 
-  // --- UPDATED SHARE FUNCTION (Direct Share) ---
   const handleShare = async () => {
     if (!gameResult) return;
     setIsSharing(true);
 
     const shareUrl = gameResult.url;
     
-    // CUSTOM CHRISTMAS MESSAGE (Includes the link inside the text)
     const fullShareText = 
 `❄️*This Christmas, slow down for a moment* ❄️
 We've dropped something fun - quick to start and fun to keep going 
@@ -192,46 +201,24 @@ Link : ${shareUrl}
 
 *Klaz - Where Learning Comes Together*`;
 
+    const shareData: ShareData = {
+      title: 'Klaz Christmas ❄️',
+      text: fullShareText,
+      url: shareUrl
+    };
+
     try {
-      let shareFiles: File[] = [];
-
-      // 1. Fetch 'christmas_card.jpeg'
-      try {
-        const response = await fetch('/christmas_card.jpeg');
-        if (response.ok) {
-           const blob = await response.blob();
-           const file = new File([blob], 'christmas_card.jpeg', { type: 'image/jpeg' });
-           shareFiles = [file];
-        } else {
-           console.warn("christmas_card.jpeg not found in public folder");
-        }
-      } catch (e) {
-         console.warn("Error fetching card", e);
-      }
-
-      // 2. Construct Share Data
-      // OPTIMIZATION: We do NOT include 'url' or 'title' in the object properties.
-      // We only pass 'text' and 'files'. This forces apps to treat the text as the caption.
-      const shareData: ShareData = {
-        text: fullShareText,
-        files: shareFiles.length > 0 ? shareFiles : undefined
-      };
-
-      // 3. Native Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback for Desktop/Unsupported browsers where native share doesn't exist
+        // Fallback
         navigator.clipboard.writeText(fullShareText);
-        alert('Sharing not supported on this device. Message copied to clipboard!');
+        alert('Message & Link copied to clipboard!');
       }
     } catch (err: any) {
-      // Handle user cancelling the share or errors
       if (err.name !== 'AbortError') {
-        console.error('Share failed', err);
-        // Only copy to clipboard if the actual share fails
         navigator.clipboard.writeText(fullShareText);
-        alert('Share failed. Message copied to clipboard!');
+        alert('Message copied to clipboard!');
       }
     } finally {
       setIsSharing(false);
