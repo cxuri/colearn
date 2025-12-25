@@ -79,7 +79,7 @@ export default async function GameAnalyticsPage({ searchParams }: PageProps) {
             <div className="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
                <div className="flex items-center gap-3 text-black">
                   <BarChart3 size={24} />
-                  <h2 className="text-2xl uppercase tracking-tighter">Leaderboard</h2>
+                  <h2 className="text-2xl text-black uppercase tracking-tighter">Leaderboard</h2>
                </div>
                <div className={`flex items-center gap-2 text-[10px] font-bold bg-[#10B981]/10 text-[#10B981] px-2 py-1 border border-[#10B981] ${mono.className}`}>
                   <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse" />
