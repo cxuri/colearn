@@ -147,7 +147,6 @@ Link: ${shareUrl}
 *Klaz - Where Learning Comes Together*`;
 
     // Pure Text + Link Share
-    // This forces WhatsApp to use the Link Preview card + your full caption
     const shareData: ShareData = {
       title: 'Klaz Christmas ❄️',
       text: fullShareText,
@@ -157,7 +156,6 @@ Link: ${shareUrl}
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback
         navigator.clipboard.writeText(fullShareText);
         alert("Link & Message copied to clipboard!");
       }
@@ -169,6 +167,7 @@ Link: ${shareUrl}
        }
     }
   };
+
   // -- PHASER ENGINE INITIALIZATION --
   useEffect(() => {
     if (gameInstance.current) return;
@@ -451,8 +450,11 @@ Link: ${shareUrl}
             this.isDead = true;
             this.physics.pause();
             this.player.setTint(0xff0000); 
-            this.bgmSound?.stop();
+
+            // --- AUDIO FIX: STOP ALL, PLAY CRASH ---
+            this.sound.stopAll(); 
             this.crashSound?.play();
+
             const onGameOver = this.registry.get('onGameOver');
             if (onGameOver) { onGameOver(Math.floor(this.globalDistance / 10), this.coinScore); }
           });
