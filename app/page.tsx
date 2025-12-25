@@ -16,6 +16,7 @@ import StaticSeparator from '@/components/seperator';
 import Socials from '@/components/socials';
 import FAQ from '@/components/faq';
 import About from '@/components/about';
+import VisionMission from '@/components/vision';
 
 const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
 
@@ -193,6 +194,8 @@ export default function Home() {
         <RollingTextStrip />
 
         <About />
+
+        <VisionMission />
         
         <div id="manifesto" className="pt-10 scroll-mt-32">
            <Manifesto />
