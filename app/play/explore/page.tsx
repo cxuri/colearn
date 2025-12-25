@@ -1,20 +1,27 @@
 import { getAllGames } from '@/app/actions';
 import Link from 'next/link';
-import { Trophy, Users, ExternalLink, Plus, LayoutGrid, Play, ArrowRight } from 'lucide-react';
+import { Trophy, Users, ExternalLink, Plus, Play, Info } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ExploreGames() {
   const games = await getAllGames();
 
+  // Color Mapping for Neobrutalist Ranks
+  const getRankStyles = (index: number) => {
+    if (index === 0) return { bg: 'bg-[#FFD700]', text: 'text-black', label: 'GOLD' };   // Gold
+    if (index === 1) return { bg: 'bg-[#C0C0C0]', text: 'text-black', label: 'SILVER' }; // Silver
+    if (index === 2) return { bg: 'bg-[#CD7F32]', text: 'text-white', label: 'BRONZE' }; // Bronze
+    return { bg: 'bg-white', text: 'text-black', label: null };
+  };
+
   if (!games || games.length === 0) {
     return (
-      <div className="min-h-screen bg-[#A5F3FC] p-8 font-mono text-black flex flex-col items-center justify-center text-center">
-        <div className="bg-white border-[6px] border-black p-10 shadow-[12px_12px_0px_0px_#000] max-w-lg">
-          <h1 className="text-5xl text-black mb-4 uppercase tracking-tighter italic">No Data</h1>
-          <p className="font-bold text-xl mb-8 leading-tight">The database is currently silent. Build the first level to break the void.</p>
-          <Link href="/play/make" className="block w-full bg-[#FDE047] border-4 border-black px-6 py-4 text-black text-2xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[8px_8px_0px_0px_#000] transition-all uppercase">
-            🛠️ Initialize Level
+      <div className="min-h-screen bg-[#F0F0F0] p-8 font-mono text-black flex items-center justify-center">
+        <div className="bg-white border-[6px] border-black p-10 shadow-[12px_12px_0px_0px_#000] text-center max-w-md">
+          <h1 className="text-4xl text-black uppercase mb-4">Board Empty</h1>
+          <Link href="/play/make" className="block w-full bg-[#BCF139] border-4 border-black py-4 text-black uppercase shadow-[6px_6px_0px_0px_#000]">
+            Create First Level
           </Link>
         </div>
       </div>
@@ -23,125 +30,130 @@ export default async function ExploreGames() {
 
   return (
     <div className="min-h-screen bg-[#F0F0F0] p-4 md:p-12 font-mono text-black selection:bg-black selection:text-[#BCF139]">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         
-        {/* HEADER SECTION */}
-        <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-white border-[6px] border-black p-8 shadow-[10px_10px_0px_0px_#000]">
-            <div className="text-center md:text-left">
-                <h1 className="text-5xl md:text-7xl text-black tracking-tighter uppercase leading-none italic">
-                  Level Board
-                </h1>
-                <p className="text-black text-xs uppercase tracking-[0.3em] mt-2 opacity-60">Global Ranking • Realtime Sync</p>
+        {/* TOP ACTION BAR */}
+        <header className="flex justify-between items-center mb-10">
+            <div className="bg-black text-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_#BCF139]">
+                <h1 className="text-2xl md:text-4xl text-black uppercase tracking-tighter">Hall of Fame</h1>
             </div>
             <Link 
                 href="/play/make" 
-                className="flex items-center gap-2 bg-[#BCF139] text-black border-4 border-black px-6 py-3 text-black text-lg uppercase shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all active:bg-white"
+                className="bg-[#BCF139] border-4 border-black p-3 md:px-6 md:py-3 text-black uppercase shadow-[4px_4px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
             >
-                <Plus strokeWidth={4} size={20} /> Create Level
+                <Plus size={20} strokeWidth={4} /> <span className="hidden md:inline">Create Level</span>
             </Link>
         </header>
 
-        {/* LEADERBOARD TABLE HEADER */}
-        <div className="hidden md:grid grid-cols-12 gap-4 px-8 mb-4 text-black text-xs uppercase tracking-widest text-gray-500">
-          <div className="col-span-1">Rank</div>
-          <div className="col-span-5">Creator / Level</div>
-          <div className="col-span-2 text-center">Plays</div>
-          <div className="col-span-2 text-center">High Score</div>
-          <div className="col-span-2 text-right">Action</div>
-        </div>
-
-        {/* LEADERBOARD LIST */}
-        <div className="space-y-4">
-          {games.map((game, i) => (
-            <div 
-              key={game.id} 
-              className="group bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-4 p-4 md:p-6">
-                
-                {/* RANK */}
-                <div className="col-span-1 flex items-center justify-center md:justify-start">
-                  <span className={`text-4xl text-black italic ${i < 3 ? 'text-[#FF90E8]' : 'text-black opacity-20'}`}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
+        {/* LEADERBOARD CONTAINER */}
+        <div className="space-y-6">
+          {games.map((game, i) => {
+            const rank = getRankStyles(i);
+            
+            return (
+              <div 
+                key={game.id} 
+                className={`relative group bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none`}
+              >
+                {/* RANK MEDAL / NUMBER */}
+                <div className={`absolute -top-4 -left-4 w-12 h-12 md:w-16 md:h-16 border-[4px] border-black flex items-center justify-center text-black text-xl md:text-3xl z-10 shadow-[4px_4px_0px_0px_#000] ${rank.bg} ${rank.text}`}>
+                   {i + 1}
                 </div>
 
-                {/* CREATOR INFO */}
-                <div className="col-span-1 md:col-span-5 flex items-center gap-4">
-                  <div className="shrink-0 relative">
-                    {game.player_url ? (
-                      <img src={game.player_url} className="w-14 h-14 border-4 border-black object-cover bg-white rotate-[-3deg] group-hover:rotate-0 transition-transform" />
-                    ) : (
-                      <div className="w-14 h-14 border-4 border-black bg-[#A5F3FC] flex items-center justify-center rotate-[-3deg]">
-                        <LayoutGrid size={24} />
+                <div className="flex flex-col md:flex-row items-stretch">
+                  
+                  {/* MAIN INFO SECTION */}
+                  <div className="flex-1 p-6 pt-10 md:pt-6 flex items-center gap-4 border-b-4 md:border-b-0 md:border-r-4 border-black">
+                    <div className="shrink-0">
+                      {game.player_url ? (
+                        <img src={game.player_url} className="w-16 h-16 md:w-20 md:h-20 border-4 border-black object-cover bg-white" />
+                      ) : (
+                        <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-black bg-gray-100 flex items-center justify-center">
+                           <Trophy size={32} className="opacity-20" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="overflow-hidden">
+                      <h2 className="text-xl md:text-3xl text-black uppercase truncate leading-none mb-2">
+                        {game.creator}
+                      </h2>
+                      {game.creator_social && (
+                        <a 
+                          href={game.creator_social.startsWith('http') ? game.creator_social : `https://${game.creator_social}`}
+                          className="text-[10px] md:text-xs text-black text-blue-600 uppercase flex items-center gap-1 hover:underline"
+                        >
+                          @{game.creator_social.split('/').pop()} <ExternalLink size={12} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* STATS SECTION */}
+                  <div className="flex divide-x-4 divide-black bg-gray-50 border-b-4 md:border-b-0 md:border-r-4 border-black">
+                    <div className="flex-1 md:w-32 p-4 flex flex-col items-center justify-center">
+                      <span className="text-[10px] text-black uppercase text-gray-400 mb-1">Plays</span>
+                      <div className="flex items-center gap-1">
+                        <Users size={14} strokeWidth={3} />
+                        <span className="text-xl text-black">{game.total_plays}</span>
                       </div>
-                    )}
-                  </div>
-                  <div className="overflow-hidden">
-                    <h2 className="text-black text-xl md:text-2xl uppercase truncate leading-tight">
-                      {game.creator}
-                    </h2>
-                    {game.creator_social && (
-                      <div className="flex items-center gap-1 text-[10px] text-black text-blue-600 uppercase hover:underline">
-                        @{game.creator_social.split('/').pop()} <ExternalLink size={10} strokeWidth={3} />
+                    </div>
+                    <div className="flex-1 md:w-32 p-4 flex flex-col items-center justify-center">
+                      <span className="text-[10px] text-black uppercase text-gray-400 mb-1">Record</span>
+                      <div className="flex items-center gap-1 text-[#FFB800]">
+                        <Trophy size={14} strokeWidth={3} />
+                        <span className="text-xl text-black">{game.high_score}</span>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
 
-                {/* PLAYS */}
-                <div className="col-span-1 md:col-span-2 flex flex-col items-center border-y-2 md:border-y-0 md:border-x-2 border-black border-dashed py-2 md:py-0">
-                  <span className="text-[10px] text-black uppercase text-gray-400 md:hidden mb-1">Total Plays</span>
-                  <div className="flex items-center gap-2">
-                    <Users size={16} strokeWidth={3} />
-                    <span className="text-2xl text-black">{(game.total_plays || 0).toLocaleString()}</span>
+                  {/* ACTIONS SECTION */}
+                  <div className="grid grid-cols-2 md:grid-cols-1 w-full md:w-28">
+                    <Link 
+                      href={`/play/game/${game.id}`}
+                      className="flex flex-col items-center justify-center p-4 bg-white hover:bg-[#3DD1FF] border-r-4 md:border-r-0 md:border-b-4 border-black transition-colors group/btn"
+                    >
+                      <Info size={20} strokeWidth={3} />
+                      <span className="text-[10px] text-black uppercase mt-1">Stats</span>
+                    </Link>
+                    <Link 
+                      href={`/play?id=${game.id}`}
+                      className="flex flex-col items-center justify-center p-4 bg-[#BCF139] hover:bg-black hover:text-white transition-colors"
+                    >
+                      <Play size={20} fill="currentColor" strokeWidth={0} />
+                      <span className="text-[10px] text-black uppercase mt-1">Play</span>
+                    </Link>
                   </div>
-                </div>
 
-                {/* HIGH SCORE */}
-                <div className="col-span-1 md:col-span-2 flex flex-col items-center">
-                   <span className="text-[10px] text-black uppercase text-gray-400 md:hidden mb-1">High Score</span>
-                   <div className="flex items-center gap-2 text-[#FFB800]">
-                    <Trophy size={16} strokeWidth={3} />
-                    <span className="text-2xl text-black">{(game.high_score || 0).toLocaleString()}</span>
-                  </div>
                 </div>
-
-                {/* ACTIONS */}
-                <div className="col-span-1 md:col-span-2 flex flex-row md:flex-col gap-2">
-                  <Link 
-                    href={`/play/game/${game.id}`}
-                    className="flex-1 bg-black text-white text-[10px] text-black uppercase py-2 text-center border-2 border-black hover:bg-white hover:text-black transition-colors"
-                  >
-                    Stats
-                  </Link>
-                  <Link 
-                    href={`/play?id=${game.id}`}
-                    className="flex-1 bg-[#3DD1FF] text-black text-[10px] text-black uppercase py-2 text-center border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-1"
-                  >
-                    Play <Play size={10} fill="currentColor" />
-                  </Link>
-                </div>
-
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* FOOTER TICKER */}
-        <div className="mt-16 overflow-hidden bg-black text-white py-4 border-t-4 border-black">
-          <div className="flex gap-10 animate-marquee whitespace-nowrap text-black text-xs uppercase tracking-widest">
-            <span>New High Score detected on 0xAF...</span>
-            <span className="text-[#BCF139]">●</span>
-            <span>Creator {games[0]?.creator} is dominating the board...</span>
-            <span className="text-[#BCF139]">●</span>
-            <span>Build your own level via /make...</span>
-            <span className="text-[#BCF139]">●</span>
-            <span>Current Players: {(games.reduce((acc, g) => acc + (g.total_plays || 0), 0)).toLocaleString()}</span>
-          </div>
-        </div>
+        {/* BOTTOM TICKER */}
+        <footer className="mt-16 bg-black text-white p-4 border-4 border-black shadow-[4px_4px_0px_0px_#BCF139] flex justify-between items-center overflow-hidden">
+            <div className="flex gap-8 animate-marquee whitespace-nowrap text-black text-[10px] uppercase tracking-widest">
+                <span>The Leaderboard resets never.</span>
+                <span className="text-[#BCF139] text-black">★</span>
+                <span>Top Creator: {games[0]?.creator}</span>
+                <span className="text-[#BCF139] text-black">★</span>
+                <span>Total Global Plays: {games.reduce((acc, g) => acc + g.total_plays, 0)}</span>
+            </div>
+        </footer>
 
       </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          animation: marquee 30s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
