@@ -197,3 +197,98 @@ export async function saveGameConfig(data: GameConfigData) {
     return { success: false, message: error.message || 'Database connection failed.' };
   }
 }
+
+// app/actions.ts
+
+// ... keep your imports ...
+
+export async function getAllGames() {
+  try {
+    // Check if table exists and has data
+    const games = await sql`
+      SELECT 
+        g.id,
+        g.creator,
+        g.creator_social,
+        g.player_url,
+        g.created_at,
+        COUNT(l.id) as total_plays,
+        COALESCE(MAX(l.score), 0) as high_score
+      FROM games g
+      LEFT JOIN leaderboard l ON g.id = l.game_id
+      GROUP BY g.id, g.creator, g.creator_social, g.player_url, g.created_at
+      ORDER BY total_plays DESC
+    `;
+
+    console.log(`✅ Fetched ${games.length} games`); // Check your server terminal for this
+
+    return games.map(g => ({
+      id: g.id,
+      creator: g.creator,
+      creator_social: g.creator_social,
+      player_url: g.player_url,
+      total_plays: parseInt(g.total_plays, 10),
+      high_score: parseInt(g.high_score, 10),
+    }));
+
+  } catch (err: any) {
+    console.error("❌ Error fetching games:", err.message);
+    // Return empty array so the page doesn't crash
+    return [];
+  }
+}
+
+// 2. Fetch Deep Analytics for a Single Game (For the Detail Page)
+export async function getGameAnalytics(gameId: string) {
+  try {
+    // A. Game Details
+    const gameResult = await sql`SELECT * FROM games WHERE id = ${gameId}`;
+    if (gameResult.length === 0) return null;
+    const game = gameResult[0];
+
+    // B. College Stats
+    const colleges = await sql`
+      SELECT college, COUNT(*) as count 
+      FROM leaderboard 
+      WHERE game_id = ${gameId} AND college IS NOT NULL AND college <> ''
+      GROUP BY college 
+      ORDER BY count DESC 
+      LIMIT 5
+    `;
+
+    // C. Branch Stats
+    const branches = await sql`
+      SELECT branch, COUNT(*) as count 
+      FROM leaderboard 
+      WHERE game_id = ${gameId} AND branch IS NOT NULL AND branch <> ''
+      GROUP BY branch 
+      ORDER BY count DESC 
+      LIMIT 5
+    `;
+
+    // D. Leaderboard (Top 10)
+    const leaderboard = await sql`
+      SELECT player_name, score, college 
+      FROM leaderboard 
+      WHERE game_id = ${gameId} 
+      ORDER BY score DESC 
+      LIMIT 10
+    `;
+
+    // E. Total Plays Count
+    const totalPlaysResult = await sql`SELECT count(*) FROM leaderboard WHERE game_id = ${gameId}`;
+    const totalPlays = parseInt(totalPlaysResult[0].count, 10);
+
+    return {
+      game,
+      totalPlays,
+      colleges: colleges.map(c => ({ name: c.college, count: parseInt(c.count) })),
+      branches: branches.map(b => ({ name: b.branch, count: parseInt(b.count) })),
+      leaderboard
+    };
+
+  } catch (err) {
+    console.error("Error fetching analytics:", err);
+    return null;
+  }
+}
