@@ -287,7 +287,7 @@ export async function getGameAnalytics(gameId: string) {
     const normalizedColleges = Object.entries(collegeMap)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+      .slice(0, 15);
 
     // Fetch Branches (You can apply similar normalization here if needed)
     const branches = await sql`
