@@ -254,6 +254,9 @@ function normalizeCollege(name: string): string {
   if (normalized.includes('muthoot') || normalized.includes('mits')) {
     return 'MITS';
   }
+  if (normalized.includes('christ') || normalized.includes('mits')) {
+    return 'CHRIST';
+  }
   
   // Return original uppercase if no match found
   return name.toUpperCase();
