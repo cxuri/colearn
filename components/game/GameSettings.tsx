@@ -24,6 +24,7 @@ const GameSettings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'visuals' | 'audio' | 'physics'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
   
   // SUCCESS STATE
   const [gameResult, setGameResult] = useState<{ id: string, url: string } | null>(null);
@@ -78,7 +79,6 @@ const GameSettings = () => {
         canvas.height = 100;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          // Draw image to fill 100x100 exactly
           ctx.drawImage(img, 0, 0, 100, 100);
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
@@ -104,7 +104,6 @@ const GameSettings = () => {
 
     if (type === 'player') {
       try {
-        // If it's the player image, force resize to 100x100
         const resizedBlob = await resizeImageTo100(file);
         handleLocalFileSelect(resizedBlob, type, file.name);
       } catch (err) {
@@ -112,7 +111,6 @@ const GameSettings = () => {
         console.error(err);
       }
     } else {
-      // Audio or other assets pass through normally
       handleLocalFileSelect(file, type, file.name);
     }
   };
@@ -131,8 +129,6 @@ const GameSettings = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
       if (context) {
-        // The canvas is already set to 100x100 in the JSX below
-        // This drawImage call squashes the video frame into that 100x100 box
         context.drawImage(videoRef.current, 0, 0, 100, 100);
         canvasRef.current.toBlob((blob) => {
           if (blob) {
@@ -176,19 +172,50 @@ const GameSettings = () => {
     if (mediaRecorderRef.current && recordingType) mediaRecorderRef.current.stop();
   };
 
+  // --- UPDATED SHARE FUNCTION ---
   const handleShare = async () => {
     if (!gameResult) return;
-    const shareData = {
-      title: 'Play my Custom Game!',
-      text: `Check out this game created by ${creatorName || 'a friend'}!`,
-      url: gameResult.url,
-    };
+    setIsSharing(true);
 
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (err) { console.log('Share closed'); }
-    } else {
-      navigator.clipboard.writeText(gameResult.url);
-      alert('Link copied to clipboard!');
+    const shareUrl = gameResult.url;
+    // Better message format
+    const shareTitle = "I built a level! 🎮";
+    const shareText = `🚀 I just created a custom level in Klaz Runner!\n\n👾 Creator: ${creatorName}\n🕹️ Play here: ${shareUrl}\n\nCan you beat it? #KlazRunner`;
+
+    try {
+      // 1. Fetch QR Code as a Blob to share it as an image file
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
+      const response = await fetch(qrApiUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'klaz-runner-level.png', { type: 'image/png' });
+
+      const shareData = {
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+        files: [file], // Attach the QR code image
+      };
+
+      // 2. Check if the browser supports sharing files (Mobile mostly)
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // 3. Fallback: If file sharing fails, try sharing just text
+        const textShareData = { title: shareTitle, text: shareText, url: shareUrl };
+        if (navigator.share && navigator.canShare(textShareData)) {
+          await navigator.share(textShareData);
+        } else {
+          // 4. Fallback: Clipboard
+          throw new Error("Native share not supported");
+        }
+      }
+    } catch (err) {
+      console.log('Share failed or canceled, falling back to clipboard', err);
+      // Combine text and url for clipboard
+      navigator.clipboard.writeText(`${shareText}`);
+      alert('Link & Message copied to clipboard!');
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -298,9 +325,10 @@ const GameSettings = () => {
                
                <button 
                  onClick={handleShare}
-                 className="flex items-center justify-center gap-2 py-4 bg-[#f0f9ff] text-black font-black uppercase tracking-wider hover:bg-blue-50 transition-colors border-4 border-black"
+                 disabled={isSharing}
+                 className="flex items-center justify-center gap-2 py-4 bg-[#f0f9ff] text-black font-black uppercase tracking-wider hover:bg-blue-50 transition-colors border-4 border-black disabled:opacity-50"
                >
-                 <Share2 size={18} strokeWidth={2.5} /> Share
+                 <Share2 size={18} strokeWidth={2.5} /> {isSharing ? 'Loading...' : 'Share'}
                </button>
              </div>
 
@@ -371,7 +399,6 @@ const GameSettings = () => {
                     <label className="flex flex-col items-center justify-center p-4 border-4 border-black bg-blue-50 hover:bg-blue-200 active:translate-y-1 transition-all cursor-pointer rounded-none">
                       <Upload strokeWidth={2.5} />
                       <span className="font-black text-xs mt-2 uppercase">Upload</span>
-                      {/* Note: onChange updated to be async for resizing */}
                       <input type="file" accept="image/*" onChange={(e) => onFileInputChange(e, 'player')} className="hidden" />
                     </label>
 

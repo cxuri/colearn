@@ -132,21 +132,42 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   };
 
   const handleShare = async () => {
-    const shareText = `I scored ${finalScore.total} in ${config.creator}'s Level! #KlazRunner\n\nPlay here: ${window.location.href}`;
-    const shareData = { title: 'Klaz Runner Score', text: shareText, url: window.location.href };
+    // 1. A more engaging message with emojis and a call to action
+    const shareTitle = 'Can you beat my score? 🏆';
+    const shareText = `🚀 I just scored ${finalScore.total} in ${config.creator}'s Level on Klaz Runner! 🏃‍♂️💨\n\nThink you can do better? Try it here:`;
+    const shareUrl = window.location.href;
 
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          navigator.clipboard.writeText(shareText);
-          alert("Score copied to clipboard!");
+    const shareData = {
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+    };
+
+    // Helper for fallback clipboard copying
+    const copyToClipboard = () => {
+        // Combine text and URL for clipboard since it doesn't have separate fields
+        const fullString = `${shareText} ${shareUrl}`;
+        navigator.clipboard.writeText(fullString);
+        alert("Link copied to clipboard! (Share not supported on this device)");
+    };
+
+    // 2. Trigger Native Share Sheet
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+            await navigator.share(shareData);
+        } catch (err: any) {
+            // If user closes the share sheet, do nothing (AbortError)
+            // If technical error, fallback to clipboard
+            if (err.name !== 'AbortError') {
+                console.error("Share failed:", err);
+                copyToClipboard();
+            }
         }
-      }
     } else {
-      navigator.clipboard.writeText(shareText);
-      alert("Score copied to clipboard!");
+        // Fallback for Desktop or unsupported browsers
+        copyToClipboard();
     }
-  };
+};
 
   const shareGameLink = async () => {
     const text = `Check out this game by ${config.creator}! Built on Klaz.app ${window.location.href}`;
