@@ -142,17 +142,6 @@ export default async function ExploreGames() {
         </div>
 
       </div>
-
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: inline-block;
-          animation: marquee 20s linear infinite;
-        }
-      `}</style>
     </div>
   );
 }
