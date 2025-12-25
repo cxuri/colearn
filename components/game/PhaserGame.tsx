@@ -44,16 +44,6 @@ interface GameConfigProps {
   };
 }
 
-export const metadata = {
-  title: 'Klaz Runner',
-  description: 'Try beating my score in Klaz Runner!',
-  openGraph: {
-    title: 'Klaz Christmas Challenge ❄️',
-    description: 'This Christmas, slow down for a moment. Play and enjoy!',
-    images: ['/christmas_card.jpeg'], 
-  },
-}
-
 const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   // HOOKS MUST BE AT THE TOP
   const searchParams = useSearchParams();
@@ -161,7 +151,6 @@ Link: ${shareUrl}
     const shareData: ShareData = {
       title: 'Klaz Christmas ❄️',
       text: fullShareText,
-      url: shareUrl
     };
 
     try {

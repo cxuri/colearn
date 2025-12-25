@@ -19,17 +19,6 @@ interface GameAsset {
   originalName: string;
 }
 
-
-export const metadata = {
-  title: 'Klaz Runner',
-  description: 'Play my custom level on Klaz Runner!',
-  openGraph: {
-    title: 'Klaz Christmas Challenge ❄️',
-    description: 'This Christmas, slow down for a moment. Play and enjoy!',
-    images: ['/christmas_card.jpeg'], 
-  },
-}
-
 const GameSettings = () => {
   // -- STATE --
   const [activeTab, setActiveTab] = useState<'profile' | 'visuals' | 'audio' | 'physics'>('profile');
@@ -204,7 +193,6 @@ Link : ${shareUrl}
     const shareData: ShareData = {
       title: 'Klaz Christmas ❄️',
       text: fullShareText,
-      url: shareUrl
     };
 
     try {

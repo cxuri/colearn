@@ -7,7 +7,15 @@ export const dynamic = 'force-dynamic';
 interface GamePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
-
+export const metadata = {
+  title: 'Klaz Runner',
+  description: 'Try beating my score in Klaz Runner!',
+  openGraph: {
+    title: 'Klaz Christmas Challenge ❄️',
+    description: 'This Christmas, slow down for a moment. Play and enjoy!',
+    images: ['/christmas_card.jpeg'], 
+  },
+}
 export default async function GamePage({ searchParams }: GamePageProps) {
   // Await the params (Required for Next.js 15 support)
   const params = await searchParams;
