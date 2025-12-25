@@ -140,15 +140,6 @@ export default async function ExploreGames() {
             </div>
         </footer>
       </div>
-
-      <style jsx global>{`
-        .text-outline-black {
-          -webkit-text-stroke: 2px black;
-        }
-        .text-outline-1-black {
-          -webkit-text-stroke: 1px black;
-        }
-      `}</style>
     </div>
   );
 }
