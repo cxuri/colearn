@@ -75,11 +75,11 @@ const GameSettings = () => {
       img.src = URL.createObjectURL(file);
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 100;
-        canvas.height = 100;
+        canvas.width = 80;
+        canvas.height = 80;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0, 100, 100);
+          ctx.drawImage(img, 0, 0, 80, 80);
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
             else reject(new Error('Canvas conversion failed'));
@@ -180,7 +180,8 @@ const GameSettings = () => {
     const shareUrl = gameResult.url;
     
     // CUSTOM CHRISTMAS MESSAGE
-    const shareText = 
+    // Note: We combine the message and link into one variable
+    const fullShareText = 
 `❄️*This Christmas, slow down for a moment* ❄️
 We've dropped something fun - quick to start and fun to keep going 
 Just tap, play and enjoy the moment ✨
@@ -193,41 +194,62 @@ Link : ${shareUrl}
 *Klaz - Where Learning Comes Together*`;
 
     try {
+      // 1. THE FIX: Copy text to clipboard immediately
+      // This is the backup for when WhatsApp ignores the caption.
+      try {
+        await navigator.clipboard.writeText(fullShareText);
+      } catch (err) {
+        console.warn("Clipboard copy failed", err);
+      }
+
       let shareFiles: File[] = [];
 
-      // Attempt to fetch 'christmas_card.png' from public folder
+      // 2. Fetch 'christmas_card.jpeg'
       try {
-        const response = await fetch('/christmas_card.png');
+        const response = await fetch('/christmas_card.jpeg');
         if (response.ok) {
            const blob = await response.blob();
-           const file = new File([blob], 'christmas_card.png', { type: 'image/png' });
+           const file = new File([blob], 'christmas_card.jpeg', { type: 'image/jpeg' });
            shareFiles = [file];
         } else {
-           console.warn("christmas_card.png not found in public folder");
+           console.warn("christmas_card.jpeg not found in public folder");
         }
       } catch (e) {
          console.warn("Error fetching card", e);
       }
 
+      // 3. Construct Share Data
+      // CRITICAL: We DO NOT pass 'url' or 'title' here if we have a file.
+      // We only pass 'text' (which has the link inside) and 'files'.
       const shareData: ShareData = {
-        title: 'Klaz Christmas ❄️',
-        text: shareText,
-        url: shareUrl,
+        text: fullShareText,
         files: shareFiles.length > 0 ? shareFiles : undefined
       };
+      
+      // If image failed to load, we can add the URL field back for better non-image sharing
+      if (!shareFiles.length) {
+          (shareData as any).url = shareUrl;
+          (shareData as any).title = 'Klaz Christmas ❄️';
+      }
 
-      // Native Share
+      // 4. Native Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        // Alert user to paste the caption if we are sending a file
+        if (shareFiles.length > 0) {
+            alert("Caption copied! Paste it in WhatsApp 📋");
+        }
         await navigator.share(shareData);
       } else {
-        // Fallback
-        navigator.clipboard.writeText(shareText);
+        // Fallback for Desktop/Unsupported
+        navigator.clipboard.writeText(fullShareText);
         alert('Message & Link copied to clipboard!');
       }
-    } catch (err) {
-      console.log('Fallback to clipboard');
-      navigator.clipboard.writeText(shareText);
-      alert('Message copied to clipboard!');
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.log('Fallback to clipboard', err);
+        navigator.clipboard.writeText(fullShareText);
+        alert('Message copied to clipboard!');
+      }
     } finally {
       setIsSharing(false);
     }
