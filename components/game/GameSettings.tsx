@@ -172,48 +172,62 @@ const GameSettings = () => {
     if (mediaRecorderRef.current && recordingType) mediaRecorderRef.current.stop();
   };
 
-  // --- UPDATED SHARE FUNCTION ---
+  // --- UPDATED SHARE FUNCTION (CHRISTMAS EDITION) ---
   const handleShare = async () => {
     if (!gameResult) return;
     setIsSharing(true);
 
     const shareUrl = gameResult.url;
-    // Better message format
-    const shareTitle = "I built a level! 🎮";
-    const shareText = `🚀 I just created a custom level in Klaz Runner!\n\n👾 Creator: ${creatorName}\n🕹️ Play here: ${shareUrl}\n\nCan you beat it? #KlazRunner`;
+    
+    // CUSTOM CHRISTMAS MESSAGE
+    const shareText = 
+`❄️*This Christmas, slow down for a moment* ❄️
+We've dropped something fun - quick to start and fun to keep going 
+Just tap, play and enjoy the moment ✨
+
+Jump in before the day's over 
+_More coming later tonight_ 👀
+
+Link : ${shareUrl}
+
+*Klaz - Where Learning Comes Together*`;
 
     try {
-      // 1. Fetch QR Code as a Blob to share it as an image file
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
-      const response = await fetch(qrApiUrl);
-      const blob = await response.blob();
-      const file = new File([blob], 'klaz-runner-level.png', { type: 'image/png' });
+      let shareFiles: File[] = [];
 
-      const shareData = {
-        title: shareTitle,
+      // Attempt to fetch 'christmas_card.png' from public folder
+      try {
+        const response = await fetch('/christmas_card.png');
+        if (response.ok) {
+           const blob = await response.blob();
+           const file = new File([blob], 'christmas_card.png', { type: 'image/png' });
+           shareFiles = [file];
+        } else {
+           console.warn("christmas_card.png not found in public folder");
+        }
+      } catch (e) {
+         console.warn("Error fetching card", e);
+      }
+
+      const shareData: ShareData = {
+        title: 'Klaz Christmas ❄️',
         text: shareText,
         url: shareUrl,
-        files: [file], // Attach the QR code image
+        files: shareFiles.length > 0 ? shareFiles : undefined
       };
 
-      // 2. Check if the browser supports sharing files (Mobile mostly)
+      // Native Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // 3. Fallback: If file sharing fails, try sharing just text
-        const textShareData = { title: shareTitle, text: shareText, url: shareUrl };
-        if (navigator.share && navigator.canShare(textShareData)) {
-          await navigator.share(textShareData);
-        } else {
-          // 4. Fallback: Clipboard
-          throw new Error("Native share not supported");
-        }
+        // Fallback
+        navigator.clipboard.writeText(shareText);
+        alert('Message & Link copied to clipboard!');
       }
     } catch (err) {
-      console.log('Share failed or canceled, falling back to clipboard', err);
-      // Combine text and url for clipboard
-      navigator.clipboard.writeText(`${shareText}`);
-      alert('Link & Message copied to clipboard!');
+      console.log('Fallback to clipboard');
+      navigator.clipboard.writeText(shareText);
+      alert('Message copied to clipboard!');
     } finally {
       setIsSharing(false);
     }

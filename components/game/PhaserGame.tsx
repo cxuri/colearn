@@ -132,42 +132,64 @@ const PhaserGame: React.FC<GameConfigProps> = ({ config }) => {
   };
 
   const handleShare = async () => {
-    // 1. A more engaging message with emojis and a call to action
-    const shareTitle = 'Can you beat my score? 🏆';
-    const shareText = `🚀 I just scored ${finalScore.total} in ${config.creator}'s Level on Klaz Runner! 🏃‍♂️💨\n\nThink you can do better? Try it here:`;
+    // Assuming you have an isSharing state like in the previous component
+    // setIsSharing(true); 
+    
     const shareUrl = window.location.href;
+    
+    // SCORE-SPECIFIC CHRISTMAS MESSAGE
+    const shareText = 
+`❄️ *I just scored ${finalScore.total} in ${config.creator}'s Level!* ❄️
 
-    const shareData = {
-        title: shareTitle,
+Think you can beat my high score? 
+Just tap, play and enjoy the moment ✨
+
+Jump in before the day's over 👀
+
+Link: ${shareUrl}
+
+*Klaz - Where Learning Comes Together*`;
+
+    try {
+      let shareFiles: File[] = [];
+
+      // 1. Fetch the static Christmas card to attach with the score
+      try {
+        const response = await fetch('/christmas_card.png');
+        if (response.ok) {
+          const blob = await response.blob();
+          const file = new File([blob], 'christmas_card.png', { type: 'image/png' });
+          shareFiles = [file];
+        }
+      } catch (e) {
+        console.warn("Could not load christmas_card.png", e);
+      }
+
+      const shareData: ShareData = {
+        title: 'My Klaz Runner Score 🏆',
         text: shareText,
         url: shareUrl,
-    };
+        files: shareFiles.length > 0 ? shareFiles : undefined
+      };
 
-    // Helper for fallback clipboard copying
-    const copyToClipboard = () => {
-        // Combine text and URL for clipboard since it doesn't have separate fields
-        const fullString = `${shareText} ${shareUrl}`;
-        navigator.clipboard.writeText(fullString);
-        alert("Link copied to clipboard! (Share not supported on this device)");
-    };
-
-    // 2. Trigger Native Share Sheet
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        try {
-            await navigator.share(shareData);
-        } catch (err: any) {
-            // If user closes the share sheet, do nothing (AbortError)
-            // If technical error, fallback to clipboard
-            if (err.name !== 'AbortError') {
-                console.error("Share failed:", err);
-                copyToClipboard();
-            }
-        }
-    } else {
-        // Fallback for Desktop or unsupported browsers
-        copyToClipboard();
+      // 2. Trigger Native Share
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Clipboard
+        navigator.clipboard.writeText(shareText);
+        alert("Score & Link copied to clipboard!");
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error("Share failed:", err);
+        navigator.clipboard.writeText(shareText);
+        alert("Score copied to clipboard!");
+      }
+    } finally {
+      // setIsSharing(false);
     }
-};
+  };
 
   const shareGameLink = async () => {
     const text = `Check out this game by ${config.creator}! Built on Klaz.app ${window.location.href}`;
