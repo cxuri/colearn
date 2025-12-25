@@ -74,24 +74,24 @@ export default async function ExploreGames() {
   );
 }
 
-/* IMPROVED SUB-COMPONENT: GameCard */
+/* UPDATED SUB-COMPONENT: GameCard */
 function GameCard({ game, rank }: { game: any, rank: number }) {
   const isTop = rank === 1;
   
   return (
     <div className="group relative flex flex-col lg:flex-row items-stretch bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all duration-200">
       
-      {/* RANK SECTION - Redesigned for mobile as a header/badge */}
+      {/* RANK SECTION */}
       <div className={`
         lg:w-32 w-full flex flex-row lg:flex-col items-center justify-between lg:justify-center 
         px-5 py-3 lg:p-0 border-b-4 lg:border-b-0 lg:border-r-4 border-black font-black
         ${isTop ? 'bg-[#FBBF24]' : 'bg-[#F0F2F5]'}
       `}>
-        <span className={`text-[9px] lg:text-[10px] not-italic uppercase font-bold opacity-60 ${mono.className}`}>Rank</span>
-        <span className="text-4xl lg:text-7xl italic leading-none">{rank}</span>
+        <span className={`text-[9px] lg:text-[10px] not-italic uppercase font-bold text-black opacity-60 ${mono.className}`}>Rank</span>
+        <span className="text-4xl lg:text-7xl italic leading-none text-black">{rank}</span>
       </div>
 
-      {/* IDENTITY SECTION - Icon is now visible on mobile */}
+      {/* IDENTITY SECTION */}
       <div className="flex-1 p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
         <div className="flex items-center gap-4 md:block shrink-0">
           <div className="relative shrink-0">
@@ -100,25 +100,28 @@ function GameCard({ game, rank }: { game: any, rank: number }) {
               <img src={game.player_url} className="relative w-14 h-14 md:w-20 md:h-20 border-2 md:border-4 border-black object-cover bg-white" alt="avatar" />
             ) : (
               <div className="relative w-14 h-14 md:w-20 md:h-20 border-2 md:border-4 border-black bg-[#F0F2F5] flex items-center justify-center">
-                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-black/20" strokeWidth={3} />
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-black" strokeWidth={3} />
               </div>
             )}
           </div>
           
-          {/* Mobile-only name display next to icon for better vertical space usage */}
+          {/* FIXED: Mobile Name Display - Added text-black and tracking-tighter */}
           <div className="md:hidden flex-1 min-w-0">
-              <h3 className="text-2xl uppercase tracking-tighter truncate leading-none">
+              <h3 className="text-2xl uppercase tracking-tighter truncate leading-none text-black font-black">
                 {game.creator || 'ANON_USER'}
               </h3>
-              <p className={`text-[9px] mt-1 bg-black text-white px-1.5 py-0.5 inline-block uppercase font-bold ${mono.className}`}>
-                NODE_{game.id.slice(0,8)}
-              </p>
+              <div className="mt-1.5">
+                <p className={`text-[9px] bg-black text-[#FBBF24] px-1.5 py-0.5 inline-block uppercase font-bold ${mono.className}`}>
+                  NODE_{game.id.slice(0,8)}
+                </p>
+              </div>
           </div>
         </div>
         
+        {/* Desktop Name Display */}
         <div className="hidden md:block flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-4 mb-3">
-            <h3 className="text-3xl text-black md:text-5xl uppercase tracking-tighter truncate group-hover:text-[#FBBF24] transition-colors">
+            <h3 className="text-3xl text-black md:text-5xl uppercase tracking-tighter truncate group-hover:text-[#FBBF24] transition-colors font-black">
               {game.creator || 'ANON_USER'}
             </h3>
             {isTop && (
@@ -135,25 +138,25 @@ function GameCard({ game, rank }: { game: any, rank: number }) {
           </div>
         </div>
 
-        {/* DATA SECTION - Stacks slightly better on mobile */}
-        <div className={`grid grid-cols-2 gap-4 md:gap-8 md:px-8 lg:border-l-2 border-black pt-4 md:pt-0 border-t-2 md:border-t-0 border-dashed ${mono.className}`}>
+        {/* DATA SECTION */}
+        <div className={`grid grid-cols-2 gap-4 md:gap-8 md:px-8 lg:border-l-2 border-black pt-4 md:pt-0 border-t-2 md:border-t-0 border-dashed border-black/20 ${mono.className}`}>
           <div className="min-w-[80px]">
-            <p className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold mb-1">Runs</p>
+            <p className="text-[9px] md:text-[10px] text-black/50 uppercase font-bold mb-1">Runs</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl md:text-3xl font-black leading-none">{game.total_plays.toLocaleString()}</span>
+              <span className="text-2xl md:text-3xl font-black leading-none text-black">{game.total_plays.toLocaleString()}</span>
             </div>
           </div>
           <div className="min-w-[80px]">
-            <p className="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold mb-1">Peak</p>
+            <p className="text-[9px] md:text-[10px] text-black/50 uppercase font-bold mb-1">Peak</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl md:text-4xl text-[#FBBF24] font-black leading-none" style={{ WebkitTextStroke: '1px black' }}>{game.high_score}</span>
+              <span className="text-2xl md:text-4xl text-[#FBBF24] font-black leading-none" style={{ WebkitTextStroke: '1px black', textShadow: '1px 1px 0px black' }}>{game.high_score}</span>
               <Trophy size={14} className="text-black hidden md:block" strokeWidth={3} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* ACTION SECTION - Thumb-friendly buttons on mobile */}
+      {/* ACTION SECTION */}
       <div className={`flex flex-row lg:flex-col border-t-4 lg:border-t-0 lg:border-l-4 border-black w-full lg:w-48 ${mono.className}`}>
         <Link href={`/play?id=${game.id}`} className="flex-1 flex items-center justify-center gap-3 lg:flex-col bg-[#FBBF24] py-4 lg:py-6 text-black uppercase text-xs font-bold border-r-4 lg:border-r-0 lg:border-b-4 border-black hover:bg-black hover:text-[#FBBF24] transition-all group/btn">
           <Play className="w-5 h-5 md:w-6 md:h-6 group-hover/btn:scale-110 transition-transform" fill="currentColor" />
