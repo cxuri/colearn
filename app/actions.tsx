@@ -198,13 +198,9 @@ export async function saveGameConfig(data: GameConfigData) {
   }
 }
 
-// app/actions.ts
-
-// ... keep your imports ...
 
 export async function getAllGames() {
   try {
-    // Check if table exists and has data
     const games = await sql`
       SELECT 
         g.id,
@@ -212,15 +208,15 @@ export async function getAllGames() {
         g.creator_social,
         g.player_url,
         g.created_at,
-        COUNT(l.id) as total_plays,
+        COUNT(l.game_id) as total_plays, -- Changed from l.id to l.game_id
         COALESCE(MAX(l.score), 0) as high_score
       FROM games g
       LEFT JOIN leaderboard l ON g.id = l.game_id
-      GROUP BY g.id, g.creator, g.creator_social, g.player_url, g.created_at
+      GROUP BY g.id
       ORDER BY total_plays DESC
     `;
 
-    console.log(`✅ Fetched ${games.length} games`); // Check your server terminal for this
+    console.log(`✅ Fetched ${games.length} games`); 
 
     return games.map(g => ({
       id: g.id,
@@ -232,8 +228,8 @@ export async function getAllGames() {
     }));
 
   } catch (err: any) {
-    console.error("❌ Error fetching games:", err.message);
-    // Return empty array so the page doesn't crash
+    // Check your terminal for this specific error message
+    console.error("❌ Error fetching games (Detailed):", err);
     return [];
   }
 }
