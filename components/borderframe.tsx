@@ -19,7 +19,7 @@ export default function BorderFrame({ children }: BorderFrameProps) {
       {/* --- TOP STRIP --- */}
       <div className="fixed top-0 left-0 w-full h-10 bg-black text-white z-[60] flex items-center justify-between px-4 md:px-12 uppercase text-xs tracking-widest border-b border-white/20">
         <span>KLAZ.APP</span>
-        <span>KOCHI, KL</span>
+        <span>Kerala, IN</span>
       </div>
 
       {/* --- BOTTOM STRIP --- */}
