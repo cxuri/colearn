@@ -15,7 +15,7 @@ import {
   Terminal,
   ChevronDown
 } from 'lucide-react';
-import { submitToWaitlist } from '../actions'; 
+import { saveWaitlistCookie, submitToWaitlist, loadCookie } from '../actions'; 
 
 // --- FONTS ---
 const mono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'] });
@@ -27,17 +27,21 @@ declare global {
   }
 }
 
-export default function JoinPage() {
+export default async function JoinPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [gsapLoaded, setGsapLoaded] = useState(false);
   const [ticketId, setTicketId] = useState('0000'); 
+  const ck = await loadCookie();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // --- 1. SETUP ---
   useEffect(() => {
+    if(ck) {
+      setStatus('success');
+    }
     setTicketId(String(Math.floor(Math.random() * 90000) + 10000));
   }, []);
 
@@ -92,6 +96,7 @@ export default function JoinPage() {
             y: -20, 
             duration: 0.3, 
             onComplete: () => {
+              saveWaitlistCookie(ticketId);
               setStatus('success');
               setMessage(result.message);
             }

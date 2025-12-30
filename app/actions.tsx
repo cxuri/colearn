@@ -2,6 +2,7 @@
 
 import { neon } from '@neondatabase/serverless';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -32,6 +33,27 @@ export async function submitToWaitlist(formData: FormData) {
   }
 }
 
+
+export async function saveWaitlistCookie(ticketId: string) {
+  const cookieStore = await cookies();
+  
+  // Store the ticket ID so they see the same number when they come back
+  cookieStore.set('klaz_waitlist', JSON.stringify({ joined: true, ticketId }), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+    path: '/',
+  });
+}
+
+export async function loadCookie() {
+  const cookieStore = await cookies();
+  if(cookieStore.get('klaz_waitlist')) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 export async function getCount() {
   try {
