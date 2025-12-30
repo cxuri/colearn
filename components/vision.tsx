@@ -43,8 +43,7 @@ export default function VisionMission() {
               </h2>
 
               <p className={`text-base font-bold text-white text-justify leading-relaxed ${mono.className}`}>
-                To simplify KTU learning through a single, trusted platform for clear, exam-ready notes and resources - powered by community-driven, gamified learning.
-              </p>
+                To build a community driven learning ecosystem where every KTU student moves from chaos to clarity - learning without stress, growing together and never feeling lost or alone              </p>
             </div>
           </div>
 
@@ -68,15 +67,8 @@ export default function VisionMission() {
                 The <br /> Mission
               </h2>
 
-              <p className={`text-xl md:text-2xl font-bold text-black leading-tight mb-6 ${archivo.className}`}>
-                Kill the <span className="bg-white px-2">Noise.</span> <br/> 
-                Build the <span className="bg-white px-2 text-[#EF4444]">Arsenal.</span>
-              </p>
-
               <p className={`text-base font-bold text-black/80 text-justify leading-relaxed ${mono.className}`}>
-                To simplify KTU learning through a single, trusted platform for clear, 
-                exam-ready notes and resources—powered by community-driven, 
-                gamified learning that actually rewards your progress.
+                To simplify KTU learning through a single, trusted platform for clear, exam-ready notes and resources - powered by community-driven, gamified learning.
               </p>
             </div>
           </div>
