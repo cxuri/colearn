@@ -48,11 +48,12 @@ export async function saveWaitlistCookie(ticketId: string) {
 
 export async function loadCookie() {
   const cookieStore = await cookies();
-  if(cookieStore.get('klaz_waitlist')) {
-    return true;
-  } else {
-    return false;
+  const cookie = cookieStore.get('klaz_waitlist');
+  
+  if (cookie) {
+    return cookie.value;
   }
+  return null;
 }
 
 export async function getCount() {
